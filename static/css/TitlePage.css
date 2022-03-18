@@ -1,0 +1,91 @@
+body {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+.container {
+    box-sizing: border-box;
+    max-width: 1219px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 55px;
+    padding-right: 55px;
+  }
+
+.Block1 {
+  background-image: url(../img/bricks.jpg);
+  background-size: cover;
+  background-position: center;
+  margin-top: 70px;
+  padding-top: 60px;
+  padding-bottom: 60px;
+}
+
+.Block2 {
+  background-color: #292928;
+  padding-top: 60px;
+  padding-bottom: 60px;
+}
+
+.Block3 {
+  background-image: url(../img/gekses.jpg);
+  background-size: cover;
+  background-position: center;
+  padding-top: 60px;
+  padding-bottom: 60px;
+}
+
+.problem-text {
+  font-family: Roboto, sans-serif;
+  font-style: normal;
+  font-weight: 50;
+  font-size: 32px;
+  line-height: 64px;
+  text-align: center;
+  color: #ded9d3;
+}
+
+.head-text {
+  font-family: Roboto, sans-serif;
+  font-style: normal;
+  font-weight: 50;
+  font-size: 35px;
+  line-height: 44px;
+  text-align: center;
+  color: #f5870a;
+}
+
+.main-text {
+  font-family: Roboto, sans-serif;
+  font-style: normal;
+  font-weight: 50;
+  font-size: 25px;
+  line-height: 34px;
+  text-align: center;
+  color: #ded9d3;
+}
+
+.super-button {
+  display: block;
+  font-size: 30px;
+  color: #f5870a;
+  background-color: black;
+  border-radius: 4px;
+  border-color: #f5870a;
+  border-width: 4px;
+  border-style: ridge;
+  transition: border-radius 0.5s ease;
+  transition: all 0.5s ease-in;
+  padding: 10px;
+}
+
+.super-button:hover {
+  border-radius: 16px;
+  color: black;
+  background-color: #f5870a;
+}
+
+.button {
+  display: flex;
+  justify-content: center;
+}

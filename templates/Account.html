@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../static/css/Head_style.css" />
+    <title>Бромница</title>
+  </head>
+  <body>
+    <div class="HEAD">
+      <div class="container">
+        <div class="logo-block">
+          <div class="logo"></div>
+          <div class="logo-text">Бромница</div>
+        </div>
+        <div class="user-block">
+          <div class="user-photo"></div>
+          <div class="user-list">
+            <ul>
+              <li class="menu">
+                Меню
+                <ul class="menu-list">
+                  <li class="menu-el"><a href="#">К альбомам</a></li>
+                  <li class="menu-el"><a href="#">Настройки</a></li>
+                  <li class="menu-el" style="border-bottom: 2px solid #ff6c03">
+                    <a href="#">Выход</a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <section class="page">
+    <div class="left-menu">
+        <div class="menu-container">
+            <div class="search-block">
+                <form method="POST">
+                    <div class="search-row">
+                        <input type="search" placeholder="Поиск..." class="search-string">
+                        <input type="submit" value="🔍" class="search-button">
+                    </div>
+                </form>
+                <form method="POST">
+                    <label class="caption1">Сортировка:</label>
+                    <select class="sort-selector">
+                        <option class="sort-option">По времени создания</option>
+                        <option class="sort-option">По названию</option>
+                        <option class="sort-option">В обратном порядке</option>
+                    </select>
+                    <input type="submit" value="Применить">
+                </form>
+            </div>
+        </div>
+        <div class="menu-container">
+            <div class="add-block">
+                <button class="add-button">+</button>
+                <label class="caption1">Добавить альбом</label>
+            </div>
+        </div>
+    </div>
+    <div class="albums-placeholder">
+
+    </div>
+</section>
+  </body>
+</html>

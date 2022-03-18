@@ -1,0 +1,14 @@
+body {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+.menu-container {
+    position: fixed;
+    box-sizing: border-box;
+    top: auto;
+    left: 0;
+    margin-right: auto;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
