@@ -4,12 +4,13 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../static/css/Account.css" />
     <link rel="stylesheet" href="../static/css/Head_style.css" />
     <title>Бромница</title>
   </head>
   <body>
     <div class="HEAD">
-      <div class="container">
+      <div class="container head">
         <div class="logo-block">
           <div class="logo"></div>
           <div class="logo-text">Бромница</div>
@@ -21,10 +22,13 @@
               <li class="menu">
                 Меню
                 <ul class="menu-list">
-                  <li class="menu-el"><a href="#">К альбомам</a></li>
-                  <li class="menu-el"><a href="#">Настройки</a></li>
-                  <li class="menu-el" style="border-bottom: 2px solid #ff6c03">
-                    <a href="#">Выход</a>
+                  <li class="menu-el"><a href="/">Главная</a></li>
+                  <li class="menu-el">
+                    <a href="/publications">Публикации</a>
+                  </li>
+                  <li class="menu-el"><a href="/settings">Настройки</a></li>
+                  <li class="menu-el last-el">
+                    <a href="/logout">Выход</a>
                   </li>
                 </ul>
               </li>
@@ -34,36 +38,60 @@
       </div>
     </div>
     <section class="page">
-    <div class="left-menu">
-        <div class="menu-container">
+      <div class="cloud container">
+        <div class="left-menu Block1">
+          <div class="menu-container">
+            <div class="up-menu">
+              <div class="user-block-on-menu">
+                <div class="user-photo"></div>
+                <div class="username-text">Пользователь</div>
+              </div>
+              <div class="paste-block">
+                <form method="POST">
+                  <input name="paste" class="none"/>
+                  <input type="submit" value="⇓" class="paste-button"/>
+                </form>
+              </div>
+            </div>
             <div class="search-block">
-                <form method="POST">
-                    <div class="search-row">
-                        <input type="search" placeholder="Поиск..." class="search-string">
-                        <input type="submit" value="🔍" class="search-button">
-                    </div>
-                </form>
-                <form method="POST">
-                    <label class="caption1">Сортировка:</label>
-                    <select class="sort-selector">
-                        <option class="sort-option">По времени создания</option>
-                        <option class="sort-option">По названию</option>
-                        <option class="sort-option">В обратном порядке</option>
-                    </select>
-                    <input type="submit" value="Применить">
-                </form>
+              <form method="POST">
+                <div class="search-row">
+                  <input
+                    type="search"
+                    placeholder="Поиск..."
+                    class="search-string"
+                    size="1"
+                  />
+                  <input type="submit" value="🔍" class="search-button" />
+                </div>
+              </form>
+              <form method="POST">
+                <div class="sort-placeholder">
+                  <label class="caption1">Сортировка:</label>
+                  <select class="sort-selector">
+                    <option class="sort-option">По времени создания</option>
+                    <option class="sort-option">По названию</option>
+                  </select>
+                  <div class="checkbox-placeholder">
+                    <input type="checkbox" class="reverse-check" />
+                    <label class="check-text">В обратном порядке</label>
+                  </div>
+                  <input type="submit" value="Применить" />
+                </div>
+              </form>
             </div>
-        </div>
-        <div class="menu-container">
+          </div>
+          <div class="menu-container">
             <div class="add-block">
-                <button class="add-button">+</button>
-                <label class="caption1">Добавить альбом</label>
+              <button class="add-button">+</button>
+              <label class="caption1">Добавить папку</label>
             </div>
+          </div>
         </div>
-    </div>
-    <div class="albums-placeholder">
-
-    </div>
-</section>
+        <div class="dirs-placeholder Block1">
+          <p>Hello</p>
+        </div>
+      </div>
+    </section>
   </body>
 </html>

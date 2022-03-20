@@ -6,10 +6,16 @@
     border-bottom: 4px solid #080807;
   }
 
+.head {
+  display: flex;
+  justify-content: space-between;
+}
+
 .logo-block {
     display: flex;
     justify-content: flex-start;
-    float: left;
+    align-items: center;
+    align-self: center;
   }
 
 .logo {
@@ -19,7 +25,6 @@
     height: 84.99px;
     margin-top: 10px;
     margin-bottom: 10px;
-    float: left;
   }
 
 .logo-text {
@@ -34,24 +39,14 @@
     margin-top: auto;
     margin-bottom: auto;
     margin-left: 10px;
-    float: left;
-  }
-
-@media screen and (max-width: 550px) {
-    .logo-block {
-      display: none;
-    }
-
-    .user-photo {
-      float: left;
-      align-self: left;
-    }
   }
 
 .user-block {
     display: flex;
     justify-content: flex-end;
-    float: right;
+    align-items: center;
+    align-self: center;
+    height: 90px;
   }
 
 .user-photo {
@@ -71,6 +66,7 @@
     margin-bottom: auto;
     padding-left: 45px;
     vertical-align: middle;
+    align-self: center;
   }
 
 div ul {
@@ -112,6 +108,12 @@ div ul {
     margin-left: -40px;
 }
 
+.last-el {
+  border-style: solid;
+  border-width: 2px;
+  border-color: #ff6c03;
+}
+
 .menu-el a {
   display: block;
   color: #ff6c03;
@@ -122,4 +124,57 @@ div ul {
 
 .menu-el a:hover {
   background: #363330;
+}
+
+@media screen and (max-width: 680px) {
+  .HEAD {
+    height: 20vh;
+  }
+
+  .logo {
+    width: 15vh;
+    height: 15vh;
+    margin-top: 1vh;
+    margin-bottom: 1vh;
+  }
+
+  .user-block {
+    height: 20vh;
+  }
+
+  .user-list {
+    padding-left: 12vw;
+  }
+
+  .menu {
+    font-size: 5vh;
+    line-height: 5vh;
+  }
+
+  .menu-el {
+    min-width: 24vh;
+    border-width: 0.5vh;
+    margin-left: -4.5vh;
+  }
+
+  .last-el {
+    border-width: 0.5vh;
+  }
+
+  .menu-el a {
+    font-size: 4vh;
+    line-height: 4vh;
+  }
+
+  .Block1 {
+    margin-top: 20vh;
+  }
+
+  .logo-text {
+    display: none;
+  }
+
+  .user-photo {
+    display: none;
+  }
 }
