@@ -52,8 +52,8 @@
 .user-photo {
     background-image: url(../img/No_user.jpg);
     background-size: cover;
-    width: 74.99px;
-    height: 74.99px;
+    width: 44.99px;
+    height: 44.99px;
     margin-top: 10px;
     margin-bottom: 10px;
     border-color: #f5870a;
@@ -154,7 +154,7 @@ div ul {
   .menu-el {
     min-width: 24vh;
     border-width: 0.5vh;
-    margin-left: -4.5vh;
+    margin-left: -5.5vh;
   }
 
   .last-el {
@@ -177,4 +177,86 @@ div ul {
   .user-photo {
     display: none;
   }
+}
+
+body::-webkit-scrollbar, .left-menu::-webkit-scrollbar {
+  width: 12px;               /* ширина scrollbar */
+  height: 12px;
+}
+
+body::-webkit-scrollbar-corner, .left-menu::-webkit-scrollbar-corner {
+  background-color: #2b2b2b;
+}
+
+body::-webkit-scrollbar-track, .left-menu::-webkit-scrollbar-track {
+  background: #2b2b2b;        /* цвет дорожки */
+}
+
+body::-webkit-scrollbar-thumb, .left-menu::-webkit-scrollbar-thumb {
+  background-color: #f78502;    /* цвет плашки */
+  border-radius: 20px;       /* закругления плашки */
+  border: 3px solid black;  /* padding вокруг плашки */
+}
+
+.custom-checkbox {
+  position: absolute;
+  z-index: 1;
+  opacity: 0;
+  display: flex;
+}
+
+/* для элемента label, связанного с .custom-checkbox */
+.custom-checkbox+label {
+  display: inline-flex;
+  align-items: center;
+  user-select: none;
+}
+
+/* создание в label псевдоэлемента before со следующими стилями */
+.custom-checkbox+label::before {
+  content: '';
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+  flex-grow: 0;
+  border: 3px solid #f79320;
+  border-radius: 0.25em;
+  margin-right: 0.5em;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: 50% 50%;
+}
+
+/* стили при наведении курсора на checkbox */
+.custom-checkbox:not(:disabled):not(:checked)+label:hover::before {
+  border-color: #edd145;
+}
+
+/* стили для активного чекбокса (при нажатии на него) */
+.custom-checkbox:not(:disabled):active+label::before {
+  background-color: #edd145;
+  border-color: #edd145;
+}
+
+/* стили для чекбокса, находящегося в фокусе */
+.custom-checkbox:focus+label::before {
+  box-shadow: 0 0 0 0.2rem #f79b11ac;
+}
+
+/* стили для чекбокса, находящегося в фокусе и не находящегося в состоянии checked */
+.custom-checkbox:focus:not(:checked)+label::before {
+  border-color: #edd145;
+}
+
+/* стили для чекбокса, находящегося в состоянии checked */
+.custom-checkbox:checked+label::before {
+  border-color: #f7c202;
+  background-color: #f78502;
+  background-image: url(../img/check.png);
+}
+
+/* стили для чекбокса, находящегося в состоянии disabled */
+.custom-checkbox:disabled+label::before {
+  background-color: #e9ecef;
 }

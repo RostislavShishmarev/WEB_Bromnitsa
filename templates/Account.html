@@ -43,13 +43,13 @@
           <div class="menu-container">
             <div class="up-menu">
               <div class="user-block-on-menu">
-                <div class="user-photo"></div>
+                <div class="main-user-photo"></div>
                 <div class="username-text">Пользователь</div>
               </div>
               <div class="paste-block">
                 <form method="POST">
-                  <input name="paste" class="none"/>
-                  <input type="submit" value="⇓" class="paste-button"/>
+                  <input name="paste" class="none" />
+                  <input type="submit" value="⎀" class="user-button" />
                 </form>
               </div>
             </div>
@@ -62,30 +62,41 @@
                     class="search-string"
                     size="1"
                   />
-                  <input type="submit" value="🔍" class="search-button" />
+                  <input type="submit" value="🔍" class="user-button" />
                 </div>
               </form>
               <form method="POST">
                 <div class="sort-placeholder">
-                  <label class="caption1">Сортировка:</label>
+                  <label class="sort-caption">Сортировка:</label>
                   <select class="sort-selector">
                     <option class="sort-option">По времени создания</option>
                     <option class="sort-option">По названию</option>
                   </select>
                   <div class="checkbox-placeholder">
-                    <input type="checkbox" class="reverse-check" />
+                    <input type="checkbox" class="custom-checkbox" />
                     <label class="check-text">В обратном порядке</label>
                   </div>
-                  <input type="submit" value="Применить" />
+                  <input
+                    type="submit"
+                    value="Применить"
+                    class="user-button sort-button"
+                  />
                 </div>
               </form>
             </div>
           </div>
           <div class="menu-container">
             <div class="add-block">
-              <button class="add-button">+</button>
-              <label class="caption1">Добавить папку</label>
+              <a class="add-button" href="/add_dir">+</a>
+              <label class="add-text">Добавить папку</label>
             </div>
+            <form method="POST">
+              <div class="add-block">
+                <input id="add-user-file" type="file" class="add-button" value="+"/>
+                <label for="ad-user-file">Выберите файл</label>
+                <input type="submit" class="add-button" value="✓" />
+              </div>
+            </form>
           </div>
         </div>
         <div class="dirs-placeholder Block1">
