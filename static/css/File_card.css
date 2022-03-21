@@ -1,0 +1,128 @@
+.file-card {
+    width: 170px;
+    height: 190px;
+    border-style: double;
+    border-color: #ff6c03;
+    border-width: 3px;
+    border-radius: 10px;
+    background-color: #211e1a;
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    margin: 15px;
+}
+
+.file-card-main {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.file-card-prevision {
+  height: 140px;
+  width: 130px;
+  border: #f7890a 2px solid;
+  margin: 0px;
+}
+
+.file-card-title {
+  font-family: Roboto, sans-serif;
+  font-size: 18px;
+  width: 130px;
+  color: #f7890a;
+  text-align: center;
+  overflow: auto;
+}
+
+.file-card-functions {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.file-card-user-list {
+    border-color: none;
+  }
+
+.file-card-user-list-el, .file-card-menu-list {
+    list-style: none;
+    position: relative;
+    padding: 0;
+    margin: 0;
+    z-index: 1;
+    }
+
+.file-card-menu-list {
+    display: none;
+    position: absolute;
+}
+
+.file-card-menu {
+  display: block;
+  font-family: Roboto, sans-serif;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 22px;
+  color: #ff6c03;
+}
+
+.file-card-menu:hover {
+    color: #e8bb17;
+}
+
+.file-card-menu:hover > ul {
+    display: inherit;
+}
+
+.file-card-menu-el-place {
+    display: block;
+    float: none;
+    display: list-item;
+    position: relative;
+    text-align: center;
+    margin-left: auto;
+}
+
+.file-card-menu-el {
+  display: block;
+  color: #ff6c03;
+  background: #000000;
+  border-color: none;
+  border-style: hidden;
+  border-radius: 9px;
+  text-decoration: none;
+  font-size: 16px;
+  text-align: center;
+  padding: 3px;
+  min-width: 124px;
+  margin-top: 2px;
+}
+
+.file-card-menu-el:hover {
+  background: #363330;
+  color: #e8bb17;
+}
+
+.download-button {
+  text-decoration: none;
+  display: block;
+  font-size: 19px;
+  font-weight: 1900;
+  color: #f5870a;
+  background-color: rgba(0, 0, 0, 0);
+  border-color: #ff6c03;
+  border-width: 2px;
+  border-style: solid;
+  border-top-color: rgba(0, 0, 0, 0);
+  transition: all 0.3s ease-in;
+  transition: border-radius 0.3s ease;
+  text-align: center;
+  padding-top: 0px;
+}
+
+.download-button:hover {
+  color: #e8bb17;
+  border-color: #e8bb17;
+  border-top-color: rgba(0, 0, 0, 0);
+  border-radius: 8px;
+}

@@ -4,8 +4,15 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="stylesheet" href="../static/css/Account.css" />
+    <link rel="stylesheet" href="../static/css/File_card.css" />
     <link rel="stylesheet" href="../static/css/Head_style.css" />
+    {% if menu == 'big' %}
+    <link rel="stylesheet" href="../static/css/Big_left_menu.css" />
+    {% else %}
+    <link rel="stylesheet" href="../static/css/Small_left_menu.css" />
+    {% endif %}
     <title>Бромница</title>
   </head>
   <body>
@@ -39,6 +46,7 @@
     </div>
     <section class="page">
       <div class="cloud container">
+        {% if menu == 'big' %}
         <div class="left-menu Block1">
           <div class="menu-container">
             <div class="up-menu">
@@ -46,10 +54,10 @@
                 <div class="main-user-photo"></div>
                 <div class="username-text">Пользователь</div>
               </div>
-              <div class="paste-block">
+              <div class="small-block">
                 <form method="POST">
-                  <input name="paste" class="none" />
-                  <input type="submit" value="⎀" class="user-button" />
+                  <input name="change-menu" class="none" />
+                  <input type="submit" value="<" class="user-button" />
                 </form>
               </div>
             </div>
@@ -92,17 +100,130 @@
             </div>
             <form method="POST">
               <div class="add-block">
-                <input id="add-user-file" type="file" class="add-button" value="+"/>
-                <label for="ad-user-file">Выберите файл</label>
-                <input type="submit" class="add-button" value="✓" />
+                <div class="input__placeholder">
+                  <input
+                    name="file"
+                    type="file"
+                    name="file"
+                    id="input__file"
+                    class="input input__file"
+                    multiple
+                  />
+                  <label for="input__file" class="input__file-button add-block">
+                    <span class="add-button">+</span>
+                    <span class="add-text input__file-button-text"
+                      >Добавить файлы</span
+                    >
+                    <input type="submit" class="submit-file-button" value="✓" />
+                  </label>
+                </div>
               </div>
             </form>
           </div>
         </div>
+        {% else %}
+        <div class="left-menu Block1">
+          <div class="small-menu-block">
+            <form method="POST">
+              <input name="change-menu" class="none" />
+              <input
+                type="submit"
+                value=">"
+                class="user-button small-menu-button"
+              />
+            </form>
+          </div>
+          <div class="small-menu-block">
+            <form method="POST">
+              <input name="paste-files" class="none" />
+              <input
+                type="submit"
+                value="⎀"
+                class="user-button small-menu-button"
+              />
+            </form>
+          </div>
+        </div>
+        {% endif %}
         <div class="dirs-placeholder Block1">
-          <p>Hello</p>
+          {% for way in files_names %}
+          <div class="file-card">
+            <div class="file-card-main">
+              <div class="file-card-prevision"></div>
+              <div class="file-card-title">{{ way.split('/')[-1] }}</div>
+            </div>
+            <div class="file-card-functions">
+              <div class="file-card-user-list">
+                <ul class="file-card-user-list-el">
+                  <li class="file-card-menu">
+                    ▼
+                    <ul class="file-card-menu-list">
+                      <div class="file-card-menu-el-place">
+                        <a
+                          class="file-card-menu-el"
+                          href="/files/public/{{ way }}"
+                          >Опубликовать</a
+                        >
+                      </div>
+                      <div class="file-card-menu-el-place">
+                        <a
+                          class="file-card-menu-el"
+                          href="/files/rename/{{ way }}"
+                          >Переименовать</a
+                        >
+                      </div>
+                      <div class="file-card-menu-el-place">
+                        <form method="POST">
+                          <input name="cut-file-{{ way }}" class="none" />
+                          <input
+                            type="submit"
+                            value="Вырезать"
+                            class="file-card-menu-el"
+                          />
+                        </form>
+                      </div>
+                      <div
+                        class="file-card-menu-el-place file-card-menu-last-el-place"
+                      >
+                        <form method="POST">
+                          <input name="del-file-{{ way }}" class="none" />
+                          <input
+                            type="submit"
+                            value="Удалить"
+                            class="file-card-menu-el"
+                          />
+                        </form>
+                      </div>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div><a class="download-button" href="/{{ way }}" download="">↓</a></div>
+            </div>
+          </div>
+          {% endfor %}
         </div>
       </div>
     </section>
+    <script>
+      let inputs = document.querySelectorAll(".input__file");
+      Array.prototype.forEach.call(inputs, function (input) {
+        let label = input.nextElementSibling,
+          labelVal = label.querySelector(".input__file-button-text").innerText;
+
+        input.addEventListener("change", function (e) {
+          let countFiles = "";
+          if (this.files && this.files.length >= 1)
+            countFiles = this.files.length;
+
+          if (countFiles)
+            label.querySelector(".input__file-button-text").innerText =
+              "Выбрано файлов: " + countFiles;
+          else
+            label.querySelector(".input__file-button-text").innerText =
+              labelVal;
+        });
+      });
+    </script>
   </body>
 </html>

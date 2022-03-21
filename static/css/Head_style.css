@@ -4,6 +4,7 @@
     top: 0;
     width: 100%;
     border-bottom: 4px solid #080807;
+    z-index: 10;
   }
 
 .head {
@@ -179,40 +180,38 @@ div ul {
   }
 }
 
-body::-webkit-scrollbar, .left-menu::-webkit-scrollbar {
-  width: 12px;               /* ширина scrollbar */
+body::-webkit-scrollbar, .left-menu::-webkit-scrollbar, .file-card-title::-webkit-scrollbar {
+  width: 12px;
   height: 12px;
 }
 
-body::-webkit-scrollbar-corner, .left-menu::-webkit-scrollbar-corner {
+body::-webkit-scrollbar-corner, .left-menu::-webkit-scrollbar-corner, .file-card-title::-webkit-scrollbar-corner {
   background-color: #2b2b2b;
 }
 
-body::-webkit-scrollbar-track, .left-menu::-webkit-scrollbar-track {
-  background: #2b2b2b;        /* цвет дорожки */
+body::-webkit-scrollbar-track, .left-menu::-webkit-scrollbar-track, .file-card-title::-webkit-scrollbar-track {
+  background: #2b2b2b;
 }
 
-body::-webkit-scrollbar-thumb, .left-menu::-webkit-scrollbar-thumb {
-  background-color: #f78502;    /* цвет плашки */
-  border-radius: 20px;       /* закругления плашки */
-  border: 3px solid black;  /* padding вокруг плашки */
+body::-webkit-scrollbar-thumb, .left-menu::-webkit-scrollbar-thumb, .file-card-title::-webkit-scrollbar-thumb {
+  background-color: #f78502;
+  border-radius: 20px;
+  border: 3px solid black;
 }
 
 .custom-checkbox {
   position: absolute;
-  z-index: 1;
+  z-index: 2;
   opacity: 0;
   display: flex;
 }
 
-/* для элемента label, связанного с .custom-checkbox */
 .custom-checkbox+label {
   display: inline-flex;
   align-items: center;
   user-select: none;
 }
 
-/* создание в label псевдоэлемента before со следующими стилями */
 .custom-checkbox+label::before {
   content: '';
   display: inline-block;
@@ -228,35 +227,58 @@ body::-webkit-scrollbar-thumb, .left-menu::-webkit-scrollbar-thumb {
   background-size: 50% 50%;
 }
 
-/* стили при наведении курсора на checkbox */
 .custom-checkbox:not(:disabled):not(:checked)+label:hover::before {
   border-color: #edd145;
 }
 
-/* стили для активного чекбокса (при нажатии на него) */
 .custom-checkbox:not(:disabled):active+label::before {
   background-color: #edd145;
   border-color: #edd145;
 }
 
-/* стили для чекбокса, находящегося в фокусе */
-.custom-checkbox:focus+label::before {
-  box-shadow: 0 0 0 0.2rem #f79b11ac;
-}
-
-/* стили для чекбокса, находящегося в фокусе и не находящегося в состоянии checked */
 .custom-checkbox:focus:not(:checked)+label::before {
   border-color: #edd145;
 }
 
-/* стили для чекбокса, находящегося в состоянии checked */
 .custom-checkbox:checked+label::before {
   border-color: #f7c202;
   background-color: #f78502;
   background-image: url(../img/check.png);
 }
 
-/* стили для чекбокса, находящегося в состоянии disabled */
 .custom-checkbox:disabled+label::before {
   background-color: #e9ecef;
+}
+
+.user-button {
+  text-decoration: none;
+  display: block;
+  font-size: 18px;
+  font-weight: 500;
+  color: #f5870a;
+  background-color: black;
+  border-radius: 3px;
+  border-color: #ff6c03;
+  border-width: 2px;
+  border-style: double;
+  transition: all 0.2s ease-in;
+  text-align: center;
+}
+
+.user-button:hover {
+  color: black;
+  background-color: #f5870a;
+}
+
+.none {
+  display: none;
+}
+
+.href {
+  text-decoration: none;
+  color: #f18810;
+}
+
+.href:hover {
+  color: #f1bc10;
 }
