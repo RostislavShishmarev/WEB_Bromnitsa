@@ -1,10 +1,10 @@
-from flask import Flask, render_template, request, url_for
+from flask import Flask, render_template, request
 import os
 from flask import send_from_directory
 
 app = Flask(__name__)
 SMALL, BIG = 'small', 'big'
-files = ['../static/img/Br_logo.png', '../static/css/Small_left_menu.css']
+files = ['../static/users-test/' + w for w in os.listdir('static/users-test')]
 
 
 class CurrentSet:

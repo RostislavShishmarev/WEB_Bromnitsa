@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link
+      rel="shortcut icon"
+      href="{{ url_for('static', filename='favicon.ico') }}"
+    />
     <link rel="stylesheet" href="../static/css/Account.css" />
     <link rel="stylesheet" href="../static/css/File_card.css" />
     <link rel="stylesheet" href="../static/css/Head_style.css" />
@@ -149,7 +152,30 @@
           {% for way in files_names %}
           <div class="file-card">
             <div class="file-card-main">
-              <div class="file-card-prevision"></div>
+              {% if way.split('.')[-1] in ['jpg', 'jpeg', 'png', 'svg', 'webp',
+              'gif', 'ico'] %}
+              <div
+                class="file-card-prevision"
+                style="background-image: url({{way}}); background-size: contain; background-repeat: no-repeat; background-position: center;"
+              ></div>
+              {% elif way.split('.')[-1] in ['mp3', 'wav', 'ogg'] %}
+              <div class="file-card-prevision">
+                <audio
+                  src="{{way}}"
+                  controls
+                  class="audio-prevision"
+                  style="
+                    background-color: #cfb79d;
+                    border: none !important;
+                    display: flex !important;
+                    flex-wrap: wrap !important;
+                    flex-direction: row !important;
+                    justify-content: flex-start !important;
+                    align-items: flex-start !important;
+                  "
+                ></audio>
+              </div>
+              {% endif %}
               <div class="file-card-title">{{ way.split('/')[-1] }}</div>
             </div>
             <div class="file-card-functions">
@@ -198,7 +224,9 @@
                   </li>
                 </ul>
               </div>
-              <div><a class="download-button" href="/{{ way }}" download="">↓</a></div>
+              <div>
+                <a class="download-button" href="/{{ way }}" download="">↓</a>
+              </div>
             </div>
           </div>
           {% endfor %}
