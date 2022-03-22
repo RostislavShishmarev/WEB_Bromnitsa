@@ -22,8 +22,8 @@
 .logo {
     background-image: url(../img/Br_logo.png);
     background-size: cover;
-    width: 84.99px;
-    height: 84.99px;
+    width: 74.99px;
+    height: 74.99px;
     margin-top: 10px;
     margin-bottom: 10px;
   }
@@ -32,7 +32,7 @@
     font-family: Roboto, sans-serif;
     font-style: normal;
     font-weight: normal;
-    font-size: 38px;
+    font-size: 32px;
     line-height: 41px;
     text-align: left;
     vertical-align: middle;
@@ -53,8 +53,8 @@
 .user-photo {
     background-image: url(../img/No_user.jpg);
     background-size: cover;
-    width: 44.99px;
-    height: 44.99px;
+    width: 39.99px;
+    height: 39.99px;
     margin-top: 10px;
     margin-bottom: 10px;
     border-color: #f5870a;
@@ -65,7 +65,7 @@
 .user-list {
     margin-top: auto;
     margin-bottom: auto;
-    padding-left: 45px;
+    padding-left: 39px;
     vertical-align: middle;
     align-self: center;
   }
@@ -87,7 +87,7 @@ div ul {
   font-family: Roboto, sans-serif;
   font-style: normal;
   font-weight: normal;
-  font-size: 30px;
+  font-size: 28px;
   color: #ff6c03;
 }
 
@@ -97,7 +97,7 @@ div ul {
 
 .menu-el {
     display: block;
-    min-width: 170px;
+    min-width: 148px;
     float: none;
     display: list-item;
     position: relative;
@@ -106,7 +106,7 @@ div ul {
     border-width: 2px;
     border-style: solid;
     border-bottom: none;
-    margin-left: -40px;
+    margin-left: -34px;
 }
 
 .last-el {
@@ -120,27 +120,27 @@ div ul {
   color: #ff6c03;
   background: #000000;
   text-decoration: none;
-  font-size: 26px;
+  font-size: 24px;
 }
 
 .menu-el a:hover {
   background: #363330;
 }
 
-@media screen and (max-width: 680px) {
+@media screen and (max-width: 520px) {
   .HEAD {
-    height: 20vh;
+    height: 13vh;
   }
 
   .logo {
-    width: 15vh;
-    height: 15vh;
+    width: 10vh;
+    height: 10vh;
     margin-top: 1vh;
     margin-bottom: 1vh;
   }
 
   .user-block {
-    height: 20vh;
+    height: 13vh;
   }
 
   .user-list {
@@ -148,27 +148,27 @@ div ul {
   }
 
   .menu {
-    font-size: 5vh;
-    line-height: 5vh;
+    font-size: 3.5vh;
+    line-height: 3.5vh;
   }
 
   .menu-el {
-    min-width: 24vh;
-    border-width: 0.5vh;
-    margin-left: -5.5vh;
+    min-width: 18vh;
+    border-width: 0.3vh;
+    margin-left: -4.1vh;
   }
 
   .last-el {
-    border-width: 0.5vh;
+    border-width: 0.3vh;
   }
 
   .menu-el a {
-    font-size: 4vh;
-    line-height: 4vh;
+    font-size: 2.9vh;
+    line-height: 2.9vh;
   }
 
   .Block1 {
-    margin-top: 20vh;
+    margin-top: 13vh;
   }
 
   .logo-text {
@@ -180,20 +180,20 @@ div ul {
   }
 }
 
-body::-webkit-scrollbar, .left-menu::-webkit-scrollbar, .file-card-title::-webkit-scrollbar {
+body::-webkit-scrollbar, .left-menu::-webkit-scrollbar {
   width: 12px;
   height: 12px;
 }
 
-body::-webkit-scrollbar-corner, .left-menu::-webkit-scrollbar-corner, .file-card-title::-webkit-scrollbar-corner {
+body::-webkit-scrollbar-corner, .left-menu::-webkit-scrollbar-corner {
   background-color: #2b2b2b;
 }
 
-body::-webkit-scrollbar-track, .left-menu::-webkit-scrollbar-track, .file-card-title::-webkit-scrollbar-track {
+body::-webkit-scrollbar-track, .left-menu::-webkit-scrollbar-track {
   background: #2b2b2b;
 }
 
-body::-webkit-scrollbar-thumb, .left-menu::-webkit-scrollbar-thumb, .file-card-title::-webkit-scrollbar-thumb {
+body::-webkit-scrollbar-thumb, .left-menu::-webkit-scrollbar-thumb {
   background-color: #f78502;
   border-radius: 20px;
   border: 3px solid black;

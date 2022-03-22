@@ -14,7 +14,7 @@ body {
 }
 
 .Block1 {
-  margin-top: 108px;
+  margin-top: 88px;
 }
 
 .page {
@@ -35,6 +35,7 @@ body {
   display: flex;
   justify-content: flex-start;
   flex-wrap: wrap;
+  align-content: flex-start;
   padding: 5px;
   padding-top: 3px;
 }

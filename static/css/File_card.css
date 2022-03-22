@@ -2,7 +2,7 @@
     width: 170px;
     height: 190px;
     border-style: double;
-    border-color: #ff6c03;
+    border-color: #ccbca3;
     border-width: 3px;
     border-radius: 10px;
     background-color: #211e1a;
@@ -21,7 +21,7 @@
 .file-card-prevision {
   height: 140px;
   width: 130px;
-  border: #f7890a 2px solid;
+  border: #cfc4b4 2px solid;
   margin: 0px;
 }
 
@@ -29,7 +29,7 @@
   font-family: Roboto, sans-serif;
   font-size: 18px;
   width: 130px;
-  color: #f7890a;
+  color: #fa8602;
   text-align: center;
   overflow: auto;
 }
@@ -63,11 +63,11 @@
   font-style: normal;
   font-weight: normal;
   font-size: 22px;
-  color: #ff6c03;
+  color: #c7c4bf;
 }
 
 .file-card-menu:hover {
-    color: #e8bb17;
+    color: #f0ece6;
 }
 
 .file-card-menu:hover > ul {
@@ -85,7 +85,7 @@
 
 .file-card-menu-el {
   display: block;
-  color: #ff6c03;
+  color: #c7c4bf;
   background: #000000;
   border-color: none;
   border-style: hidden;
@@ -108,9 +108,9 @@
   display: block;
   font-size: 19px;
   font-weight: 1900;
-  color: #f5870a;
+  color: #baac97;
   background-color: rgba(0, 0, 0, 0);
-  border-color: #ff6c03;
+  border-color: #baac97;
   border-width: 2px;
   border-style: solid;
   border-top-color: rgba(0, 0, 0, 0);
@@ -121,8 +121,27 @@
 }
 
 .download-button:hover {
-  color: #e8bb17;
-  border-color: #e8bb17;
+  color: #ff9a03;
+  border-color: #ff9a03;
   border-top-color: rgba(0, 0, 0, 0);
   border-radius: 8px;
+}
+
+.file-card-title::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+.file-card-title::-webkit-scrollbar-corner {
+  background-color: #2b2b2b;
+}
+
+.file-card-title::-webkit-scrollbar-track {
+  background: #2b2b2b;
+}
+
+.file-card-title::-webkit-scrollbar-thumb {
+  background-color: #75736f;
+  border-radius: 20px;
+  border: 3px solid black;
 }
