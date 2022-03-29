@@ -8,5 +8,6 @@ class File(SqlAlchemyBase):
 
     user = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("users.id"))
     path = sqlalchemy.Column(sqlalchemy.String)
+    name = sqlalchemy.Column(sqlalchemy.String)
 
     users = orm.relation("User", back_populates='file')
