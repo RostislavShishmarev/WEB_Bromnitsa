@@ -152,29 +152,32 @@
           {% for way in files_names %}
           <div class="file-card">
             <div class="file-card-main">
-              {% if way.split('.')[-1] in ['jpg', 'jpeg', 'png', 'svg', 'webp',
-              'gif', 'ico'] %}
-              <div
-                class="file-card-prevision"
-                style="background-image: url({{way}}); background-size: contain; background-repeat: no-repeat; background-position: center;"
-              ></div>
-              {% elif way.split('.')[-1] in ['mp3', 'wav', 'ogg'] %}
+              {% if way.split('.')[-1] in ['mp3', 'wav', 'ogg'] %}
               <div class="file-card-prevision">
                 <audio
                   src="{{way}}"
                   controls
-                  class="audio-prevision"
-                  style="
-                    background-color: #cfb79d;
-                    border: none !important;
-                    display: flex !important;
-                    flex-wrap: wrap !important;
-                    flex-direction: row !important;
-                    justify-content: flex-start !important;
-                    align-items: flex-start !important;
-                  "
                 ></audio>
               </div>
+              {% elif way.split('.')[-1] in ['jpg', 'jpeg', 'png', 'svg', 'webp',
+              'gif', 'ico'] %}
+              <div
+                class="file-card-prevision"
+                style="background-image: url({{way}});"
+              ></div>
+              {% else %}
+              {% set image_way = '../static/img/file_types/file.png' %}
+              {% for type_ in os.listdir('static/img/file_types') %}
+              {% if way.split('.')[-1] in type_.split('.')[0].split('_') %}
+              {% set image_way = '../static/img/file_types/' + type_ %}
+              {% endif %}
+              {% endfor %}
+              <div
+                class="file-card-prevision"
+              ><div
+              class="file-card-icon"
+              style="background-image: url({{image_way}});"
+            ></div></div>
               {% endif %}
               <div class="file-card-title">{{ way.split('/')[-1] }}</div>
             </div>

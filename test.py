@@ -28,9 +28,9 @@ def cloud():
     if request.method == 'POST':
         if 'change-menu' in request.form.keys():
             CurrentSet.menu_mode = SMALL if CurrentSet.menu_mode == BIG else BIG
-        return render_template('Account.html', menu=CurrentSet.menu_mode, files_names=files)
+        return render_template('Account.html', menu=CurrentSet.menu_mode, files_names=files, os=os)
     return render_template('Account.html', menu=CurrentSet.menu_mode,
-                           files_names=files)
+                           files_names=files, os=os)
 
 
 if __name__ == '__main__':
