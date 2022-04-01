@@ -154,39 +154,61 @@
             <div class="file-card-main">
               {% if way.split('.')[-1] in ['mp3', 'wav', 'ogg'] %}
               <div class="file-card-prevision">
-                <audio
-                  src="{{way}}"
-                  controls
-                ></audio>
+                <audio src="{{way}}" controls></audio>
               </div>
-              {% elif way.split('.')[-1] in ['jpg', 'jpeg', 'png', 'svg', 'webp',
-              'gif', 'ico'] %}
+              {% elif way.split('.')[-1] in ['jpg', 'jpeg', 'png', 'svg',
+              'webp', 'gif', 'ico'] %}
               <div
                 class="file-card-prevision"
                 style="background-image: url({{way}});"
               ></div>
               {% else %}
-              {% set image_way = '../static/img/file_types/file.png' %}
+              {% set types = {'exist': False} %}
               {% for type_ in os.listdir('static/img/file_types') %}
-              {% if way.split('.')[-1] in type_.split('.')[0].split('_') %}
+              {% if (way.split('/')[-1] == '..' or os.path.isdir(way[3:])) and not types['exist'] %}
+              <div class="file-card-prevision">
+                <div
+                  class="file-card-icon"
+                  style="background-image: url(../static/img/file_types/directory.png);"
+                ></div>
+              </div>
+              {% set _ = types.update({'exist': True}) %}
+              {% elif way.split('.')[-1] in type_.split('.')[0].split('_') and not types['exist'] %} 
               {% set image_way = '../static/img/file_types/' + type_ %}
+              <div class="file-card-prevision">
+                <div
+                  class="file-card-icon"
+                  style="background-image: url({{image_way}});"
+                ></div>
+              </div>
+              {% set _ = types.update({'exist': True}) %}
               {% endif %}
               {% endfor %}
-              <div
-                class="file-card-prevision"
-              ><div
-              class="file-card-icon"
-              style="background-image: url({{image_way}});"
-            ></div></div>
+              {% if not types['exist'] %}
+              <div class="file-card-prevision">
+                <div
+                  class="file-card-icon"
+                  style="
+                    background-image: url(../static/img/file_types/file.png);
+                  "
+                ></div>
+              </div>
+              {% endif %}
               {% endif %}
               <div class="file-card-title">{{ way.split('/')[-1] }}</div>
             </div>
+            {% if way.split('/')[-1] == '..' %}
+            <div class="file-card-functions" style="justify-content: flex-end;">
+            {% set class_ = 'none' %}
+            {% else %}
             <div class="file-card-functions">
-              <div class="file-card-user-list">
+            {% endif %}
+              <div class="file-card-user-list {{class_}}">
                 <ul class="file-card-user-list-el">
                   <li class="file-card-menu">
                     ▼
                     <ul class="file-card-menu-list">
+                      {% if os.path.isfile(way[3:]) %}
                       <div class="file-card-menu-el-place">
                         <a
                           class="file-card-menu-el"
@@ -194,6 +216,7 @@
                           >Опубликовать</a
                         >
                       </div>
+                      {% endif %}
                       <div class="file-card-menu-el-place">
                         <a
                           class="file-card-menu-el"
@@ -228,7 +251,13 @@
                 </ul>
               </div>
               <div>
+                {% if os.path.isfile(way[3:]) %}
                 <a class="download-button" href="/{{ way }}" download="">↓</a>
+                {% elif way.split('/')[-1] == '..' %}
+                <a class="opendir-button" href="/{{'cloud/' + way.split('/')[3:-2]|join('&') }}">📂</a>
+                {% else %}
+                <a class="opendir-button" href="/{{'cloud/' + way.split('/')[3:]|join('&') }}">📂</a>
+                {% endif %}
               </div>
             </div>
           </div>
