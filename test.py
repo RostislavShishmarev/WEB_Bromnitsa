@@ -19,13 +19,19 @@ def favicon():
 
 @app.route('/')
 def main_page():
-    return render_template('TitlePage.html')
+    nav = [{'href': '/login', 'title': 'Войти'},
+           {'href': '/publications', 'title': 'Публикации'}]
+    return render_template('TitlePage.html', title='Главная', navigation=nav)
 
 
 @app.route('/cloud', methods=['GET', 'POST'])
 @app.route('/cloud/', methods=['GET', 'POST'])
 @app.route('/cloud/<path:current_dir>', methods=['GET', 'POST'])
 def cloud(current_dir=''):
+    nav = [{'href': '/', 'title': 'Главная'},
+           {'href': '/publications', 'title': 'Публикации'},
+           {'href': '/settings', 'title': 'Настройки'},
+           {'href': '/logout', 'title': 'Выход'}]
     current_dir = current_dir.replace('&', '/')
     files = ['../static/users/' + (current_dir + '/' if current_dir else '') + w
              for w in (['..', ] if current_dir else []) + os.listdir('static/users/' + current_dir)]
@@ -33,9 +39,9 @@ def cloud(current_dir=''):
         if 'change-menu' in request.form.keys():
             CurrentSet.menu_mode = SMALL if CurrentSet.menu_mode == BIG\
                 else BIG
-        return render_template('Account.html', menu=CurrentSet.menu_mode,
+        return render_template('Account.html', title='Облако', navigation=nav, menu=CurrentSet.menu_mode,
                                files_names=files, os=os)
-    return render_template('Account.html', menu=CurrentSet.menu_mode,
+    return render_template('Account.html', title='Облако', navigation=nav, menu=CurrentSet.menu_mode,
                            files_names=files, os=os)
 
 

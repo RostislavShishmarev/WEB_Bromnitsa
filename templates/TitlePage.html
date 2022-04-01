@@ -1,79 +1,68 @@
-<!DOCTYPE html>
-<html lang="ru">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <link rel="stylesheet" href="../static/css/TitlePage.css" />
-    <link rel="stylesheet" href="../static/css/Head_style.css" />
-    <title>Бромница</title>
-  </head>
-  <body>
-    <div class="HEAD">
-      <div class="container head">
-        <div class="logo-block">
-          <div class="logo"></div>
-          <div class="logo-text">Бромница</div>
-        </div>
-        <div class="user-block">
-          <div class="user-photo"></div>
-          <div class="user-list">
-            <ul>
-              <li class="menu">
-                Меню
-                <ul class="menu-list">
-                  <li class="menu-el"><a href="/login">Войти</a></li>
-                  <li class="menu-el last-el">
-                    <a href="/publications">Публикации</a>
-                  </li>
-                </ul>
+{% extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" href="../static/css/TitlePage.css" />
+<div class="HEAD">
+  <div class="container head">
+    <div class="logo-block">
+      <div class="logo"></div>
+      <div class="logo-text">Бромница</div>
+    </div>
+    <div class="user-block">
+      <div class="user-photo"></div>
+      <div class="user-list">
+        <ul>
+          <li class="menu">
+            Меню
+            <ul class="menu-list">
+              <li class="menu-el"><a href="/login">Войти</a></li>
+              <li class="menu-el last-el">
+                <a href="/publications">Публикации</a>
               </li>
             </ul>
-          </div>
-        </div>
+          </li>
+        </ul>
       </div>
     </div>
-    <section class="block Block1">
-      <div class="container">
-        <div class="problem-text">
-          <p>
-            На компьютере закончилось место под бесконечный поток файлов? Или
-            просто нужен удобный инструмент для их хранения?<br />"Бромница"
-            поможет!
-          </p>
-        </div>
-      </div>
-    </section>
-    <div class="block Block2">
-      <div class="container">
-        <div class="head-text">А что это?</div>
-      </div>
-      <div class="container">
-        <div class="main-text">
-          <p>
-            "WEB-Бромница" — абсолютно бесплатное облачное хранилище,
-            позволяющее создавать папки и добавлять в них файлы.
-          </p>
-          <p>
-            Она быстро и легко освободит ваше устройство от лишней нагрузки,
-            ведь их так же просто скачивать, как и загружать.
-          </p>
-          <p>
-            Кроме того, пользователи могут выкладывать свои файлы на всеобщее
-            скачивание в нашей
-            <a class="href" href="/publications">новостной странице</a>, где
-            каждый может найти для себя что-то интересное.
-          </p>
-        </div>
-      </div>
+  </div>
+</div>
+<section class="block Block1">
+  <div class="container">
+    <div class="problem-text">
+      <p>
+        На компьютере закончилось место под бесконечный поток файлов? Или просто
+        нужен удобный инструмент для их хранения?<br />"Бромница" поможет!
+      </p>
     </div>
-    <div class="block Block3">
-      <div class="container">
-        <div class="button">
-          <a class="super-button" href="/register">Создать аккаунт</a>
-        </div>
-      </div>
+  </div>
+</section>
+<div class="block Block2">
+  <div class="container">
+    <div class="head-text">А что это?</div>
+  </div>
+  <div class="container">
+    <div class="main-text">
+      <p>
+        "WEB-Бромница" — абсолютно бесплатное облачное хранилище, позволяющее
+        создавать папки и добавлять в них файлы.
+      </p>
+      <p>
+        Она быстро и легко освободит ваше устройство от лишней нагрузки, ведь их
+        так же просто скачивать, как и загружать.
+      </p>
+      <p>
+        Кроме того, пользователи могут выкладывать свои файлы на всеобщее
+        скачивание в нашей
+        <a class="href" href="/publications">новостной странице</a>, где каждый
+        может найти для себя что-то интересное.
+      </p>
     </div>
-  </body>
-</html>
+  </div>
+</div>
+<div class="block Block3">
+  <div class="container">
+    <div class="button">
+      <a class="super-button" href="/register">Создать аккаунт</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

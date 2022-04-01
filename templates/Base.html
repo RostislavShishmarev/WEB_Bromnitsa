@@ -10,7 +10,7 @@
     />
     <link rel="stylesheet" href="../static/css/Main.css" />
     <link rel="stylesheet" href="../static/css/Head_style.css" />
-    <title>Бромница</title>
+    <title>{{ title }}</title>
   </head>
   <body>
     <div class="HEAD">
@@ -26,10 +26,17 @@
               <li class="menu">
                 Меню
                 <ul class="menu-list">
-                  <li class="menu-el"><a href="/login">Войти</a></li>
+                  {% for element in navigation %}
+                  {% if loop.last %}
                   <li class="menu-el last-el">
-                    <a href="/publications">Публикации</a>
+                    <a href="{{element['href']}}">{{element['title']}}</a>
                   </li>
+                  {% else %}
+                  <li class="menu-el">
+                    <a href="{{element['href']}}">{{element['title']}}</a>
+                  </li>
+                  {% endif %}
+                  {% endfor %}
                 </ul>
               </li>
             </ul>

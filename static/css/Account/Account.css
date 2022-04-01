@@ -1,20 +1,5 @@
-body {
-  margin-left: auto;
-  margin-right: auto;
-  background-color: #141312;
-}
-
 .container {
-  box-sizing: border-box;
-  max-width: 1219px;
-  margin-left: auto;
-  margin-right: auto;
   padding-left: 0px;
-  padding-right: 55px;
-}
-
-.Block1 {
-  margin-top: 88px;
 }
 
 .page {
