@@ -108,7 +108,30 @@
           </div>
         </div>
         {% endif %}
-        <div class="dirs-placeholder Block1">
+        <div class="main-placeholder Block1">
+        <div class="nav-placeholder">
+          <div class="nav-block">
+            <form method="POST">
+              <input name="prev" class="none" />
+              <input
+                type="submit"
+                value="<<"
+                class="user-button"
+              />
+            </form>
+          </div>
+          <div class="nav-block">
+            <form method="POST">
+              <input name="next" class="none" />
+              <input
+                type="submit"
+                value=">>"
+                class="user-button"
+              />
+            </form>
+          </div>
+        </div>
+        <div class="dirs-placeholder">
           {% for way in files_names %}
           <div class="file-card">
             <div class="file-card-main">
@@ -224,6 +247,7 @@
           {% endfor %}
         </div>
       </div>
+    </div>
     </section>
     <script>
       let inputs = document.querySelectorAll(".input__file");

@@ -179,36 +179,3 @@ div ul {
     display: none;
   }
 }
-
-.user-button {
-  text-decoration: none;
-  display: block;
-  font-size: 18px;
-  font-weight: 500;
-  color: #f5870a;
-  background-color: black;
-  border-radius: 3px;
-  border-color: #ff6c03;
-  border-width: 2px;
-  border-style: double;
-  transition: all 0.2s ease-in;
-  text-align: center;
-}
-
-.user-button:hover {
-  color: black;
-  background-color: #f5870a;
-}
-
-.none {
-  display: none;
-}
-
-.href {
-  text-decoration: none;
-  color: #f18810;
-}
-
-.href:hover {
-  color: #f1bc10;
-}

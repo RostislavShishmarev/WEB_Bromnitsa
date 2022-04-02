@@ -12,15 +12,27 @@
   background-color: #1f1d1c;
 }
 
-.dirs-placeholder {
+.main-placeholder {
   position: relative;
-  margin-left: 56px;
   min-width: calc(100% - 28px);
   min-height: 100vh;
+  display: block;
+  padding-left: 56px;
+  padding-top: 3px;
+}
+
+.nav-placeholder {
+  display: flex;
+  justify-content: space-between;
+}
+
+.nav-block {
+  margin: 12px;
+}
+
+.dirs-placeholder {
   display: flex;
   justify-content: flex-start;
   flex-wrap: wrap;
   align-content: flex-start;
-  padding: 5px;
-  padding-top: 3px;
 }
