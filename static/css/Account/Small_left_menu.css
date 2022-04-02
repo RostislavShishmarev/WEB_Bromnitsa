@@ -8,6 +8,7 @@
   flex-direction: column;
   justify-content: flex-start;
   border: ridge 3px #141312;
+  z-index: 4;
 }
 
 .small-menu-block {

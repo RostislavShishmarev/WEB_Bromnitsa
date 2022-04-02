@@ -14,7 +14,7 @@
   </head>
   <body>
     <div class="HEAD">
-      <div class="container head">
+      <div class="br-container head">
         <div class="logo-block">
           <div class="logo"></div>
           <div class="logo-text">Бромница</div>
@@ -26,8 +26,7 @@
               <li class="menu">
                 Меню
                 <ul class="menu-list">
-                  {% for element in navigation %}
-                  {% if loop.last %}
+                  {% for element in navigation %} {% if loop.last %}
                   <li class="menu-el last-el">
                     <a href="{{element['href']}}">{{element['title']}}</a>
                   </li>
@@ -35,8 +34,7 @@
                   <li class="menu-el">
                     <a href="{{element['href']}}">{{element['title']}}</a>
                   </li>
-                  {% endif %}
-                  {% endfor %}
+                  {% endif %} {% endfor %}
                 </ul>
               </li>
             </ul>

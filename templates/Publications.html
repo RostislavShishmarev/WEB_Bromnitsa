@@ -1,0 +1,42 @@
+{% extends "Base.html" %} {% block content %}
+<link rel="stylesheet" href="../static/css/Publications.css" />
+<link rel="stylesheet" href="../static/css/Account/Account.css" />
+<div class="publ-head-block Block1">
+  <div class="br-container">
+    <p class="publ-head-text">Наши публикации</p>
+  </div>
+</div>
+<div class="Block2">
+  <div class="br-container">
+    <div class="nav-placeholder">
+      <div class="connector">
+        <div class="nav-block">
+          <form method="POST">
+            <input name="prev" class="none" />
+            <input type="submit" value="<" class="nav-button" />
+          </form>
+        </div>
+        <div class="nav-block">
+          <form method="POST">
+            <div class="search-row">
+              <input
+                type="search"
+                placeholder="Поиск..."
+                class="search-string"
+                size="1"
+              />
+              <input type="submit" value="🔍" class="user-button" />
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="nav-block">
+        <form method="POST">
+          <input name="next" class="none" />
+          <input type="submit" value=">" class="nav-button" />
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

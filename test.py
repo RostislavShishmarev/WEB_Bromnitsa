@@ -32,17 +32,32 @@ def cloud(current_dir=''):
            {'href': '/publications', 'title': 'Публикации'},
            {'href': '/settings', 'title': 'Настройки'},
            {'href': '/logout', 'title': 'Выход'}]
-    current_dir = current_dir.replace('&', '/')
-    files = ['../static/users/' + (current_dir + '/' if current_dir else '') + w
-             for w in (['..', ] if current_dir else []) + os.listdir('static/users/' + current_dir)]
+    current_dir = 'static/users/' + current_dir.replace('&', '/')
     if request.method == 'POST':
         if 'change-menu' in request.form.keys():
             CurrentSet.menu_mode = SMALL if CurrentSet.menu_mode == BIG\
                 else BIG
         return render_template('Account.html', title='Облако', navigation=nav, menu=CurrentSet.menu_mode,
-                               files_names=files, os=os)
+                               current_dir=current_dir, os=os, sort_function=sort_function)
     return render_template('Account.html', title='Облако', navigation=nav, menu=CurrentSet.menu_mode,
-                           files_names=files, os=os)
+                           current_dir=current_dir, os=os, sort_function=sort_function)
+
+
+@app.route('/publications')
+def publications():
+    nav = [{'href': '/', 'title': 'Главная'},
+           {'href': '/login', 'title': 'Войти'}]
+    return render_template('Publications.html', title='Публикации', navigation=nav)
+
+
+def sort_function(list_, cur_dir):
+    key_sort = lambda x: x
+    return sorted(list(filter(lambda f: os.path.isdir('/'.join([cur_dir,
+                                                                f])), list_)),
+                  key=key_sort) +\
+           sorted(list(filter(lambda f: os.path.isfile('/'.join([cur_dir,
+                                                                 f])), list_)),
+                  key=key_sort)
 
 
 if __name__ == '__main__':
