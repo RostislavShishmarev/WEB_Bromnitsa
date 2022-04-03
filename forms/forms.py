@@ -40,3 +40,17 @@ class ChangePasswordForm(FlaskForm):
     password_again = PasswordField('Повторите пароль',
                                    validators=[DataRequired()])
     submit = SubmitField('Сменить пароль')
+
+
+class MakeDirForm(FlaskForm):
+    name = StringField('Название', validators=[DataRequired()])
+    submit = SubmitField('Создать')
+
+
+class RenameFileForm(FlaskForm):
+    name = StringField('Новое имя', validators=[DataRequired()])
+    submit = SubmitField('Переименовать')
+
+
+class DeleteFileForm(FlaskForm):
+    submit = SubmitField('Удалить')

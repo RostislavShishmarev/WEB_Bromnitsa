@@ -204,7 +204,7 @@
                       <div class="file-card-menu-el-place">
                         <a
                           class="file-card-menu-el"
-                          href="/make_publication/{{ way.split('/')[3:]|join('&') }}"
+                          href="/make_publication/{{ way.split('/')[4:]|join('&') }}"
                           >Опубликовать</a
                         >
                       </div>
@@ -212,9 +212,19 @@
                       <div class="file-card-menu-el-place">
                         <a
                           class="file-card-menu-el"
-                          href="/rename_file/{{ way.split('/')[3:]|join('&') }}"
+                          href="/rename_file/{{ way.split('/')[4:]|join('&') }}"
                           >Переименовать</a
                         >
+                      </div>
+                      <div class="file-card-menu-el-place">
+                        <form method="POST">
+                          <input name="copy-file-{{ way }}" class="none" />
+                          <input
+                            type="submit"
+                            value="Копировать"
+                            class="file-card-menu-el"
+                          />
+                        </form>
                       </div>
                       <div class="file-card-menu-el-place">
                         <form method="POST">
@@ -229,14 +239,10 @@
                       <div
                         class="file-card-menu-el-place file-card-menu-last-el-place"
                       >
-                        <form method="POST">
-                          <input name="del-file-{{ way }}" class="none" />
-                          <input
-                            type="submit"
-                            value="Удалить"
-                            class="file-card-menu-el"
-                          />
-                        </form>
+                      <a
+                      class="file-card-menu-el"
+                      href="/delete_file/{{ way.split('/')[4:]|join('&') }}"
+                      >Удалить</a>
                       </div>
                     </ul>
                   </li>
@@ -246,9 +252,9 @@
                 {% if os.path.isfile(way[3:]) %}
                 <a class="download-button" href="/{{ way }}" download="">↓</a>
                 {% elif name == '..' %}
-                <a class="opendir-button" href="/{{'cloud/' + way.split('/')[3:-2]|join('&') }}">📂</a>
+                <a class="opendir-button" href="/{{'cloud/' + way.split('/')[4:-2]|join('&') }}">📂</a>
                 {% else %}
-                <a class="opendir-button" href="/{{'cloud/' + way.split('/')[3:]|join('&') }}">📂</a>
+                <a class="opendir-button" href="/{{'cloud/' + way.split('/')[4:]|join('&') }}">📂</a>
                 {% endif %}
               </div>
             </div>

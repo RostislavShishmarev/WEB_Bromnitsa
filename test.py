@@ -2,7 +2,7 @@ import os
 from flask import Flask, render_template, request
 from flask import send_from_directory
 from forms.forms import RegisterForm, LoginForm, SettingsForm,\
-    ChangePasswordForm
+    ChangePasswordForm, MakeDirForm, RenameFileForm, DeleteFileForm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'super_Seсret_key_of_devEl0pers'
@@ -16,7 +16,7 @@ class CurrentSet:
 
 class Autor:
     name = 'Моккий Кифович'
-    photo = 'static/users/User_phoenix.jpg'
+    photo = 'static/users/1/User_phoenix.jpg'
     email = 'mokk@mail.ru'
     is_authenticated = True
 
@@ -28,7 +28,7 @@ class flask_login:
 class Publication:
     def __init__(self, filename, description, show_email=False):
         self.autor = Autor
-        self.filename = 'static/users/' + filename
+        self.filename = 'static/users/1/' + filename
         self.description = description
         self.show_email = show_email
 
@@ -55,7 +55,7 @@ def cloud(current_dir=''):
            {'href': '/publications', 'title': 'Публикации'},
            {'href': '/settings', 'title': 'Настройки'},
            {'href': '/logout', 'title': 'Выход'}]
-    current_dir = 'static/users/' + current_dir.replace('&', '/')
+    current_dir = 'static/users/1/' + current_dir.replace('&', '/')
     if request.method == 'POST':
         if 'change-menu' in request.form.keys():
             CurrentSet.menu_mode = SMALL if CurrentSet.menu_mode == BIG\
@@ -137,6 +137,47 @@ def change_password():
            {'href': '/settings', 'title': 'Настройки'},
            {'href': '/logout', 'title': 'Выход'}]
     return render_template('Form.html', title='Сменить пароль', navigation=nav,
+                           form=form, current_user=flask_login.current_user)
+
+
+@app.route('/add_dir', methods=['GET', 'POST'])
+def add_dir():
+    form = MakeDirForm()
+    nav = [{'href': '/', 'title': 'Главная'},
+           {'href': '/publications', 'title': 'Публикации'},
+           {'href': '/cloud', 'title': 'Облако'},
+           {'href': '/settings', 'title': 'Настройки'},
+           {'href': '/logout', 'title': 'Выход'}]
+    return render_template('Form.html', title='Создать папку', navigation=nav,
+                           form=form, current_user=flask_login.current_user)
+
+
+@app.route('/rename_file/<path:filename>', methods=['GET', 'POST'])
+def rename_file(filename):
+    filename = filename.replace('&', '/')
+    form = RenameFileForm()
+    form.name.data = filename.split('/')[-1].split('.')[0]
+    nav = [{'href': '/', 'title': 'Главная'},
+           {'href': '/publications', 'title': 'Публикации'},
+           {'href': '/cloud', 'title': 'Облако'},
+           {'href': '/settings', 'title': 'Настройки'},
+           {'href': '/logout', 'title': 'Выход'}]
+    return render_template('Form.html', title='Переименовать файл', navigation=nav,
+                           form=form, current_user=flask_login.current_user)
+
+
+@app.route('/delete_file/<path:filename>', methods=['GET', 'POST'])
+def delete_file(filename):
+    filename = filename.replace('&', '/')
+    form = DeleteFileForm()
+    nav = [{'href': '/', 'title': 'Главная'},
+           {'href': '/publications', 'title': 'Публикации'},
+           {'href': '/cloud', 'title': 'Облако'},
+           {'href': '/settings', 'title': 'Настройки'},
+           {'href': '/logout', 'title': 'Выход'}]
+    return render_template('Form.html',
+                           title='Удалить файл ' + filename.split('/')[-1],
+                           navigation=nav,
                            form=form, current_user=flask_login.current_user)
 
 
