@@ -22,6 +22,7 @@ class User(SqlAlchemyBase):
                                       default=datetime.datetime.now)
     photo = sqlalchemy.Column(sqlalchemy.String,
                               nullable=True)
+    path = sqlalchemy.Column(sqlalchemy.String)
 
     files = orm.relation("Publication", back_populates='user')
 

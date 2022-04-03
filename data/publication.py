@@ -13,7 +13,6 @@ class Publication(SqlAlchemyBase):
     decription = sqlalchemy.Column(sqlalchemy.String)
     path = sqlalchemy.Column(sqlalchemy.String)
     filename = sqlalchemy.Column(sqlalchemy.String)
-    public = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
     show_email = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
     modified_date = sqlalchemy.Column(sqlalchemy.DateTime,
                                       default=datetime.datetime.now)
