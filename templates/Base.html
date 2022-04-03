@@ -20,7 +20,12 @@
           <div class="logo-text">Бромница</div>
         </div>
         <div class="user-block">
-          <div class="user-photo"></div>
+          {% if current_user.is_authenticated %}
+              {% set photo_name = '../' + current_user.photo %}
+              {% else %}
+              {% set photo_name = '../static/img/No_user.png' %}
+              {% endif %}
+          <div class="user-photo" style="background-image: url({{photo_name}})"></div>
           <div class="user-list">
             <ul>
               <li class="menu">

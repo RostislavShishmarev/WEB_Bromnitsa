@@ -15,8 +15,9 @@
           <div class="menu-container">
             <div class="up-menu">
               <div class="user-block-on-menu">
-                <div class="main-user-photo"></div>
-                <div class="username-text">Пользователь</div>
+              {% set photo_name = '../' + current_user.photo %}
+                <div class="main-user-photo" style="background-image: url({{photo_name}})"></div>
+                <div class="username-text">{{ current_user.name }}</div>
               </div>
               <div class="small-block">
                 <form method="POST">

@@ -175,3 +175,14 @@
   font-size: 18px;
   margin-left: 5px;
 }
+
+.error-message {
+  color: red;
+  background-color: #080707;
+  border: dotted 3px red;
+  padding: 4px;
+  margin-top: 4px;
+  font-family: Roboto, sans-serif;
+  font-size: 19px;
+  align-self: flex-start;
+}

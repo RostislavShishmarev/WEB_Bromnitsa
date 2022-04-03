@@ -1,0 +1,61 @@
+{% extends "Base.html" %} {% block content %}
+<link rel="stylesheet" href="../static/css/Form.css" />
+<link rel="stylesheet" href="../static/css/Settings.css" />
+<div class="Block1">
+  <div class="br-container">
+    <div class="main-form-placeholder">
+      <div class="form-title">{{ title }}</div>
+      <form action="" method="post">
+        <div class="fields-placeholder">
+          <div class="form-field settings-photo-block">
+              {% set photo_name = '../' + current_user.photo %}
+              <div class="settings-user-photo" style="background-image: url({{photo_name}})"></div>
+              <div class="input__placeholder form-field-input">
+                {{ form.photo(id="input__file", class="input input__file") }}
+                <label for="input__file" class="input__file-button add-block">
+                  <span class="add-button">+</span>
+                  <span class="field-label input__file-button-text"
+                    >Добавить файл</span
+                  >
+                </label>
+              </div>
+          </div>
+          <div class="form-field">
+            {{ form.name.label(class="field-label") }} {{
+            form.name(class="form-text-field") }} {% for error in form.name.errors %}
+            <div class="error-message">{{ error }}</div>
+            {% endfor %}
+          </div>
+          <div class="form-field">
+            {{ form.email.label(class="field-label") }} {{
+            form.email(class="form-text-field") }} {% for error in form.email.errors %}
+            <div class="error-message">{{ error }}</div>
+            {% endfor %}
+          </div>
+          <div class="bottom-choice">
+            <p>{{ form.submit(type="submit", class="user-button") }}</p>
+            <a class="change-password-href href" href="/change_password">Смена пароля</a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+  let inputs = document.querySelectorAll(".input__file");
+  Array.prototype.forEach.call(inputs, function (input) {
+    let label = input.nextElementSibling,
+      labelVal = label.querySelector(".input__file-button-text").innerText;
+
+    input.addEventListener("change", function (e) {
+      let countFiles = "";
+      if (this.files && this.files.length >= 1) countFiles = this.files.length;
+
+      if (countFiles)
+        label.querySelector(".input__file-button-text").innerText =
+          "Выбрано файлов: " + countFiles;
+      else label.querySelector(".input__file-button-text").innerText = labelVal;
+    });
+  });
+</script>
+{% endblock %}

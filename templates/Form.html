@@ -11,12 +11,7 @@
           <div class="form-field">
             {{ field.label(class="field-label") }}
             <div class="input__placeholder form-field-input">
-              <input
-                type="file"
-                name="{{ field.name }}"
-                id="input__file"
-                class="input input__file"
-              />
+              {{ field(id="input__file", class="input input__file") }}
               <label for="input__file" class="input__file-button add-block">
                 <span class="add-button">+</span>
                 <span class="field-label input__file-button-text"

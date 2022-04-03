@@ -1,7 +1,8 @@
 import os
 from flask import Flask, render_template, request
 from flask import send_from_directory
-from forms.forms import RegisterForm, LoginForm
+from forms.forms import RegisterForm, LoginForm, SettingsForm,\
+    ChangePasswordForm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'super_Seсret_key_of_devEl0pers'
@@ -17,6 +18,11 @@ class Autor:
     name = 'Моккий Кифович'
     photo = 'static/users/User_phoenix.jpg'
     email = 'mokk@mail.ru'
+    is_authenticated = True
+
+
+class flask_login:
+    current_user = Autor
 
 
 class Publication:
@@ -31,14 +37,14 @@ class Publication:
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
                                'favicon.ico',
-                               mimetype='image/vnd.microsoft.icon')
+                               mimetype='image/vnd.microsoft.icon', current_user=flask_login.current_user)
 
 
 @app.route('/')
 def main_page():
     nav = [{'href': '/login', 'title': 'Войти'},
            {'href': '/publications', 'title': 'Публикации'}]
-    return render_template('TitlePage.html', title='Главная', navigation=nav)
+    return render_template('TitlePage.html', title='Главная', navigation=nav, current_user=flask_login.current_user)
 
 
 @app.route('/cloud', methods=['GET', 'POST'])
@@ -57,11 +63,11 @@ def cloud(current_dir=''):
         return render_template('Account.html', title='Облако',
                                navigation=nav, menu=CurrentSet.menu_mode,
                                current_dir=current_dir, os=os,
-                               sort_function=sort_function)
+                               sort_function=sort_function, current_user=flask_login.current_user)
     return render_template('Account.html', title='Облако',
                            navigation=nav, menu=CurrentSet.menu_mode,
                            current_dir=current_dir, os=os,
-                           sort_function=sort_function)
+                           sort_function=sort_function, current_user=flask_login.current_user)
 
 
 @app.route('/publications', methods=['GET', 'POST'])
@@ -75,7 +81,7 @@ def publications():
                                                      игры "Отражение"'),
                                          Publication('play_fone.mp3',
                                                      DESC, True)],
-                           os=os)
+                           os=os, current_user=flask_login.current_user)
 
 
 @app.route('/make_publication/<path:filename>',methods=['GET', 'POST'])
@@ -88,7 +94,7 @@ def make_publication(filename):
            {'href': '/logout', 'title': 'Выход'}]
     return render_template('Publication_maker.html',
                            title='Создать публикацию', navigation=nav, os=os,
-                           publication=Publication(filename, ''))
+                           publication=Publication(filename, ''), current_user=flask_login.current_user)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -98,7 +104,7 @@ def register():
            {'href': '/', 'title': 'Главная'},
            {'href': '/publications', 'title': 'Публикации'}]
     return render_template('Form.html', title='Регистрация', navigation=nav,
-                           form=form)
+                           form=form, current_user=flask_login.current_user)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -107,8 +113,31 @@ def login():
     nav = [{'href': '/register', 'title': 'Регистрация'},
            {'href': '/', 'title': 'Главная'},
            {'href': '/publications', 'title': 'Публикации'}]
-    return render_template('Form.html', title='Войти', navigation=nav,
-                           form=form)
+    return render_template('Form.html', title='Авторизация', navigation=nav,
+                           form=form, current_user=flask_login.current_user)
+
+
+@app.route('/settings', methods=['GET', 'POST'])
+def settings():
+    form = SettingsForm()
+    nav = [{'href': '/', 'title': 'Главная'},
+           {'href': '/publications', 'title': 'Публикации'},
+           {'href': '/cloud', 'title': 'Облако'},
+           {'href': '/logout', 'title': 'Выход'}]
+    return render_template('Settings.html', title='Настройки', navigation=nav,
+                           form=form, current_user=flask_login.current_user)
+
+
+@app.route('/change_password', methods=['GET', 'POST'])
+def change_password():
+    form = ChangePasswordForm()
+    nav = [{'href': '/', 'title': 'Главная'},
+           {'href': '/publications', 'title': 'Публикации'},
+           {'href': '/cloud', 'title': 'Облако'},
+           {'href': '/settings', 'title': 'Настройки'},
+           {'href': '/logout', 'title': 'Выход'}]
+    return render_template('Form.html', title='Сменить пароль', navigation=nav,
+                           form=form, current_user=flask_login.current_user)
 
 
 def sort_function(list_, cur_dir):
