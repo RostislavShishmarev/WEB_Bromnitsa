@@ -1,0 +1,64 @@
+{% extends "Base.html" %} {% block content %}
+<link rel="stylesheet" href="../static/css/Form.css" />
+<div class="Block1">
+  <div class="br-container">
+    <div class="main-form-placeholder">
+      <div class="form-title">{{ title }}</div>
+      <form action="" method="post">
+        <div class="fields-placeholder">
+          {{ form.hidden_tag() }} {% for field in form if field.name not in
+          ['csrf_token', 'submit'] %} {% if field.name == 'photo' %}
+          <div class="form-field">
+            {{ field.label(class="field-label") }}
+            <div class="input__placeholder form-field-input">
+              <input
+                type="file"
+                name="{{ field.name }}"
+                id="input__file"
+                class="input input__file"
+              />
+              <label for="input__file" class="input__file-button add-block">
+                <span class="add-button">+</span>
+                <span class="field-label input__file-button-text"
+                  >Добавить файл</span
+                >
+              </label>
+            </div>
+          </div>
+          {% elif field.name == "remember_me" %}
+          <div class="checkbox-placeholder form-field-checkbox">
+            {{ field(class="custom-checkbox") }} {{
+            field.label(class="check-text") }}
+          </div>
+          {% else %}
+          <div class="form-field">
+            {{ field.label(class="field-label") }} {{
+            field(class="form-text-field") }} {% for error in field.errors %}
+            <div class="error-message">{{ error }}</div>
+            {% endfor %}
+          </div>
+          {% endif %} {% endfor %}
+          <p>{{ form.submit(type="submit", class="user-button") }}</p>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+  let inputs = document.querySelectorAll(".input__file");
+  Array.prototype.forEach.call(inputs, function (input) {
+    let label = input.nextElementSibling,
+      labelVal = label.querySelector(".input__file-button-text").innerText;
+
+    input.addEventListener("change", function (e) {
+      let countFiles = "";
+      if (this.files && this.files.length >= 1) countFiles = this.files.length;
+
+      if (countFiles)
+        label.querySelector(".input__file-button-text").innerText =
+          "Выбрано файлов: " + countFiles;
+      else label.querySelector(".input__file-button-text").innerText = labelVal;
+    });
+  });
+</script>
+{% endblock %}

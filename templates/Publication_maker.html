@@ -1,0 +1,99 @@
+{% extends "Base.html" %} {% block content %}
+<link rel="stylesheet" href="../static/css/Form.css" />
+<link rel="stylesheet" href="../static/css/Publications.css" />
+<link rel="stylesheet" href="../static/css/Account/File_card.css" />
+<link rel="stylesheet" href="../static/css/Publication_maker.css" />
+<div class="maker-head-block Block1">
+  <div class="br-container">
+    <p class="maker-head-text">Создание публикации</p>
+    <div class="publication-maker">
+      <label class="maker-title-text"> Введите описание </label>
+      <form>
+        <div class="maker-main">
+          <textarea type="textarea" class="maker-area" name="description">
+{{ publication.description }}</textarea
+          >
+          <div class="checkbox-placeholder">
+            <input type="checkbox" class="custom-checkbox" name="reverse" />
+            <label class="check-text">Показывать e-mail</label>
+          </div>
+        </div>
+        <input type="submit" value="Проверить" class="maker-button" />
+      </form>
+    </div>
+  </div>
+</div>
+<div class="br-container">
+  <div class="publ-card">
+    <div class="publ-card-title">
+      <div class="publ-card-title-text">
+        {{publication.filename.split('/')[-1]}}
+      </div>
+      <div class="publ-card-user-block">
+        <div class="publ-card-user-name">{{publication.autor.name}}</div>
+        {% set photo_name = '../' + publication.autor.photo %}
+        <div
+          class="publ-card-user-photo"
+          style="background-image: url({{photo_name}})"
+        ></div>
+      </div>
+    </div>
+    <div class="publ-card-main">
+      <div class="publ-card-file">
+        {% set filename = '../' + publication.filename %} {% if
+        filename.split('.')[-1] in ['mp3', 'wav', 'ogg'] %}
+        <div class="file-card-prevision">
+          <audio src="{{filename}}" controls></audio>
+        </div>
+        {% elif filename.split('.')[-1] in ['jpg', 'jpeg', 'png', 'svg', 'webp',
+        'gif', 'ico'] %}
+        <div
+          class="file-card-prevision"
+          style="background-image: url({{filename}});"
+        ></div>
+        {% else %} {% set types = {'exist': False} %} {% for type_ in
+        os.listdir('static/img/file_types') %} {% if filename.split('.')[-1] in
+        type_.split('.')[0].split('_') and not types['exist'] %} {% set
+        image_way = '../static/img/file_types/' + type_ %}
+        <div class="file-card-prevision">
+          <div
+            class="file-card-icon"
+            style="background-image: url({{image_way}});"
+          ></div>
+        </div>
+        {% set _ = types.update({'exist': True}) %} {% endif %} {% endfor %} {%
+        endif %}
+        <div class="publ-card-description">
+          {% for p in publication.description.split('&&') %}
+          <p class="publ-card-description-text">{{ p }}</p>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="publ-card-bottom">
+        <a
+          class="download-button publ-download-button"
+          href="/{{ filename }}"
+          download=""
+          >↓</a
+        >
+        {% if publication.show_email %}
+        <div class="publ-card-email">{{ publication.autor.email }}</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+<div class="br-container">
+  <div class="bottom-buttons">
+    <div class="maker-bottom-button-block">
+      <form method="POST">
+        <input name="public" class="none" />
+        <input type="submit" value="Опубликовать" class="maker-button bottom-button" />
+      </form>
+    </div>
+    <div class="maker-bottom-button-block">
+      <a class="maker-button bottom-button" href="/cloud">Отмена</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

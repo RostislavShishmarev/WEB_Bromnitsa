@@ -37,25 +37,3 @@
   flex-wrap: wrap;
   align-content: flex-start;
 }
-
-.user-button {
-  text-decoration: none;
-  display: block;
-  font-size: 18px;
-  font-weight: 500;
-  color: #f5870a;
-  background-color: black;
-  border-radius: 3px;
-  border-color: #ff6c03;
-  border-width: 2px;
-  border-style: double;
-  transition: all 0.2s ease-in;
-  text-align: center;
-  position: relative;
-}
-
-.user-button:hover {
-  color: black;
-  background-color: #f5870a;
-  position: relative;
-}

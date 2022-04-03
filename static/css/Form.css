@@ -1,0 +1,177 @@
+.main-form-placeholder {
+  background-image: url(../img/bricks.jpg);
+  background-size: cover;
+  background-position: center;
+  border-radius: 30px;
+  border: ridge 4px #1c1c1b;
+  padding: 10px;
+}
+
+.fields-placeholder {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.form-title {
+  font-family: Roboto, sans-serif;
+  font-size: 36px;
+  color: #ff7f08;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.field-label {
+  font-family: Roboto, sans-serif;
+  font-size: 17px;
+  color: #f78502;
+  white-space: nowrap;
+  margin-left: 4px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  margin-top: 9px;
+}
+
+.form-field-input {
+  margin: 4px 0px 0px 0px !important;
+}
+
+.form-field-checkbox {
+  align-self: flex-start;
+  margin-top: 9px;
+}
+
+.form-text-field {
+  box-sizing: border-box;
+  background-color: #080707;
+  border-color: #ff6c03;
+  border-style: solid;
+  color: #f79320;
+  margin-top: 4px;
+}
+
+.sort-selector {
+  color: #f5870a;
+  background-color: #1c1c1b;
+  border-color: black;
+  margin-bottom: 5px;
+}
+
+.checkbox-placeholder {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.check-text {
+  font-family: Roboto, sans-serif;
+  color: #f5870a;
+  font-size: 15px;
+}
+
+.custom-checkbox {
+  position: absolute;
+  z-index: 2;
+  opacity: 0;
+  display: flex;
+}
+
+.custom-checkbox + label {
+  display: inline-flex;
+  align-items: center;
+  user-select: none;
+}
+
+.custom-checkbox + label::before {
+  content: "";
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+  flex-grow: 0;
+  border: 3px solid #f79320;
+  border-radius: 0.25em;
+  margin-right: 0.5em;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: 50% 50%;
+}
+
+.custom-checkbox:not(:disabled):not(:checked) + label:hover::before {
+  border-color: #edd145;
+}
+
+.custom-checkbox:not(:disabled):active + label::before {
+  background-color: #edd145;
+  border-color: #edd145;
+}
+
+.custom-checkbox:focus:not(:checked) + label::before {
+  border-color: #edd145;
+}
+
+.custom-checkbox:checked + label::before {
+  border-color: #f7c202;
+  background-color: #f78502;
+  background-image: url(../img/check.png);
+}
+
+.custom-checkbox:disabled + label::before {
+  background-color: #e9ecef;
+}
+
+.input__placeholder {
+  position: relative;
+  margin: 15px 0;
+  text-align: center;
+  width: 150px;
+}
+
+.input__file {
+  opacity: 0;
+  visibility: hidden;
+  position: absolute;
+}
+
+.input__file-button {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  cursor: pointer;
+}
+
+.add-block {
+  display: flex;
+  align-items: center;
+}
+
+.add-button {
+  text-decoration: none;
+  font-size: 21px;
+  color: #f5870a;
+  background-color: black;
+  border-radius: 14px;
+  border-color: #ff6c03;
+  border-width: 2px;
+  border-style: double;
+  transition: all 0.2s ease-in;
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
+.add-button:hover {
+  color: black;
+  background-color: #f5870a;
+}
+
+.add-text {
+  font-family: Roboto, sans-serif;
+  color: #ff6c03;
+  font-size: 18px;
+  margin-left: 5px;
+}

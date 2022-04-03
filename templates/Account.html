@@ -4,6 +4,7 @@
     <link rel="stylesheet" href="../static/css/Account/File_card.css" />
     {% if menu == 'big' %}
     <link rel="stylesheet" href="../static/css/Account/Big_left_menu.css" />
+    <link rel="stylesheet" href="../static/css/Form.css" />
     {% else %}
     <link rel="stylesheet" href="../static/css/Account/Small_left_menu.css" />
     {% endif %}
@@ -155,7 +156,7 @@
               {% else %}
               {% set types = {'exist': False} %}
               {% for type_ in os.listdir('static/img/file_types') %}
-              {% if (name == '..' or os.path.isdir(way[3:])) and not types['exist'] %}
+              {% if (name == '..' or os.path.isdir(way[1:])) and not types['exist'] %}
               <div class="file-card-prevision">
                 <div
                   class="file-card-icon"
@@ -198,11 +199,11 @@
                   <li class="file-card-menu">
                     ▼
                     <ul class="file-card-menu-list">
-                      {% if os.path.isfile(way[3:]) %}
+                      {% if os.path.isfile(way[1:]) %}
                       <div class="file-card-menu-el-place">
                         <a
                           class="file-card-menu-el"
-                          href="/files/public/{{ way }}"
+                          href="/make_publication/{{ way.split('/')[3:]|join('&') }}"
                           >Опубликовать</a
                         >
                       </div>
@@ -210,7 +211,7 @@
                       <div class="file-card-menu-el-place">
                         <a
                           class="file-card-menu-el"
-                          href="/files/rename/{{ way }}"
+                          href="/rename_file/{{ way.split('/')[3:]|join('&') }}"
                           >Переименовать</a
                         >
                       </div>

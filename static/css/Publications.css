@@ -78,6 +78,7 @@
   background-color: #211e1a;
   padding: 10px;
   margin-bottom: 15px;
+  overflow: auto;
 }
 
 .publ-card-title {
@@ -99,6 +100,7 @@
   display: flex;
   justify-content: flex-end;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .publ-card-user-name {
@@ -123,15 +125,14 @@
 
 .publ-card-main {
   display: flex;
-  justify-content: flex-between;
-  flex-wrap: wrap;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
 .publ-card-file {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
+  justify-content: flex-start;
+  flex-wrap: wrap;
 }
 
 .publ-download-button {
@@ -139,10 +140,23 @@
   margin-left: 5px;
 }
 
+.publ-card-bottom {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
 .publ-card-description {
   margin-left: 20px;
 }
 
 .publ-card-description-text {
+  color: #c9b7a5;
+}
+
+.publ-card-email {
+  font-family: Roboto, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
   color: #c9b7a5;
 }

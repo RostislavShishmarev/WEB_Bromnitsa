@@ -41,7 +41,7 @@ body::-webkit-scrollbar-thumb,
 }
 
 .Block1 {
-  margin-top: 88px;
+  margin-top: 95px;
 }
 
 @media screen and (max-width: 520px) {
@@ -61,57 +61,6 @@ body::-webkit-scrollbar-thumb,
 
 .href:hover {
   color: #f1bc10;
-}
-
-.custom-checkbox {
-  position: absolute;
-  z-index: 2;
-  opacity: 0;
-  display: flex;
-}
-
-.custom-checkbox + label {
-  display: inline-flex;
-  align-items: center;
-  user-select: none;
-}
-
-.custom-checkbox + label::before {
-  content: "";
-  display: inline-block;
-  width: 1em;
-  height: 1em;
-  flex-shrink: 0;
-  flex-grow: 0;
-  border: 3px solid #f79320;
-  border-radius: 0.25em;
-  margin-right: 0.5em;
-  background-repeat: no-repeat;
-  background-position: center center;
-  background-size: 50% 50%;
-}
-
-.custom-checkbox:not(:disabled):not(:checked) + label:hover::before {
-  border-color: #edd145;
-}
-
-.custom-checkbox:not(:disabled):active + label::before {
-  background-color: #edd145;
-  border-color: #edd145;
-}
-
-.custom-checkbox:focus:not(:checked) + label::before {
-  border-color: #edd145;
-}
-
-.custom-checkbox:checked + label::before {
-  border-color: #f7c202;
-  background-color: #f78502;
-  background-image: url(../img/check.png);
-}
-
-.custom-checkbox:disabled + label::before {
-  background-color: #e9ecef;
 }
 
 .nav-placeholder {
@@ -143,4 +92,26 @@ body::-webkit-scrollbar-thumb,
 
 .nav-button:hover {
   background-color: #bdb3a278;
+}
+
+.user-button {
+  text-decoration: none;
+  display: block;
+  font-size: 18px;
+  font-weight: 500;
+  color: #f5870a;
+  background-color: black;
+  border-radius: 3px;
+  border-color: #ff6c03;
+  border-width: 2px;
+  border-style: double;
+  transition: all 0.2s ease-in;
+  text-align: center;
+  position: relative;
+}
+
+.user-button:hover {
+  color: black;
+  background-color: #f5870a;
+  position: relative;
 }
