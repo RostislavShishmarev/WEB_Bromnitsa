@@ -4,12 +4,23 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="shortcut icon"
+      href="{{ url_for('static', filename='favicon.ico') }}"
+    />
+    <link rel="stylesheet" href="../static/css/Account.css" />
+    <link rel="stylesheet" href="../static/css/File_card.css" />
     <link rel="stylesheet" href="../static/css/Head_style.css" />
+    {% if menu == 'big' %}
+    <link rel="stylesheet" href="../static/css/Big_left_menu.css" />
+    {% else %}
+    <link rel="stylesheet" href="../static/css/Small_left_menu.css" />
+    {% endif %}
     <title>Бромница</title>
   </head>
   <body>
     <div class="HEAD">
-      <div class="container">
+      <div class="container head">
         <div class="logo-block">
           <div class="logo"></div>
           <div class="logo-text">Бромница</div>
@@ -21,10 +32,13 @@
               <li class="menu">
                 Меню
                 <ul class="menu-list">
-                  <li class="menu-el"><a href="#">К альбомам</a></li>
-                  <li class="menu-el"><a href="#">Настройки</a></li>
-                  <li class="menu-el" style="border-bottom: 2px solid #ff6c03">
-                    <a href="#">Выход</a>
+                  <li class="menu-el"><a href="/">Главная</a></li>
+                  <li class="menu-el">
+                    <a href="/publications">Публикации</a>
+                  </li>
+                  <li class="menu-el"><a href="/settings">Настройки</a></li>
+                  <li class="menu-el last-el">
+                    <a href="/logout">Выход</a>
                   </li>
                 </ul>
               </li>
@@ -34,36 +48,210 @@
       </div>
     </div>
     <section class="page">
-    <div class="left-menu">
-        <div class="menu-container">
+      <div class="cloud container">
+        {% if menu == 'big' %}
+        <div class="left-menu Block1">
+          <div class="menu-container">
+            <div class="up-menu">
+              <div class="user-block-on-menu">
+                <div class="main-user-photo"></div>
+                <div class="username-text">Пользователь</div>
+              </div>
+              <div class="small-block">
+                <form method="POST">
+                  <input name="change-menu" class="none" />
+                  <input type="submit" value="<" class="user-button" />
+                </form>
+              </div>
+            </div>
             <div class="search-block">
-                <form method="POST">
-                    <div class="search-row">
-                        <input type="search" placeholder="Поиск..." class="search-string">
-                        <input type="submit" value="🔍" class="search-button">
-                    </div>
-                </form>
-                <form method="POST">
-                    <label class="caption1">Сортировка:</label>
-                    <select class="sort-selector">
-                        <option class="sort-option">По времени создания</option>
-                        <option class="sort-option">По названию</option>
-                        <option class="sort-option">В обратном порядке</option>
-                    </select>
-                    <input type="submit" value="Применить">
-                </form>
+              <form method="POST">
+                <div class="search-row">
+                  <input
+                    type="search"
+                    placeholder="Поиск..."
+                    class="search-string"
+                    size="1"
+                  />
+                  <input type="submit" value="🔍" class="user-button" />
+                </div>
+              </form>
+              <form method="POST">
+                <div class="sort-placeholder">
+                  <label class="sort-caption">Сортировка:</label>
+                  <select class="sort-selector">
+                    <option class="sort-option">По времени создания</option>
+                    <option class="sort-option">По названию</option>
+                  </select>
+                  <div class="checkbox-placeholder">
+                    <input type="checkbox" class="custom-checkbox" />
+                    <label class="check-text">В обратном порядке</label>
+                  </div>
+                  <input
+                    type="submit"
+                    value="Применить"
+                    class="user-button sort-button"
+                  />
+                </div>
+              </form>
             </div>
-        </div>
-        <div class="menu-container">
+          </div>
+          <div class="menu-container">
             <div class="add-block">
-                <button class="add-button">+</button>
-                <label class="caption1">Добавить альбом</label>
+              <a class="add-button" href="/add_dir">+</a>
+              <label class="add-text">Добавить папку</label>
             </div>
+            <form method="POST">
+              <div class="add-block">
+                <div class="input__placeholder">
+                  <input
+                    name="file"
+                    type="file"
+                    name="file"
+                    id="input__file"
+                    class="input input__file"
+                    multiple
+                  />
+                  <label for="input__file" class="input__file-button add-block">
+                    <span class="add-button">+</span>
+                    <span class="add-text input__file-button-text"
+                      >Добавить файлы</span
+                    >
+                    <input type="submit" class="submit-file-button" value="✓" />
+                  </label>
+                </div>
+              </div>
+            </form>
+          </div>
         </div>
-    </div>
-    <div class="albums-placeholder">
+        {% else %}
+        <div class="left-menu Block1">
+          <div class="small-menu-block">
+            <form method="POST">
+              <input name="change-menu" class="none" />
+              <input
+                type="submit"
+                value=">"
+                class="user-button small-menu-button"
+              />
+            </form>
+          </div>
+          <div class="small-menu-block">
+            <form method="POST">
+              <input name="paste-files" class="none" />
+              <input
+                type="submit"
+                value="⎀"
+                class="user-button small-menu-button"
+              />
+            </form>
+          </div>
+        </div>
+        {% endif %}
+        <div class="dirs-placeholder Block1">
+          {% for way in files_names %}
+          <div class="file-card">
+            <div class="file-card-main">
+              {% if way.split('.')[-1] in ['jpg', 'jpeg', 'png', 'svg', 'webp',
+              'gif', 'ico'] %}
+              <div
+                class="file-card-prevision"
+                style="background-image: url({{way}}); background-size: contain; background-repeat: no-repeat; background-position: center;"
+              ></div>
+              {% elif way.split('.')[-1] in ['mp3', 'wav', 'ogg'] %}
+              <div class="file-card-prevision">
+                <audio
+                  src="{{way}}"
+                  controls
+                  class="audio-prevision"
+                  style="
+                    background-color: #cfb79d;
+                    border: none !important;
+                    display: flex !important;
+                    flex-wrap: wrap !important;
+                    flex-direction: row !important;
+                    justify-content: flex-start !important;
+                    align-items: flex-start !important;
+                  "
+                ></audio>
+              </div>
+              {% endif %}
+              <div class="file-card-title">{{ way.split('/')[-1] }}</div>
+            </div>
+            <div class="file-card-functions">
+              <div class="file-card-user-list">
+                <ul class="file-card-user-list-el">
+                  <li class="file-card-menu">
+                    ▼
+                    <ul class="file-card-menu-list">
+                      <div class="file-card-menu-el-place">
+                        <a
+                          class="file-card-menu-el"
+                          href="/files/public/{{ way }}"
+                          >Опубликовать</a
+                        >
+                      </div>
+                      <div class="file-card-menu-el-place">
+                        <a
+                          class="file-card-menu-el"
+                          href="/files/rename/{{ way }}"
+                          >Переименовать</a
+                        >
+                      </div>
+                      <div class="file-card-menu-el-place">
+                        <form method="POST">
+                          <input name="cut-file-{{ way }}" class="none" />
+                          <input
+                            type="submit"
+                            value="Вырезать"
+                            class="file-card-menu-el"
+                          />
+                        </form>
+                      </div>
+                      <div
+                        class="file-card-menu-el-place file-card-menu-last-el-place"
+                      >
+                        <form method="POST">
+                          <input name="del-file-{{ way }}" class="none" />
+                          <input
+                            type="submit"
+                            value="Удалить"
+                            class="file-card-menu-el"
+                          />
+                        </form>
+                      </div>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <a class="download-button" href="/{{ way }}" download="">↓</a>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+    <script>
+      let inputs = document.querySelectorAll(".input__file");
+      Array.prototype.forEach.call(inputs, function (input) {
+        let label = input.nextElementSibling,
+          labelVal = label.querySelector(".input__file-button-text").innerText;
 
-    </div>
-</section>
+        input.addEventListener("change", function (e) {
+          let countFiles = "";
+          if (this.files && this.files.length >= 1)
+            countFiles = this.files.length;
+
+          if (countFiles)
+            label.querySelector(".input__file-button-text").innerText =
+              "Выбрано файлов: " + countFiles;
+          else
+            label.querySelector(".input__file-button-text").innerText =
+              labelVal;
+        });
+      });
+    </script>
   </body>
 </html>

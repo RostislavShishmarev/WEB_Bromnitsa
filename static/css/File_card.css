@@ -1,0 +1,183 @@
+.file-card {
+    width: 170px;
+    height: 190px;
+    border-style: double;
+    border-color: #ccbca3;
+    border-width: 3px;
+    border-radius: 10px;
+    background-color: #211e1a;
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    margin: 15px;
+}
+
+.file-card-main {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.file-card-prevision {
+  height: 140px;
+  width: 130px;
+  border: #cfc4b4 2px solid;
+  margin: 0px;
+}
+
+.file-card-title {
+  font-family: Roboto, sans-serif;
+  font-size: 18px;
+  width: 130px;
+  color: #fa8602;
+  text-align: center;
+  overflow: auto;
+}
+
+.file-card-functions {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.file-card-user-list {
+    border-color: none;
+  }
+
+.file-card-user-list-el, .file-card-menu-list {
+    list-style: none;
+    position: relative;
+    padding: 0;
+    margin: 0;
+    z-index: 1;
+    }
+
+.file-card-menu-list {
+    display: none;
+    position: absolute;
+}
+
+.file-card-menu {
+  display: block;
+  font-family: Roboto, sans-serif;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 22px;
+  color: #c7c4bf;
+}
+
+.file-card-menu:hover {
+    color: #f0ece6;
+}
+
+.file-card-menu:hover > ul {
+    display: inherit;
+}
+
+.file-card-menu-el-place {
+    display: block;
+    float: none;
+    display: list-item;
+    position: relative;
+    text-align: center;
+    margin-left: auto;
+}
+
+.file-card-menu-el {
+  display: block;
+  color: #c7c4bf;
+  background: #000000;
+  border-color: none;
+  border-style: hidden;
+  border-radius: 9px;
+  text-decoration: none;
+  font-size: 16px;
+  text-align: center;
+  padding: 3px;
+  min-width: 124px;
+  margin-top: 2px;
+}
+
+.file-card-menu-el:hover {
+  background: #363330;
+  color: #e8bb17;
+}
+
+.download-button {
+  text-decoration: none;
+  display: block;
+  font-size: 19px;
+  font-weight: 1900;
+  color: #baac97;
+  background-color: rgba(0, 0, 0, 0);
+  border-color: #baac97;
+  border-width: 2px;
+  border-style: solid;
+  border-top-color: rgba(0, 0, 0, 0);
+  transition: all 0.3s ease-in;
+  transition: border-radius 0.3s ease;
+  text-align: center;
+  padding-top: 0px;
+}
+
+.download-button:hover {
+  color: #ff9a03;
+  border-color: #ff9a03;
+  border-top-color: rgba(0, 0, 0, 0);
+  border-radius: 8px;
+}
+
+.file-card-title::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+.file-card-title::-webkit-scrollbar-corner {
+  background-color: #2b2b2b;
+}
+
+.file-card-title::-webkit-scrollbar-track {
+  background: #2b2b2b;
+}
+
+.file-card-title::-webkit-scrollbar-thumb {
+  background-color: #75736f;
+  border-radius: 20px;
+  border: 3px solid black;
+}
+
+.file-card-prevision {
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+audio {
+  width: 130px;
+  border: none !important;
+  border-image-repeat: unset !important;
+  border-image-slice: 0% !important;
+}
+
+audio::-webkit-media-controls-panel {
+  background-color: #cfb79d;
+  border: none !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  flex-direction: row !important;
+  justify-content: flex-start !important;
+  align-items: flex-start !important;
+}
+
+audio::-webkit-media-controls-timeline {
+  width: 45px;
+}
+
+audio::-webkit-media-controls-current-time-display {
+  display: none !important;
+}
+
+audio::-webkit-media-controls-time-remaining-display {
+  display: none !important;
+}
