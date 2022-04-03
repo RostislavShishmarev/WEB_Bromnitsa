@@ -24,50 +24,6 @@
   padding-top: 3px;
 }
 
-.nav-placeholder {
-  display: flex;
-  justify-content: space-between;
-  overflow: auto;
-}
-
-.nav-placeholder::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
-}
-
-.nav-placeholder::-webkit-scrollbar-corner {
-  background-color: #2b2b2b;
-}
-
-.nav-placeholder::-webkit-scrollbar-track {
-  background: #2b2b2b;
-}
-
-.nav-placeholder::-webkit-scrollbar-thumb {
-  background-color: #75736f;
-  border-radius: 20px;
-  border: 3px solid black;
-}
-
-.nav-block {
-  margin: 12px;
-}
-
-.nav-button {
-  background-color: rgba(0, 0, 0, 0);
-  border-radius: 50%;
-  border: none;
-  color: #baae9b;
-  font-size: 32px;
-  height: 48px;
-  width: 48px;
-  transition: background-color 0.2s ease-in-out;
-}
-
-.nav-button:hover {
-  background-color: #bdb3a278;
-}
-
 .dir-text {
   color: #baae9b;
   font-family: Roboto, sans-serif;
@@ -80,4 +36,26 @@
   justify-content: flex-start;
   flex-wrap: wrap;
   align-content: flex-start;
+}
+
+.user-button {
+  text-decoration: none;
+  display: block;
+  font-size: 18px;
+  font-weight: 500;
+  color: #f5870a;
+  background-color: black;
+  border-radius: 3px;
+  border-color: #ff6c03;
+  border-width: 2px;
+  border-style: double;
+  transition: all 0.2s ease-in;
+  text-align: center;
+  position: relative;
+}
+
+.user-button:hover {
+  color: black;
+  background-color: #f5870a;
+  position: relative;
 }

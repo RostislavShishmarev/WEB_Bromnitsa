@@ -10,6 +10,18 @@ class CurrentSet:
     menu_mode = SMALL
 
 
+class Autor:
+    name = 'Моккий Кифович'
+    photo = 'static/users/User_phoenix.jpg'
+
+
+class Publication:
+    def __init__(self):
+        self.autor = Autor
+        self.filename = 'static/users/Exploding_block.png'
+        self.description = '''Мелодия из игры Отражение (GameReflection).&&Скачивайте на здоровье!'''
+
+
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
@@ -37,17 +49,23 @@ def cloud(current_dir=''):
         if 'change-menu' in request.form.keys():
             CurrentSet.menu_mode = SMALL if CurrentSet.menu_mode == BIG\
                 else BIG
-        return render_template('Account.html', title='Облако', navigation=nav, menu=CurrentSet.menu_mode,
-                               current_dir=current_dir, os=os, sort_function=sort_function)
-    return render_template('Account.html', title='Облако', navigation=nav, menu=CurrentSet.menu_mode,
-                           current_dir=current_dir, os=os, sort_function=sort_function)
+        return render_template('Account.html', title='Облако',
+                               navigation=nav, menu=CurrentSet.menu_mode,
+                               current_dir=current_dir, os=os,
+                               sort_function=sort_function)
+    return render_template('Account.html', title='Облако',
+                           navigation=nav, menu=CurrentSet.menu_mode,
+                           current_dir=current_dir, os=os,
+                           sort_function=sort_function)
 
 
-@app.route('/publications')
+@app.route('/publications', methods=['GET', 'POST'])
 def publications():
     nav = [{'href': '/', 'title': 'Главная'},
            {'href': '/login', 'title': 'Войти'}]
-    return render_template('Publications.html', title='Публикации', navigation=nav)
+    return render_template('Publications.html', title='Публикации',
+                           navigation=nav, publications=[Publication(), Publication()],
+                           os=os)
 
 
 def sort_function(list_, cur_dir):
