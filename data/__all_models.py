@@ -1,2 +1,1 @@
-from . import users
-from . import file
+from . import users, publication
