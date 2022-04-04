@@ -1,0 +1,101 @@
+{% extends "Base.html" %} {% block content %}
+<link rel="stylesheet" href="../static/css/Publications.css" />
+<link rel="stylesheet" href="../static/css/Account/File_card.css" />
+<div class="publ-head-block Block1">
+  <div class="br-container">
+    <p class="publ-head-text">Наши публикации</p>
+  </div>
+</div>
+<div class="Block2">
+  <div class="br-container">
+    <div class="nav-placeholder">
+      <div class="connector">
+        <div class="nav-block">
+          <form method="POST">
+            <input name="prev" class="none" />
+            <input type="submit" value="<" class="nav-button" />
+          </form>
+        </div>
+        <div class="nav-block">
+          <form method="POST">
+            <div class="search-row">
+              <input
+                type="search"
+                placeholder="Поиск..."
+                class="search-string"
+                size="1"
+              />
+              <input type="submit" value="🔍" class="search-button" />
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="nav-block">
+        <form method="POST">
+          <input name="next" class="none" />
+          <input type="submit" value=">" class="nav-button" />
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="br-container">
+  <div class="publications-list">
+    {% for new in publications %}
+    <div class="publ-card">
+      <div class="publ-card-title">
+        <div class="publ-card-title-text">{{new.filename.split('/')[-1]}}</div>
+        <div class="publ-card-user-block">
+          <div class="publ-card-user-name">{{new.autor.name}}</div>
+          {% set photo_name = '../' + new.autor.photo %}
+          <div
+            class="publ-card-user-photo"
+            style="background-image: url({{photo_name}})"
+          ></div>
+        </div>
+      </div>
+      <div class="publ-card-main">
+        <div class="publ-card-file">
+          {% set filename = '../' + new.filename %}
+          {% if filename.split('.')[-1] in ['mp3', 'wav', 'ogg'] %}
+          <div class="file-card-prevision">
+            <audio src="{{filename}}" controls></audio>
+          </div>
+          {% elif filename.split('.')[-1] in ['jpg', 'jpeg', 'png', 'svg', 'webp',
+          'gif', 'ico'] %}
+          <div
+            class="file-card-prevision"
+            style="background-image: url({{filename}});"
+          ></div>
+          {% else %}
+          {% set types = {'exist': False} %}
+          {% for type_ in os.listdir('static/img/file_types') %} 
+          {% if filename.split('.')[-1] in type_.split('.')[0].split('_') and not types['exist'] %}
+          {% set image_way = '../static/img/file_types/' + type_ %}
+          <div class="file-card-prevision">
+            <div
+              class="file-card-icon"
+              style="background-image: url({{image_way}});"
+            ></div>
+          </div>
+          {% set _ = types.update({'exist': True}) %}
+          {% endif %}
+          {% endfor %}
+          {% endif %}
+          <div class="publ-card-description">
+            {% for p in new.description.split('\n') %}
+              <p class="publ-card-description-text">{{ p }}</p>
+              {% endfor %}
+          </div>
+          </div>
+          <div class="publ-card-bottom">
+        <a class="download-button publ-download-button" href="/{{ filename }}" download="">↓</a>
+        {% if new.show_email %}
+          <div class="publ-card-email">{{ new.autor.email }}</div>
+          {% endif %}</div></div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

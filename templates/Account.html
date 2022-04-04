@@ -1,61 +1,23 @@
-<!DOCTYPE html>
-<html lang="ru">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      rel="shortcut icon"
-      href="{{ url_for('static', filename='favicon.ico') }}"
-    />
-    <link rel="stylesheet" href="../static/css/Account.css" />
-    <link rel="stylesheet" href="../static/css/File_card.css" />
-    <link rel="stylesheet" href="../static/css/Head_style.css" />
+{% extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" href="../static/css/Account/Account.css" />
+    <link rel="stylesheet" href="../static/css/Account/File_card.css" />
     {% if menu == 'big' %}
-    <link rel="stylesheet" href="../static/css/Big_left_menu.css" />
+    <link rel="stylesheet" href="../static/css/Account/Big_left_menu.css" />
+    <link rel="stylesheet" href="../static/css/Form.css" />
     {% else %}
-    <link rel="stylesheet" href="../static/css/Small_left_menu.css" />
+    <link rel="stylesheet" href="../static/css/Account/Small_left_menu.css" />
     {% endif %}
-    <title>Бромница</title>
-  </head>
-  <body>
-    <div class="HEAD">
-      <div class="container head">
-        <div class="logo-block">
-          <div class="logo"></div>
-          <div class="logo-text">Бромница</div>
-        </div>
-        <div class="user-block">
-          <div class="user-photo"></div>
-          <div class="user-list">
-            <ul>
-              <li class="menu">
-                Меню
-                <ul class="menu-list">
-                  <li class="menu-el"><a href="/">Главная</a></li>
-                  <li class="menu-el">
-                    <a href="/publications">Публикации</a>
-                  </li>
-                  <li class="menu-el"><a href="/settings">Настройки</a></li>
-                  <li class="menu-el last-el">
-                    <a href="/logout">Выход</a>
-                  </li>
-                </ul>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
     <section class="page">
-      <div class="cloud container">
+      <div class="cloud br-container">
         {% if menu == 'big' %}
         <div class="left-menu Block1">
           <div class="menu-container">
             <div class="up-menu">
               <div class="user-block-on-menu">
-                <div class="main-user-photo"></div>
-                <div class="username-text">Пользователь</div>
+              {% set photo_name = '../' + current_user.photo %}
+                <div class="main-user-photo" style="background-image: url({{photo_name}})"></div>
+                <div class="username-text">{{ current_user.name }}</div>
               </div>
               <div class="small-block">
                 <form method="POST">
@@ -72,6 +34,7 @@
                     placeholder="Поиск..."
                     class="search-string"
                     size="1"
+                    name="search_string"
                   />
                   <input type="submit" value="🔍" class="user-button" />
                 </div>
@@ -79,12 +42,12 @@
               <form method="POST">
                 <div class="sort-placeholder">
                   <label class="sort-caption">Сортировка:</label>
-                  <select class="sort-selector">
+                  <select class="sort-selector" name="sort_selector">
                     <option class="sort-option">По времени создания</option>
                     <option class="sort-option">По названию</option>
                   </select>
                   <div class="checkbox-placeholder">
-                    <input type="checkbox" class="custom-checkbox" />
+                    <input type="checkbox" class="custom-checkbox" name="reverse" />
                     <label class="check-text">В обратном порядке</label>
                   </div>
                   <input
@@ -148,55 +111,120 @@
           </div>
         </div>
         {% endif %}
-        <div class="dirs-placeholder Block1">
-          {% for way in files_names %}
+        <div class="main-placeholder Block1">
+        <div class="nav-placeholder">
+          <div class="nav-block">
+            <form method="POST">
+              <input name="prev" class="none" />
+              <input
+                type="submit"
+                value="<"
+                class="nav-button"
+              />
+            </form>
+          </div>
+          <div class="nav-block"><p class="dir-text">{{ current_dir.split('/')[-1] }}</p></div>
+          <div class="nav-block">
+            <form method="POST">
+              <input name="next" class="none" />
+              <input
+                type="submit"
+                value=">"
+                class="nav-button"
+              />
+            </form>
+          </div>
+        </div>
+        <div class="dirs-placeholder">
+          {% set back = [] %}
+          {% if current_dir.split('/')[-1] %}
+          {% set back = back + ['..', ] %}
+          {% endif %}
+          {% for name in back + sort_function(os.listdir(current_dir), current_dir) %}
+          {% set way = '/'.join(['..', current_dir, name]) %}
           <div class="file-card">
             <div class="file-card-main">
-              {% if way.split('.')[-1] in ['jpg', 'jpeg', 'png', 'svg', 'webp',
-              'gif', 'ico'] %}
+              {% if name.split('.')[-1] in ['mp3', 'wav', 'ogg'] %}
+              <div class="file-card-prevision">
+                <audio src="{{way}}" controls></audio>
+              </div>
+              {% elif name.split('.')[-1] in ['jpg', 'jpeg', 'png', 'svg',
+              'webp', 'gif', 'ico'] %}
               <div
                 class="file-card-prevision"
-                style="background-image: url({{way}}); background-size: contain; background-repeat: no-repeat; background-position: center;"
+                style="background-image: url({{way}});"
               ></div>
-              {% elif way.split('.')[-1] in ['mp3', 'wav', 'ogg'] %}
+              {% else %}
+              {% set types = {'exist': False} %}
+              {% for type_ in os.listdir('static/img/file_types') %}
+              {% if (name == '..' or os.path.isdir(way[1:])) and not types['exist'] %}
               <div class="file-card-prevision">
-                <audio
-                  src="{{way}}"
-                  controls
-                  class="audio-prevision"
+                <div
+                  class="file-card-icon"
+                  style="background-image: url(../static/img/file_types/directory.png);"
+                ></div>
+              </div>
+              {% set _ = types.update({'exist': True}) %}
+              {% elif name.split('.')[-1] in type_.split('.')[0].split('_') and not types['exist'] %} 
+              {% set image_way = '../static/img/file_types/' + type_ %}
+              <div class="file-card-prevision">
+                <div
+                  class="file-card-icon"
+                  style="background-image: url({{image_way}});"
+                ></div>
+              </div>
+              {% set _ = types.update({'exist': True}) %}
+              {% endif %}
+              {% endfor %}
+              {% if not types['exist'] %}
+              <div class="file-card-prevision">
+                <div
+                  class="file-card-icon"
                   style="
-                    background-color: #cfb79d;
-                    border: none !important;
-                    display: flex !important;
-                    flex-wrap: wrap !important;
-                    flex-direction: row !important;
-                    justify-content: flex-start !important;
-                    align-items: flex-start !important;
+                    background-image: url(../static/img/file_types/file.png);
                   "
-                ></audio>
+                ></div>
               </div>
               {% endif %}
-              <div class="file-card-title">{{ way.split('/')[-1] }}</div>
+              {% endif %}
+              <div class="file-card-title">{{ name }}</div>
             </div>
+            {% if name == '..' %}
+            <div class="file-card-functions" style="justify-content: flex-end;">
+            {% set class_ = 'none' %}
+            {% else %}
             <div class="file-card-functions">
-              <div class="file-card-user-list">
+            {% endif %}
+              <div class="file-card-user-list {{class_}}">
                 <ul class="file-card-user-list-el">
                   <li class="file-card-menu">
                     ▼
                     <ul class="file-card-menu-list">
+                      {% if os.path.isfile(way[1:]) %}
                       <div class="file-card-menu-el-place">
                         <a
                           class="file-card-menu-el"
-                          href="/files/public/{{ way }}"
+                          href="/make_publication/{{ way.split('/')[4:]|join('&') }}"
                           >Опубликовать</a
                         >
                       </div>
+                      {% endif %}
                       <div class="file-card-menu-el-place">
                         <a
                           class="file-card-menu-el"
-                          href="/files/rename/{{ way }}"
+                          href="/rename_file/{{ way.split('/')[4:]|join('&') }}"
                           >Переименовать</a
                         >
+                      </div>
+                      <div class="file-card-menu-el-place">
+                        <form method="POST">
+                          <input name="copy-file-{{ way }}" class="none" />
+                          <input
+                            type="submit"
+                            value="Копировать"
+                            class="file-card-menu-el"
+                          />
+                        </form>
                       </div>
                       <div class="file-card-menu-el-place">
                         <form method="POST">
@@ -211,27 +239,30 @@
                       <div
                         class="file-card-menu-el-place file-card-menu-last-el-place"
                       >
-                        <form method="POST">
-                          <input name="del-file-{{ way }}" class="none" />
-                          <input
-                            type="submit"
-                            value="Удалить"
-                            class="file-card-menu-el"
-                          />
-                        </form>
+                      <a
+                      class="file-card-menu-el"
+                      href="/delete_file/{{ way.split('/')[4:]|join('&') }}"
+                      >Удалить</a>
                       </div>
                     </ul>
                   </li>
                 </ul>
               </div>
               <div>
+                {% if os.path.isfile(way[3:]) %}
                 <a class="download-button" href="/{{ way }}" download="">↓</a>
+                {% elif name == '..' %}
+                <a class="opendir-button" href="/{{'cloud/' + way.split('/')[4:-2]|join('&') }}">📂</a>
+                {% else %}
+                <a class="opendir-button" href="/{{'cloud/' + way.split('/')[4:]|join('&') }}">📂</a>
+                {% endif %}
               </div>
             </div>
           </div>
           {% endfor %}
         </div>
       </div>
+    </div>
     </section>
     <script>
       let inputs = document.querySelectorAll(".input__file");
@@ -253,5 +284,4 @@
         });
       });
     </script>
-  </body>
-</html>
+{% endblock %}

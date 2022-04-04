@@ -1,0 +1,84 @@
+.maker-head-block {
+  background-image: url(../img/bricks.jpg);
+  background-size: cover;
+  background-position: center;
+  padding-bottom: 20px;
+}
+
+.maker-head-text {
+  font-family: Roboto, sans-serif;
+  font-size: 36px;
+  color: #ff7f08;
+  text-align: center;
+  padding-top: 25px;
+  padding-bottom: 20px;
+  margin-bottom: 0px;
+}
+
+.publication-maker {
+  background-color: #1c1a18;
+  border-radius: 17px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.maker-title-text {
+  font-family: Roboto, sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  color: #f5870a;
+}
+
+.maker-main {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.maker-area {
+  box-sizing: border-box;
+  max-width: 400px;
+  min-width: 155px;
+  background-color: #080707;
+  border-color: #8c847b;
+  border-style: solid;
+  color: #f7c202;
+  margin-top: 3px;
+  margin-bottom: 8px;
+  margin-right: 5px;
+  min-width: 80%;
+}
+
+.maker-button {
+  text-decoration: none;
+  display: block;
+  font-size: 18px;
+  font-weight: 500;
+  color: #f5870a;
+  background-color: black;
+  border-radius: 3px;
+  border-color: #ff6c03;
+  border-width: 2px;
+  border-style: double;
+  transition: all 0.2s ease-in;
+  text-align: center;
+  position: relative;
+}
+
+.maker-button:hover {
+  color: black;
+  background-color: #f5870a;
+  position: relative;
+}
+
+.bottom-buttons {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.bottom-button {
+  font-family: Roboto, sans-serif;
+  font-size: 24px;
+  padding: 5px;
+  margin: 2px;
+}

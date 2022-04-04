@@ -1,0 +1,162 @@
+.publ-head-block {
+  background-image: url(../img/bricks.jpg);
+  background-size: cover;
+  background-position: center;
+}
+
+.publ-head-text {
+  font-family: Roboto, sans-serif;
+  font-size: 45px;
+  color: #ff7f08;
+  text-align: center;
+  padding-top: 60px;
+  padding-bottom: 60px;
+  margin-bottom: 0px;
+}
+
+.connector {
+  display: flex;
+  align-items: center;
+}
+
+.search-row {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.search-string {
+  box-sizing: border-box;
+  width: 17vw;
+  max-width: 400px;
+  min-width: 155px;
+  background-color: #080707;
+  border-color: #8c847b;
+  border-style: solid;
+  color: #f7c202;
+}
+
+.search-string::placeholder {
+  color: #c9b7a5;
+}
+
+.search-button {
+  text-decoration: none;
+  display: block;
+  font-size: 18px;
+  font-weight: 500;
+  color: #c9b7a5;
+  background-color: black;
+  border-radius: 3px;
+  border-color: #8c847b;
+  border-width: 2px;
+  border-style: double;
+  transition: all 0.2s ease-in;
+  text-align: center;
+  position: relative;
+}
+
+.search-button:hover {
+  color: black;
+  background-color: #c9b7a5;
+  position: relative;
+}
+
+.publications-list {
+  background-color: #332b23;
+  border-radius: 25px;
+  min-height: 50vh;
+  padding: 20px;
+}
+
+.publ-card {
+  display: flex;
+  flex-direction: column;
+  border-style: double;
+  border-color: #ccbca3;
+  border-width: 3px;
+  border-radius: 10px;
+  background-color: #211e1a;
+  padding: 10px;
+  margin-bottom: 15px;
+  overflow: auto;
+}
+
+.publ-card-title {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.publ-card-title-text {
+  font-family: Roboto, sans-serif;
+  font-size: 28px;
+  color: #c9b7a5;
+  overflow: auto;
+  margin-right: 13px;
+  white-space: nowrap;
+}
+
+.publ-card-user-block {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.publ-card-user-name {
+  font-family: Roboto, sans-serif;
+  font-size: 22px;
+  color: #c9b7a5;
+  margin-right: 10px;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: auto;
+}
+
+.publ-card-user-photo {
+  background-image: url(../img/No_user.jpg);
+  background-size: cover;
+  width: 44.99px;
+  height: 43.99px;
+  border-color: #8c847b;
+  border-width: 4px;
+  border-style: ridge;
+}
+
+.publ-card-main {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.publ-card-file {
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.publ-download-button {
+  width: 17px;
+  margin-left: 5px;
+}
+
+.publ-card-bottom {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.publ-card-description {
+  margin-left: 20px;
+}
+
+.publ-card-description-text {
+  color: #c9b7a5;
+}
+
+.publ-card-email {
+  font-family: Roboto, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #c9b7a5;
+}
