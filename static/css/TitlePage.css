@@ -89,12 +89,3 @@ body {
   display: flex;
   justify-content: center;
 }
-
-.href {
-  text-decoration: none;
-  color: #f18810;
-}
-
-.href:hover {
-  color: #f1bc10;
-}
