@@ -7,18 +7,17 @@
   <div class="br-container">
     <p class="maker-head-text">Создание публикации</p>
     <div class="publication-maker">
-      <label class="maker-title-text"> Введите описание </label>
-      <form>
+      <form method="POST">
+        {{ form.hidden_tag() }}
+        {{ form.description.label(class="maker-title-text") }}
         <div class="maker-main">
-          <textarea type="textarea" class="maker-area" name="description">
-{{ publication.description }}</textarea
-          >
+          {{ form.description(class="maker-area") }}
           <div class="checkbox-placeholder">
-            <input type="checkbox" class="custom-checkbox" name="show_email" />
-            <label class="check-text">Показывать e-mail</label>
+            {{ form.show_email(class="custom-checkbox") }}
+            {{ form.show_email.label(class="check-text") }}
           </div>
         </div>
-        <input type="submit" value="Проверить" class="maker-button" />
+        {{ form.submit(type="submit", class="maker-button") }}
       </form>
     </div>
   </div>
@@ -64,7 +63,7 @@
         {% set _ = types.update({'exist': True}) %} {% endif %} {% endfor %} {%
         endif %}
         <div class="publ-card-description">
-          {% for p in publication.description.split('&&') %}
+          {% for p in publication.description.split('\n') %}
           <p class="publ-card-description-text">{{ p }}</p>
           {% endfor %}
         </div>

@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import PasswordField, StringField, \
-    SubmitField, EmailField, BooleanField, FileField
+    SubmitField, EmailField, BooleanField, FileField, TextAreaField
 from wtforms.validators import DataRequired
 from flask_wtf.file import FileAllowed
 
@@ -54,3 +54,9 @@ class RenameFileForm(FlaskForm):
 
 class DeleteFileForm(FlaskForm):
     submit = SubmitField('Удалить')
+
+
+class MakePublicationForm(FlaskForm):
+    description = TextAreaField('Введите описание')
+    show_email = BooleanField('Показывать e-mail', default=False)
+    submit = SubmitField('Проверить')

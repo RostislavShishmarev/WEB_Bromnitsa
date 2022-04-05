@@ -14,8 +14,9 @@ class User(SqlAlchemyBase):
     password = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     photo = sqlalchemy.Column(sqlalchemy.String,
                               default='static/img/No_user.png')
+    path = sqlalchemy.Column(sqlalchemy.String, nullable=False)
 
-    files = orm.relation("Publication", back_populates='user')
+    files = orm.relation("Publication", back_populates='author')
 
     def set_password(self, password):
         self.password = generate_password_hash(password)
