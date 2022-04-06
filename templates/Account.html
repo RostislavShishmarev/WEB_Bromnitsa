@@ -140,6 +140,7 @@
           {% if current_dir.split('/')[-1] %}
           {% set back = back + ['..', ] %}
           {% endif %}
+          {% set len_of_user_dir = current_dir.split('cloud')[0].split('/')|length + 1 %}
           {% for name in back + sort_function(os.listdir(current_dir), current_dir) %}
           {% set way = '/'.join(['..', current_dir, name]) %}
           <div class="file-card">
@@ -204,7 +205,7 @@
                       <div class="file-card-menu-el-place">
                         <a
                           class="file-card-menu-el"
-                          href="/make_publication/{{ way.split('/')[4:]|join('&') }}"
+                          href="/make_publication/{{ way.split('/')[len_of_user_dir:]|join('&') }}"
                           >Опубликовать</a
                         >
                       </div>
@@ -212,7 +213,7 @@
                       <div class="file-card-menu-el-place">
                         <a
                           class="file-card-menu-el"
-                          href="/rename_file/{{ way.split('/')[4:]|join('&') }}"
+                          href="/rename_file/{{ way.split('/')[len_of_user_dir:]|join('&') }}"
                           >Переименовать</a
                         >
                       </div>
@@ -241,7 +242,7 @@
                       >
                       <a
                       class="file-card-menu-el"
-                      href="/delete_file/{{ way.split('/')[4:]|join('&') }}"
+                      href="/delete_file/{{ way.split('/')[len_of_user_dir:]|join('&') }}"
                       >Удалить</a>
                       </div>
                     </ul>
@@ -252,9 +253,9 @@
                 {% if os.path.isfile(way[3:]) %}
                 <a class="download-button" href="/{{ way }}" download="">↓</a>
                 {% elif name == '..' %}
-                <a class="opendir-button" href="/{{'cloud/' + way.split('/')[4:-2]|join('&') }}">📂</a>
+                <a class="opendir-button" href="/{{'cloud/' + way.split('/')[len_of_user_dir:-2]|join('&') }}">📂</a>
                 {% else %}
-                <a class="opendir-button" href="/{{'cloud/' + way.split('/')[4:]|join('&') }}">📂</a>
+                <a class="opendir-button" href="/{{'cloud/' + way.split('/')[len_of_user_dir:]|join('&') }}">📂</a>
                 {% endif %}
               </div>
             </div>

@@ -2,7 +2,6 @@ import sqlalchemy
 from sqlalchemy import orm
 from werkzeug.security import generate_password_hash, check_password_hash
 from data.db_session import SqlAlchemyBase
-import datetime
 
 
 class User(SqlAlchemyBase):
@@ -18,8 +17,6 @@ class User(SqlAlchemyBase):
                               unique=True)
     password = sqlalchemy.Column(sqlalchemy.String,
                                         nullable=True)
-    modified_date = sqlalchemy.Column(sqlalchemy.DateTime,
-                                      default=datetime.datetime.now)
     photo = sqlalchemy.Column(sqlalchemy.String,
                               nullable=True)
     path = sqlalchemy.Column(sqlalchemy.String)

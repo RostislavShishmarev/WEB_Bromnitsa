@@ -7,8 +7,8 @@ def main():
     user1 = User(
         username='Arty',
         email='test@ts.com',
-        photo='C/pho.png',
-        path='C/da',
+        photo='static/users/1/cloud/User_phoenix.jpg',
+        path='static/users/1',
 
     )
     user1.set_password('123')
