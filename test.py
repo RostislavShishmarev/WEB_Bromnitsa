@@ -2,11 +2,14 @@ import os
 from flask import Flask, render_template, request
 from flask import send_from_directory
 from forms.forms import RegisterForm, LoginForm, SettingsForm,\
-    ChangePasswordForm, MakeDirForm, RenameFileForm, DeleteFileForm
+    ChangePasswordForm, MakeDirForm, RenameFileForm, DeleteFileForm,\
+    MakePublicationForm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'super_Seсret_key_of_devEl0pers'
+app.config['JSON_AS_ASCII'] = False
 SMALL, BIG = 'small', 'big'
+USER_DIR = 'static/users/1/cloud/'
 DESC = '''Мелодия из игры Отражение'''
 
 
@@ -16,7 +19,7 @@ class CurrentSet:
 
 class Autor:
     name = 'Моккий Кифович'
-    photo = 'static/users/1/User_phoenix.jpg'
+    photo = 'static/users/1/cloud/User_phoenix.jpg'
     email = 'mokk@mail.ru'
     is_authenticated = True
 
@@ -28,7 +31,7 @@ class flask_login:
 class Publication:
     def __init__(self, filename, description, show_email=False):
         self.autor = Autor
-        self.filename = 'static/users/1/' + filename
+        self.filename = USER_DIR + filename
         self.description = description
         self.show_email = show_email
 
@@ -37,7 +40,7 @@ class Publication:
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
                                'favicon.ico',
-                               mimetype='image/vnd.microsoft.icon', current_user=flask_login.current_user)
+                               mimetype='image/vnd.microsoft.icon')
 
 
 @app.route('/')
@@ -55,7 +58,7 @@ def cloud(current_dir=''):
            {'href': '/publications', 'title': 'Публикации'},
            {'href': '/settings', 'title': 'Настройки'},
            {'href': '/logout', 'title': 'Выход'}]
-    current_dir = 'static/users/1/' + current_dir.replace('&', '/')
+    current_dir = USER_DIR + current_dir.replace('&', '/')
     if request.method == 'POST':
         if 'change-menu' in request.form.keys():
             CurrentSet.menu_mode = SMALL if CurrentSet.menu_mode == BIG\
@@ -87,14 +90,17 @@ def publications():
 @app.route('/make_publication/<path:filename>',methods=['GET', 'POST'])
 def make_publication(filename):
     filename = filename.replace('&', '/')
+    form = MakePublicationForm()
     nav = [{'href': '/', 'title': 'Главная'},
            {'href': '/publications', 'title': 'Публикации'},
            {'href': '/cloud', 'title': 'Облако'},
            {'href': '/settings', 'title': 'Настройки'},
            {'href': '/logout', 'title': 'Выход'}]
+    print(filename)
     return render_template('Publication_maker.html',
                            title='Создать публикацию', navigation=nav, os=os,
-                           publication=Publication(filename, ''), current_user=flask_login.current_user)
+                           publication=Publication(filename, ''),
+                           current_user=flask_login.current_user, form=form)
 
 
 @app.route('/register', methods=['GET', 'POST'])
