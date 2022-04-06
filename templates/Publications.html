@@ -24,6 +24,7 @@
                 placeholder="Поиск..."
                 class="search-string"
                 size="1"
+                name="search_string"
               />
               <input type="submit" value="🔍" class="search-button" />
             </div>
@@ -46,8 +47,8 @@
       <div class="publ-card-title">
         <div class="publ-card-title-text">{{new.filename.split('/')[-1]}}</div>
         <div class="publ-card-user-block">
-          <div class="publ-card-user-name">{{new.autor.name}}</div>
-          {% set photo_name = '../' + new.autor.photo %}
+          <div class="publ-card-user-name">{{new.author.username}}</div>
+          {% set photo_name = '../' + new.author.photo %}
           <div
             class="publ-card-user-photo"
             style="background-image: url({{photo_name}})"
@@ -91,7 +92,7 @@
           <div class="publ-card-bottom">
         <a class="download-button publ-download-button" href="/{{ filename }}" download="">↓</a>
         {% if new.show_email %}
-          <div class="publ-card-email">{{ new.autor.email }}</div>
+          <div class="publ-card-email">{{ new.author.email }}</div>
           {% endif %}</div></div>
       </div>
       {% endfor %}
