@@ -1,37 +1,27 @@
-from flask import Flask, render_template, request
-import os
-from flask import send_from_directory
+import data.db_session as db_session
+from data.users import User
+from data.publication import Publication
 
-app = Flask(__name__)
-SMALL, BIG = 'small', 'big'
-files = ['../static/users-test/' + w for w in os.listdir('static/users-test')]
+def main():
+    db_session.global_init("data/cloud.sqlite")
+    user1 = User(
+        username='Arty',
+        email='test@ts.com',
+        photo='C/pho.png',
+        path='C/da',
 
+    )
 
-class CurrentSet:
-    menu_mode = SMALL
-
-
-@app.route('/favicon.ico')
-def favicon():
-    return send_from_directory(os.path.join(app.root_path, 'static'),
-                               'favicon.ico',
-                               mimetype='image/vnd.microsoft.icon')
+    user1.set_password('123')
 
 
-@app.route('/')
-def main_page():
-    return render_template('TitlePage.html')
 
+    db_sess = db_session.create_session()
+    db_sess.add(user1)
+    db_sess.commit()
 
-@app.route('/cloud', methods=['GET', 'POST'])
-def cloud():
-    if request.method == 'POST':
-        if 'change-menu' in request.form.keys():
-            CurrentSet.menu_mode = SMALL if CurrentSet.menu_mode == BIG else BIG
-        return render_template('Account.html', menu=CurrentSet.menu_mode, files_names=files)
-    return render_template('Account.html', menu=CurrentSet.menu_mode,
-                           files_names=files)
 
 
 if __name__ == '__main__':
-    app.run(port=8080, host='127.0.0.1')
+
+    main()

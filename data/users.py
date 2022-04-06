@@ -1,7 +1,7 @@
 import sqlalchemy
 from sqlalchemy import orm
 from werkzeug.security import generate_password_hash, check_password_hash
-from db_session import SqlAlchemyBase
+from data.db_session import SqlAlchemyBase
 import datetime
 
 
@@ -24,7 +24,7 @@ class User(SqlAlchemyBase):
                               nullable=True)
     path = sqlalchemy.Column(sqlalchemy.String)
 
-    files = orm.relation("Publication", back_populates='user')
+    publication = orm.relation("Publication", back_populates='user')
 
     def set_password(self, password):
         self.hashed_password = generate_password_hash(password)

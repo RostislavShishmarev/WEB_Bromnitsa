@@ -1,6 +1,6 @@
 import sqlalchemy
 from sqlalchemy import orm
-from db_session import SqlAlchemyBase
+from data.db_session import SqlAlchemyBase
 import datetime
 
 
@@ -17,4 +17,4 @@ class Publication(SqlAlchemyBase):
     modified_date = sqlalchemy.Column(sqlalchemy.DateTime,
                                       default=datetime.datetime.now)
 
-    users = orm.relation("User", back_populates='file')
+    user = orm.relation("User", back_populates='publication')

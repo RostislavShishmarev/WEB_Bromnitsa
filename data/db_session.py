@@ -3,6 +3,7 @@ import sqlalchemy.orm as orm
 from sqlalchemy.orm import Session
 import sqlalchemy.ext.declarative as dec
 
+
 SqlAlchemyBase = dec.declarative_base()
 
 __factory = None
@@ -24,7 +25,8 @@ def global_init(db_file):
     __factory = orm.sessionmaker(bind=engine)
 
     # noinspection PyUnresolvedReferences
-    import __all_models
+    import data.__all_models
+
 
     SqlAlchemyBase.metadata.create_all(engine)
 
