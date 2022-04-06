@@ -1,2 +1,2 @@
 from . import users
-from . import file
+from . import publication
