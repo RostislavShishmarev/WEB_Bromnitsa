@@ -1,16 +1,15 @@
 import os
 import flask as fl
 import requests as rq
-from data import db_session as d_s
-from data.publication import Publication
 from flask import render_template, request
 from forms.forms import MakePublicationForm
-from helpers import Saver, TempPubl, Autor, sort_function, make_publ_file
+from helpers import Saver, sort_function
 
 app = fl.Flask(__name__)
 app.config['SECRET_KEY'] = 'super_Seсret_key_of_devEl0pers'
 FILES_NUMBER = 2
 SERVER = '127.0.0.1:8080'
+PUBL_API = '127.0.0.1:5000'
 publ_maker = Saver(description='', show_email=False)
 publ_shower = Saver(current_index=0, string='')
 
@@ -26,6 +25,16 @@ def favicon():
 SMALL, BIG = 'small', 'big'
 
 
+class Autor:
+    id = 1
+    name = 'Моккий Кифович'
+    photo = 'static/users/1/cloud/User_phoenix.jpg'
+    password = 'hoorey!'
+    email = 'mokk@mail.ru'
+    path = 'static/users/1'
+    is_authenticated = True
+
+
 class flask_login:
     current_user = Autor
 
@@ -33,6 +42,15 @@ class flask_login:
 class CurrentSet:
     menu_mode = SMALL
 # TEST ><><><>< ^
+
+
+class TempPubl:
+    def __init__(self, filename, description, show_email=False,
+                 author=flask_login.current_user):
+        self.autor = author
+        self.filename = flask_login.current_user.path + '/cloud/' + filename
+        self.description = description
+        self.show_email = show_email
 
 
 @app.route('/publications', methods=['GET', 'POST'])
@@ -45,12 +63,14 @@ def publications():
     else:
         nav = [{'href': '/', 'title': 'Главная'},
                {'href': '/login', 'title': 'Войти'}]
+
     if request.method == 'POST':
         if 'search_string' in request.form.keys():
             publ_shower.string = request.form['search_string'].lower()
-    json_publs = rq.get('http://127.0.0.1:5000/publ_api' +\
+    json_publs = rq.get('http://{}/publ_api'.format(PUBL_API) +\
                         ('/' + publ_shower.string
                          if publ_shower.string else '')).json()
+
     if request.method == 'POST':
         if 'next' in request.form.keys():
             if publ_shower.current_index + FILES_NUMBER < len(json_publs):
@@ -60,6 +80,7 @@ def publications():
                 publ_shower.current_index -= FILES_NUMBER
     ind = publ_shower.current_index
     publs = json_publs[ind:ind + FILES_NUMBER]
+
     return render_template('Publications.html', title='Публикации',
                            navigation=nav,
                            publications=publs,
@@ -74,20 +95,25 @@ def make_publication(filename):
            {'href': '/cloud', 'title': 'Облако'},
            {'href': '/settings', 'title': 'Настройки'},
            {'href': '/logout', 'title': 'Выход'}]
+
     form = MakePublicationForm()
     if form.validate_on_submit():
         publ_maker.description = form.description.data
         publ_maker.show_email = form.show_email.data
+
     if request.method == 'POST':
         if 'public' in request.form.keys():
-            db_sess = d_s.create_session()
-            new_filename = make_publ_file(filename)
-            publ = Publication(description=publ_maker.description,
-                               show_email=publ_maker.show_email,
-                               filename=new_filename,
-                               user_id=flask_login.current_user.id)
-            db_sess.add(publ)
-            db_sess.commit()
+            publ_dict = {
+                'description': publ_maker.description,
+                'filename': flask_login.current_user.path + '/cloud' +\
+                            filename,
+                'user_id': flask_login.current_user.id,
+            }
+            if publ_maker.show_email:
+                publ_dict['show_email'] = publ_maker.show_email
+            res = rq.post('http://{}/publ_api'.format(PUBL_API),
+                          params=publ_dict).json()
+            print(res)
             return fl.redirect('/publications')
     form.description.data = publ_maker.description
     form.show_email.data = publ_maker.show_email
@@ -121,5 +147,4 @@ def cloud(current_dir=''):
 
 
 if __name__ == '__main__':
-    d_s.global_init('db/cloud.db')
     app.run(port=int(SERVER.split(':')[1]), host=SERVER.split(':')[0])
