@@ -1,0 +1,30 @@
+.settings-photo-block {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: row;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.settings-user-photo {
+  background-image: url(../img/No_user.jpg);
+  background-size: cover;
+  width: 94.99px;
+  height: 94.99px;
+  border-width: 4px;
+  border-radius: 5px;
+  border-style: solid;
+  border-color: #ff6c03;
+  margin-right: 10px;
+}
+
+.bottom-choice {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.change-password-href {
+  align-self: center;
+}

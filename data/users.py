@@ -2,10 +2,10 @@ import sqlalchemy
 from sqlalchemy import orm
 from werkzeug.security import generate_password_hash, check_password_hash
 from data.db_session import SqlAlchemyBase
-import datetime
+from flask_login import UserMixin
 
 
-class User(SqlAlchemyBase):
+class User(SqlAlchemyBase, UserMixin):
     __tablename__ = 'users'
 
     id = sqlalchemy.Column(sqlalchemy.Integer,
@@ -16,18 +16,16 @@ class User(SqlAlchemyBase):
                               nullable=True,
                               index=True,
                               unique=True)
-    hashed_password = sqlalchemy.Column(sqlalchemy.String,
+    password = sqlalchemy.Column(sqlalchemy.String,
                                         nullable=True)
-    modified_date = sqlalchemy.Column(sqlalchemy.DateTime,
-                                      default=datetime.datetime.now)
     photo = sqlalchemy.Column(sqlalchemy.String,
                               nullable=True)
     path = sqlalchemy.Column(sqlalchemy.String)
 
-    publication = orm.relation("Publication", back_populates='user')
+    publication = orm.relation("Publication", back_populates='author')
 
     def set_password(self, password):
-        self.hashed_password = generate_password_hash(password)
+        self.password = generate_password_hash(password)
 
     def check_password(self, password):
-        return check_password_hash(self.hashed_password, password)
+        return check_password_hash(self.password, password)

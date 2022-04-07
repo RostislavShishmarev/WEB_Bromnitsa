@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="shortcut icon"
+      href="{{ url_for('static', filename='favicon.ico') }}"
+    />
+    <link rel="stylesheet" href="../static/css/Main.css" />
+    <link rel="stylesheet" href="../static/css/Head_style.css" />
+    <title>{{ title }}</title>
+  </head>
+  <body>
+    <div class="HEAD">
+      <div class="br-container head">
+        <div class="logo-block">
+          <div class="logo"></div>
+          <div class="logo-text">Бромница</div>
+        </div>
+        <div class="user-block">
+          {% if current_user.is_authenticated %}
+              {% set photo_name = '../' + current_user.photo %}
+              {% else %}
+              {% set photo_name = '../static/img/No_user.png' %}
+              {% endif %}
+          <div class="user-photo" style="background-image: url({{photo_name}})"></div>
+          <div class="user-list">
+            <ul>
+              <li class="menu">
+                Меню
+                <ul class="menu-list">
+                  {% for element in navigation %} {% if loop.last %}
+                  <li class="menu-el last-el">
+                    <a href="{{element['href']}}">{{element['title']}}</a>
+                  </li>
+                  {% else %}
+                  <li class="menu-el">
+                    <a href="{{element['href']}}">{{element['title']}}</a>
+                  </li>
+                  {% endif %} {% endfor %}
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% block content %}{% endblock %}
+  </body>
+</html>

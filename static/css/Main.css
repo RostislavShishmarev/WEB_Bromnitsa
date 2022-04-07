@@ -1,0 +1,117 @@
+body {
+  margin-left: auto;
+  margin-right: auto;
+  background-color: #141312;
+}
+
+*::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+*::-webkit-scrollbar-corner {
+  background-color: #2b2b2b;
+}
+
+*::-webkit-scrollbar-track {
+  background: #2b2b2b;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #75736f;
+  border-radius: 20px;
+  border: 3px solid black;
+}
+
+body::-webkit-scrollbar-thumb,
+.left-menu::-webkit-scrollbar-thumb {
+  background-color: #f78502;
+  border-radius: 20px;
+  border: 3px solid black;
+}
+
+/* Не container, чтобы не мешать адаптивной сетке */
+.br-container {
+  box-sizing: border-box;
+  max-width: 1219px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 55px;
+  padding-right: 55px;
+}
+
+.Block1 {
+  margin-top: 95px;
+}
+
+@media screen and (max-width: 520px) {
+  .Block1 {
+    margin-top: 13vh;
+  }
+}
+
+.none {
+  display: none;
+}
+
+.href {
+  text-decoration: none;
+  color: #f18810;
+}
+
+.href:hover {
+  color: #f1bc10;
+}
+
+.nav-placeholder {
+  display: flex;
+  justify-content: space-between;
+  overflow: auto;
+}
+
+.nav-placeholder::-webkit-scrollbar-thumb {
+  background-color: #75736f;
+  border-radius: 20px;
+  border: 3px solid black;
+}
+
+.nav-block {
+  margin: 12px;
+}
+
+.nav-button {
+  background-color: rgba(0, 0, 0, 0);
+  border-radius: 50%;
+  border: none;
+  color: #baae9b;
+  font-size: 32px;
+  height: 48px;
+  width: 48px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.nav-button:hover {
+  background-color: #bdb3a278;
+}
+
+.user-button {
+  text-decoration: none;
+  display: block;
+  font-size: 18px;
+  font-weight: 500;
+  color: #f5870a;
+  background-color: black;
+  border-radius: 3px;
+  border-color: #ff6c03;
+  border-width: 2px;
+  border-style: double;
+  transition: all 0.2s ease-in;
+  text-align: center;
+  position: relative;
+}
+
+.user-button:hover {
+  color: black;
+  background-color: #f5870a;
+  position: relative;
+}

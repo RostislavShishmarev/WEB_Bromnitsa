@@ -1,0 +1,39 @@
+.br-container {
+  padding-left: 0px;
+}
+
+.page {
+  background-color: #141312;
+  min-height: 100vh;
+  background-image: url(../../img/bricks.jpg);
+  background-size: cover;
+  background-position: center;
+}
+
+.cloud {
+  display: flex;
+  background-color: #1f1d1c;
+}
+
+.main-placeholder {
+  position: relative;
+  min-width: calc(100% - 28px);
+  min-height: 100vh;
+  display: block;
+  margin-left: 56px;
+  padding-top: 3px;
+}
+
+.dir-text {
+  color: #baae9b;
+  font-family: Roboto, sans-serif;
+  font-size: 32px;
+  margin: 0px;
+}
+
+.dirs-placeholder {
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  align-content: flex-start;
+}
