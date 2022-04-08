@@ -66,5 +66,5 @@ class PublApi(Resource):
 
 api.add_resource(PublApi, '/publ_api/<search_string>', '/publ_api')
 if __name__ == '__main__':
-    d_s.global_init('db/cloud.db')
+    d_s.global_init('db/cloud.sqlite')
     app.run(port=int(SERVER.split(':')[1]), host=SERVER.split(':')[0])
