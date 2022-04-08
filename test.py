@@ -1,9 +1,13 @@
 import os
-from flask import Flask, render_template, request
+import data.db_session as db_session
+from data.users import User
+from flask import Flask, render_template, request, redirect
 from flask import send_from_directory
 from forms.forms import RegisterForm, LoginForm, SettingsForm,\
     ChangePasswordForm, MakeDirForm, RenameFileForm, DeleteFileForm,\
     MakePublicationForm
+from flask_login import login_user
+from flask_login import LoginManager
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'super_Seсret_key_of_devEl0pers'
@@ -11,6 +15,15 @@ app.config['JSON_AS_ASCII'] = False
 SMALL, BIG = 'small', 'big'
 USER_DIR = 'static/users/1/cloud/'
 DESC = '''Мелодия из игры Отражение'''
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    db_session.global_init("db/cloud.sqlite")
+    db_sess = db_session.create_session()
+    return db_sess.query(User).get(user_id)
 
 
 class CurrentSet:
@@ -105,12 +118,24 @@ def make_publication(filename):
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    form = RegisterForm()
-    nav = [{'href': '/login', 'title': 'Войти'},
-           {'href': '/', 'title': 'Главная'},
-           {'href': '/publications', 'title': 'Публикации'}]
-    return render_template('Form.html', title='Регистрация', navigation=nav,
-                           form=form, current_user=flask_login.current_user)
+        form = RegisterForm()
+        nav = [{'href': '/login', 'title': 'Войти'},
+               {'href': '/', 'title': 'Главная'},
+               {'href': '/publications', 'title': 'Публикации'}]
+        db_session.global_init("db/cloud.sqlite")
+        user1 = User(
+            username=form.name.data,
+            email=form.email.data,
+            photo=form.photo.data,
+            password=form.password.data,
+            path=USER_DIR
+        )
+        #user1.set_password(form.password.data)
+        db_sess = db_session.create_session()
+        db_sess.add(user1)
+        db_sess.commit()
+        return render_template('Form.html', title='Регистрация', navigation=nav,
+                               form=form, current_user=flask_login.current_user)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -119,6 +144,17 @@ def login():
     nav = [{'href': '/register', 'title': 'Регистрация'},
            {'href': '/', 'title': 'Главная'},
            {'href': '/publications', 'title': 'Публикации'}]
+    if form.validate_on_submit():
+        db_session.global_init("db/cloud.sqlite")
+        db_sess = db_session.create_session()
+        user = db_sess.query(User).filter(User.email == form.email.data).first()
+        #if not user or not user.check_password(form.password.data):
+        if not user or user.password != form.password.data:
+            return render_template('Form.html',
+                                   message="Неправильный логин или пароль",
+                                   form=form)
+        login_user(user, remember=form.remember_me.data)
+        return redirect("/")
     return render_template('Form.html', title='Авторизация', navigation=nav,
                            form=form, current_user=flask_login.current_user)
 
@@ -198,5 +234,6 @@ def sort_function(list_, cur_dir):
 
 
 if __name__ == '__main__':
-    app.run(port=8080, host='127.0.0.1')
 
+    #login_manager.login_view = 'login'
+    app.run(port=8080, host='127.0.0.1')
