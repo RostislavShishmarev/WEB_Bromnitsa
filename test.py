@@ -145,26 +145,37 @@ def register():
                {'href': '/publications', 'title': 'Публикации'}]
         if form.validate_on_submit():
             db_session.global_init("db/cloud.sqlite")
-            a = USER_DIR + form.name.data
+            db_sess = db_session.create_session()
             user1 = User(
                 username=form.name.data,
                 email=form.email.data,
                 photo=form.photo.data,
                 password=form.password.data,
-                path=a
+                path=USER_DIR
             )
-            # user1.set_password(form.password.data)
-            db_sess = db_session.create_session()
             user = db_sess.query(User).filter(User.email == form.email.data).first()
             if user:
-                print(1)
+                form.email.errors = "Вы уже зарегистрированы"
                 return render_template('Form.html',
                                        message="Вы уже зарегистрированы",
                                        form=form)
+            if form.password.data != form.password_again.data:
+                form.password.errors = "Не совпадают пароли"
+                return render_template('Form.html',
+                                       message="Не совпадают пароли",
+                                       form=form)
             db_sess.add(user1)
             db_sess.commit()
-            login_user(user, remember=form.remember_me.data)
-            return redirect("/settings")
+            a = f'static/users/{user1.id}/cloud'
+            user1.path = a
+            db_sess.add(user1)
+            db_sess.commit()
+            os.chdir('static/users')
+            os.mkdir(str(user1.id))
+            os.chdir(str(user1.id))
+            os.mkdir('cloud')
+            login_user(user1, remember=form.remember_me.data)
+            return redirect("/")
         return render_template('Form.html', title='Регистрация', navigation=nav,
                                form=form, current_user=flask_login.current_user)
 
@@ -182,6 +193,7 @@ def login():
         if user and user.password == form.password.data:
             login_user(user, remember=form.remember_me.data)
             return redirect("/settings")
+        form.email.errors = "Неправильный логин или пароль"
         return render_template('Form.html',
                                message="Неправильный логин или пароль",
                                form=form)
@@ -230,6 +242,7 @@ def change_password():
            {'href': '/settings', 'title': 'Настройки'},
            {'href': '/logout', 'title': 'Выход'}]
     if form.password.data != form.password_again.data:
+        form.password = "Пароли не совпадают"
         return render_template('Form.html',
                                message="Пароли не совпадают",
                                form=form)
