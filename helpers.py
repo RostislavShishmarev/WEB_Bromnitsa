@@ -1,6 +1,15 @@
 import os
 import shutil
 
+IMAGE_TYPES = ('jpg', 'jpeg', 'png', 'svg', 'webp', 'gif', 'ico')
+
+
+class Errors:
+    USER_EXIST = "Такой пользователь уже есть"
+    DIFF_PASS = 'Пароли не совпадают'
+    NO_USER = "Такого пользователя не существует"
+    INCOR_PASS = "Неверный пароль"
+
 
 class Saver:
     def __init__(self, **kwargs):
