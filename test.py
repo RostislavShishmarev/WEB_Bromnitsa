@@ -1,6 +1,7 @@
 import os
 import data.db_session as db_session
 from data.users import User
+from data.publication import Publication
 from flask import Flask, render_template, request, redirect
 from flask import send_from_directory
 from forms.forms import RegisterForm, LoginForm, SettingsForm,\
@@ -8,10 +9,13 @@ from forms.forms import RegisterForm, LoginForm, SettingsForm,\
     MakePublicationForm
 from flask_login import login_user
 from flask_login import LoginManager
+from flask_login import login_required, logout_user, current_user
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'super_Seсret_key_of_devEl0pers'
 app.config['JSON_AS_ASCII'] = False
+login_manager = LoginManager()
+login_manager.init_app(app)
 SMALL, BIG = 'small', 'big'
 USER_DIR = 'static/users/1/cloud/'
 DESC = '''Мелодия из игры Отражение'''
@@ -41,10 +45,19 @@ class flask_login:
     current_user = Autor
 
 
-class Publication:
+'''class Publication:
     def __init__(self, filename, description, show_email=False):
         self.autor = Autor
         self.filename = USER_DIR + filename
+        self.description = description
+        self.show_email = show_email'''
+
+
+class TempPubl:
+    def __init__(self, filename, description, show_email=False,
+                 author=flask_login.current_user):
+        self.autor = author
+        self.filename = flask_login.current_user.path + '/cloud/' + filename
         self.description = description
         self.show_email = show_email
 
@@ -60,6 +73,13 @@ def favicon():
 def main_page():
     nav = [{'href': '/login', 'title': 'Войти'},
            {'href': '/publications', 'title': 'Публикации'}]
+    db_session.global_init("db/cloud.sqlite")
+    db_sess = db_session.create_session()
+    '''if current_user.is_authenticated:
+        publication = db_sess.query(Publication).filter(
+            (Publication.author == current_user))
+    else:
+        publication = db_sess.query(Publication)'''
     return render_template('TitlePage.html', title='Главная', navigation=nav, current_user=flask_login.current_user)
 
 
@@ -88,31 +108,32 @@ def cloud(current_dir=''):
 
 @app.route('/publications', methods=['GET', 'POST'])
 def publications():
-    nav = [{'href': '/', 'title': 'Главная'},
-           {'href': '/login', 'title': 'Войти'}]
+    if flask_login.current_user.is_authenticated:
+        nav = [{'href': '/', 'title': 'Главная'},
+               {'href': '/cloud', 'title': 'Облако'},
+               {'href': '/settings', 'title': 'Настройки'},
+               {'href': '/logout', 'title': 'Выход'}]
+    else:
+        nav = [{'href': '/', 'title': 'Главная'},
+               {'href': '/login', 'title': 'Войти'}]
+
     return render_template('Publications.html', title='Публикации',
                            navigation=nav,
-                           publications=[Publication('Exploding_block.png',
-                                                     'Картинка взрывблока из \
-                                                     игры "Отражение"'),
-                                         Publication('play_fone.mp3',
-                                                     DESC, True)],
+                           publications=publs,
                            os=os, current_user=flask_login.current_user)
 
 
 @app.route('/make_publication/<path:filename>',methods=['GET', 'POST'])
 def make_publication(filename):
     filename = filename.replace('&', '/')
-    form = MakePublicationForm()
     nav = [{'href': '/', 'title': 'Главная'},
            {'href': '/publications', 'title': 'Публикации'},
            {'href': '/cloud', 'title': 'Облако'},
            {'href': '/settings', 'title': 'Настройки'},
            {'href': '/logout', 'title': 'Выход'}]
-    print(filename)
     return render_template('Publication_maker.html',
                            title='Создать публикацию', navigation=nav, os=os,
-                           publication=Publication(filename, ''),
+                           publication=publ,
                            current_user=flask_login.current_user, form=form)
 
 
@@ -148,15 +169,21 @@ def login():
         db_session.global_init("db/cloud.sqlite")
         db_sess = db_session.create_session()
         user = db_sess.query(User).filter(User.email == form.email.data).first()
-        #if not user or not user.check_password(form.password.data):
-        if not user or user.password != form.password.data:
-            return render_template('Form.html',
-                                   message="Неправильный логин или пароль",
-                                   form=form)
-        login_user(user, remember=form.remember_me.data)
-        return redirect("/")
+        if user and user.password == form.password.data:
+            login_user(user, remember=form.remember_me.data)
+            return redirect("/settings")
+        return render_template('Form.html',
+                               message="Неправильный логин или пароль",
+                               form=form)
     return render_template('Form.html', title='Авторизация', navigation=nav,
                            form=form, current_user=flask_login.current_user)
+
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect("/")
 
 
 @app.route('/settings', methods=['GET', 'POST'])
@@ -166,6 +193,20 @@ def settings():
            {'href': '/publications', 'title': 'Публикации'},
            {'href': '/cloud', 'title': 'Облако'},
            {'href': '/logout', 'title': 'Выход'}]
+    if form.is_submitted():
+        db_session.global_init("db/cloud.sqlite")
+        db_sess = db_session.create_session()
+        user = db_sess.query(User).filter(User.email == current_user.email).first()
+        user.email = form.email.data
+        user.username = form.name.data
+        user.photo = form.photo.data
+        db_sess.add(user)
+        db_sess.commit()
+    #if type(current_user) == User:
+    form.email.data = current_user.email
+    form.name.data = current_user.username
+    form.photo.data = current_user.photo
+
     return render_template('Settings.html', title='Настройки', navigation=nav,
                            form=form, current_user=flask_login.current_user)
 
@@ -178,6 +219,17 @@ def change_password():
            {'href': '/cloud', 'title': 'Облако'},
            {'href': '/settings', 'title': 'Настройки'},
            {'href': '/logout', 'title': 'Выход'}]
+    if form.password.data != form.password_again.data:
+        return render_template('Form.html',
+                               message="Пароли не совпадают",
+                               form=form)
+    if form.validate_on_submit():
+        db_session.global_init("db/cloud.sqlite")
+        db_sess = db_session.create_session()
+        user = db_sess.query(User).filter(User.email == current_user.email).first()
+        user.password = form.password.data
+        db_sess.add(user)
+        db_sess.commit()
     return render_template('Form.html', title='Сменить пароль', navigation=nav,
                            form=form, current_user=flask_login.current_user)
 
@@ -235,5 +287,5 @@ def sort_function(list_, cur_dir):
 
 if __name__ == '__main__':
 
-    #login_manager.login_view = 'login'
+    login_manager.login_view = 'login'
     app.run(port=8080, host='127.0.0.1')
