@@ -143,18 +143,28 @@ def register():
         nav = [{'href': '/login', 'title': 'Войти'},
                {'href': '/', 'title': 'Главная'},
                {'href': '/publications', 'title': 'Публикации'}]
-        db_session.global_init("db/cloud.sqlite")
-        user1 = User(
-            username=form.name.data,
-            email=form.email.data,
-            photo=form.photo.data,
-            password=form.password.data,
-            path=USER_DIR
-        )
-        #user1.set_password(form.password.data)
-        db_sess = db_session.create_session()
-        db_sess.add(user1)
-        db_sess.commit()
+        if form.validate_on_submit():
+            db_session.global_init("db/cloud.sqlite")
+            a = USER_DIR + form.name.data
+            user1 = User(
+                username=form.name.data,
+                email=form.email.data,
+                photo=form.photo.data,
+                password=form.password.data,
+                path=a
+            )
+            # user1.set_password(form.password.data)
+            db_sess = db_session.create_session()
+            user = db_sess.query(User).filter(User.email == form.email.data).first()
+            if user:
+                print(1)
+                return render_template('Form.html',
+                                       message="Вы уже зарегистрированы",
+                                       form=form)
+            db_sess.add(user1)
+            db_sess.commit()
+            login_user(user, remember=form.remember_me.data)
+            return redirect("/settings")
         return render_template('Form.html', title='Регистрация', navigation=nav,
                                form=form, current_user=flask_login.current_user)
 
