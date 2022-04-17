@@ -7,16 +7,17 @@ from forms.forms import RegisterForm, LoginForm, SettingsForm,\
 
 import data.db_session as db_session
 from data.users import User
-from helpers import Errors
+from helpers import Errors, CurrentSettings, alpha_sorter, time_sorter,\
+    reverse_dec
 
 app = fl.Flask(__name__)
 app.config['SECRET_KEY'] = 'super_Seсret_key_of_devEl0pers'
 app.config['JSON_AS_ASCII'] = False
-SMALL, BIG = 'small', 'big'
-DEFAULT_PHOTO = 'static/img/No_user.jpg'
 login_manager = fl_log.LoginManager()
 login_manager.init_app(app)
+cloud_set = CurrentSettings()
 
+DEFAULT_PHOTO = 'static/img/No_user.jpg'
 
 
 @login_manager.user_loader
@@ -30,10 +31,6 @@ def load_user(user_id):
 def logout():
     fl_log.logout_user()
     return redirect("/")
-
-
-class CurrentSet:
-    menu_mode = SMALL
 
 
 @app.route('/favicon.ico')
@@ -66,19 +63,39 @@ def cloud(current_dir=''):
            {'href': '/publications', 'title': 'Публикации'},
            {'href': '/settings', 'title': 'Настройки'},
            {'href': '/logout', 'title': 'Выход'}]
-    current_dir = fl_log.current_user.path + '/cloud' + current_dir.replace('&', '/')
+    cloud_set.out_of_root = bool(current_dir)
+    current_dir = fl_log.current_user.path + '/cloud' +\
+                  current_dir.replace('&', '/')
     if request.method == 'POST':
         if 'change-menu' in request.form.keys():
-            CurrentSet.menu_mode = SMALL if CurrentSet.menu_mode == BIG\
-                else BIG
-        return render_template('Account.html', title='Облако',
-                               navigation=nav, menu=CurrentSet.menu_mode,
-                               current_dir=current_dir, os=os,
-                               sort_function=sort_function, current_user=fl_log.current_user)
+            cloud_set.change_mode()
+        elif 'filesubmit' in request.form.keys():
+            files = request.files.getlist('file')
+            for file in files:
+                file.save(current_dir + '/' + file.filename.replace(' ', '_'))
+        elif 'search_string' in request.form.keys():
+            cloud_set.string = request.form['search_string'].lower()
+            cloud_set.current_index = 0
+        elif 'sort_selector' in request.form.keys():
+            if 'По названию' in request.form['sort_selector']:
+                func = alpha_sorter
+            else:
+                func = time_sorter
+            if request.form.get('reverse', False):
+                func = reverse_dec(func)
+            cloud_set.sort_func = func
+        elif 'next' in request.form.keys():
+            n = len(cloud_set.sort_func(os.listdir(current_dir), current_dir,
+                                        cloud_set.string))
+            if cloud_set.current_index + cloud_set.files_num < n:
+                cloud_set.current_index += cloud_set.files_num
+        elif 'prev' in request.form.keys():
+            if cloud_set.current_index - cloud_set.files_num >= 0:
+                cloud_set.current_index -= cloud_set.files_num
     return render_template('Account.html', title='Облако',
-                           navigation=nav, menu=CurrentSet.menu_mode,
+                           navigation=nav, settings=cloud_set,
                            current_dir=current_dir, os=os,
-                           sort_function=sort_function, current_user=fl_log.current_user)
+                           current_user=fl_log.current_user)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -253,8 +270,20 @@ def delete_file(filename):
                            form=form, current_user=fl_log.current_user)
 
 
-def sort_function(list_, cur_dir):
+
+def alpha_sorter(list_, cur_dir, reverse=False):
     key_sort = lambda x: x
+    step = -1 if reverse else 1
+    return sort_func(list_, cur_dir, key_sort)[::step]
+
+
+def time_sorter(list_, cur_dir, reverse=False):
+    key_sort = lambda f: os.path.getmtime('/'.join([cur_dir, f]))
+    step = -1 if reverse else 1
+    return sort_func(list_, cur_dir, key_sort)[::step]
+
+
+def sort_func(list_, cur_dir, key_sort):
     return sorted(list(filter(lambda f: os.path.isdir('/'.join([cur_dir,
                                                                 f])), list_)),
                   key=key_sort) +\
