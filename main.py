@@ -66,7 +66,7 @@ def cloud(current_dir=''):
            {'href': '/publications', 'title': 'Публикации'},
            {'href': '/settings', 'title': 'Настройки'},
            {'href': '/logout', 'title': 'Выход'}]
-    current_dir = USER_DIR + current_dir.replace('&', '/')
+    current_dir = fl_log.current_user.path + '/cloud' + current_dir.replace('&', '/')
     if request.method == 'POST':
         if 'change-menu' in request.form.keys():
             CurrentSet.menu_mode = SMALL if CurrentSet.menu_mode == BIG\
@@ -193,6 +193,18 @@ def change_password():
            {'href': '/cloud', 'title': 'Облако'},
            {'href': '/settings', 'title': 'Настройки'},
            {'href': '/logout', 'title': 'Выход'}]
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        if form.password.data != form.password_again.data:
+            form.password_again.errors.append(Errors.DIFF_PASS)
+            return render_template('Form.html', title='Сменить пароль',
+                                   navigation=nav, form=form,
+                                   current_user=fl_log.current_user)
+        user = db_sess.query(User).filter(User.id ==\
+                                          fl_log.current_user.id).first()
+        user.set_password(form.password.data)
+        db_sess.commit()
+        return redirect('/')
     return render_template('Form.html', title='Сменить пароль', navigation=nav,
                            form=form, current_user=fl_log.current_user)
 
