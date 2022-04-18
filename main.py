@@ -1,4 +1,5 @@
 import os
+import shutil
 import flask as fl
 import flask_login as fl_log
 from flask import render_template, request, redirect, send_from_directory
@@ -8,7 +9,7 @@ from forms.forms import RegisterForm, LoginForm, SettingsForm,\
 import data.db_session as db_session
 from data.users import User
 from helpers import Errors, CurrentSettings, alpha_sorter, time_sorter,\
-    reverse_dec
+    reverse_dec, BAD_DIR_CHARS, format_name
 
 app = fl.Flask(__name__)
 app.config['SECRET_KEY'] = 'super_Seсret_key_of_devEl0pers'
@@ -29,7 +30,9 @@ def load_user(user_id):
 @fl_log.login_required
 @app.route('/logout')
 def logout():
+    global cloud_set
     fl_log.logout_user()
+    cloud_set = CurrentSettings()
     return redirect("/")
 
 
@@ -63,9 +66,8 @@ def cloud(current_dir=''):
            {'href': '/publications', 'title': 'Публикации'},
            {'href': '/settings', 'title': 'Настройки'},
            {'href': '/logout', 'title': 'Выход'}]
-    cloud_set.out_of_root = bool(current_dir)
-    current_dir = fl_log.current_user.path + '/cloud' +\
-                  current_dir.replace('&', '/')
+    current_dir = cloud_set.update_dir(current_dir.replace('&', '/'),
+                                       fl_log.current_user.path)
     if request.method == 'POST':
         if 'change-menu' in request.form.keys():
             cloud_set.change_mode()
@@ -93,8 +95,7 @@ def cloud(current_dir=''):
             if cloud_set.current_index - cloud_set.files_num >= 0:
                 cloud_set.current_index -= cloud_set.files_num
     return render_template('Account.html', title='Облако',
-                           navigation=nav, settings=cloud_set,
-                           current_dir=current_dir, os=os,
+                           navigation=nav, settings=cloud_set, os=os,
                            current_user=fl_log.current_user)
 
 
@@ -235,6 +236,25 @@ def add_dir():
            {'href': '/cloud', 'title': 'Облако'},
            {'href': '/settings', 'title': 'Настройки'},
            {'href': '/logout', 'title': 'Выход'}]
+    if form.validate_on_submit():
+        dirname = form.name.data
+        full = cloud_set.current_dir + '/' + dirname
+        # Сначала именно символы
+        incor_symb = BAD_DIR_CHARS & set(dirname)
+        if incor_symb:
+            form.name.errors.append(Errors.BAD_CHAR + '"' +\
+                                    '", "'.join(incor_symb) + '"')
+            return render_template('Form.html', title='Создать папку',
+                                   navigation=nav, form=form,
+                                   current_user=fl_log.current_user)
+        if os.path.exists(full):
+            form.name.errors.append(Errors.DIR_EXIST)
+            return render_template('Form.html', title='Создать папку',
+                                   navigation=nav, form=form,
+                                   current_user=fl_log.current_user)
+        os.mkdir(full)
+        return redirect('/cloud/' +\
+                        cloud_set.cur_dir_from_user.replace('/', '&'))
     return render_template('Form.html', title='Создать папку', navigation=nav,
                            form=form, current_user=fl_log.current_user)
 
@@ -242,54 +262,68 @@ def add_dir():
 @fl_log.login_required
 @app.route('/rename_file/<path:filename>', methods=['GET', 'POST'])
 def rename_file(filename):
-    filename = filename.replace('&', '/')
+    filepath = filename.replace('&', '/')
+    filename = filepath.split('/')[-1]
+    filetype = '.' + filename.split('.')[-1]
     form = RenameFileForm()
-    form.name.data = filename.split('/')[-1].split('.')[0]
     nav = [{'href': '/', 'title': 'Главная'},
            {'href': '/publications', 'title': 'Публикации'},
            {'href': '/cloud', 'title': 'Облако'},
            {'href': '/settings', 'title': 'Настройки'},
            {'href': '/logout', 'title': 'Выход'}]
-    return render_template('Form.html', title='Переименовать файл', navigation=nav,
-                           form=form, current_user=fl_log.current_user)
+    full = format_name(fl_log.current_user.path + '/cloud/' + filepath)
+    if form.validate_on_submit():
+        new_name = form.name.data
+        new_full = format_name(fl_log.current_user.path + '/cloud/' +\
+                               filepath[:-len(filename)] + new_name)
+        if os.path.isfile(full):
+            new_full += filetype
+        # Сначала именно символы
+        incor_symb = BAD_DIR_CHARS & set(new_name)
+        if incor_symb:
+            form.name.errors.append(Errors.BAD_CHAR + '"' +\
+                                    '", "'.join(incor_symb) + '"')
+            return render_template('Form.html', title='Переименовать файл',
+                                   navigation=nav, form=form,
+                                   current_user=fl_log.current_user)
+        if os.path.exists(new_full) and full != new_full:
+            form.name.errors.append(Errors.FILE_EXISTS)
+            return render_template('Form.html', title='Переименовать файл',
+                                   navigation=nav, form=form,
+                                   current_user=fl_log.current_user)
+        os.rename(full, new_full)
+        return redirect('/cloud/' +\
+                        filepath[:-len(filename) - 1].replace('/', '&'))
+    form.name.data = filename[:-len(filetype)] if os.path.isfile(full)\
+        else filename
+    return render_template('Form.html', title='Переименовать файл',
+                           navigation=nav, form=form,
+                           current_user=fl_log.current_user)
 
 
 @fl_log.login_required
 @app.route('/delete_file/<path:filename>', methods=['GET', 'POST'])
 def delete_file(filename):
-    filename = filename.replace('&', '/')
+    filepath = filename.replace('&', '/')
+    filename = filepath.split('/')[-1]
     form = DeleteFileForm()
     nav = [{'href': '/', 'title': 'Главная'},
            {'href': '/publications', 'title': 'Публикации'},
            {'href': '/cloud', 'title': 'Облако'},
            {'href': '/settings', 'title': 'Настройки'},
            {'href': '/logout', 'title': 'Выход'}]
+    full = format_name(fl_log.current_user.path + '/cloud/' + filepath)
+    if form.validate_on_submit():
+        if os.path.isfile(full):
+            os.remove(full)
+        else:
+            shutil.rmtree(full)
+        return redirect('/cloud/' +\
+                        filepath[:-len(filename) - 1].replace('/', '&'))
     return render_template('Form.html',
                            title='Удалить файл ' + filename.split('/')[-1],
                            navigation=nav,
                            form=form, current_user=fl_log.current_user)
-
-
-
-def alpha_sorter(list_, cur_dir, reverse=False):
-    key_sort = lambda x: x
-    step = -1 if reverse else 1
-    return sort_func(list_, cur_dir, key_sort)[::step]
-
-
-def time_sorter(list_, cur_dir, reverse=False):
-    key_sort = lambda f: os.path.getmtime('/'.join([cur_dir, f]))
-    step = -1 if reverse else 1
-    return sort_func(list_, cur_dir, key_sort)[::step]
-
-
-def sort_func(list_, cur_dir, key_sort):
-    return sorted(list(filter(lambda f: os.path.isdir('/'.join([cur_dir,
-                                                                f])), list_)),
-                  key=key_sort) +\
-           sorted(list(filter(lambda f: os.path.isfile('/'.join([cur_dir,
-                                                                 f])), list_)),
-                  key=key_sort)
 
 
 if __name__ == '__main__':

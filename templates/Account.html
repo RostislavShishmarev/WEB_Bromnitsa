@@ -17,7 +17,7 @@
               <div class="user-block-on-menu">
               {% set photo_name = '../' + current_user.photo %}
                 <div class="main-user-photo" style="background-image: url({{photo_name}})"></div>
-                <div class="username-text">{{ current_user.name }}</div>
+                <div class="username-text">{{ current_user.username }}</div>
               </div>
               <div class="small-block">
                 <form method="POST">
@@ -125,7 +125,7 @@
           </div>
           {% set dir_name = '' %}
           {% if settings.out_of_root %}
-          {% set dir_name = current_dir.split('/')[-1]  %}
+          {% set dir_name = settings.current_dir.split('/')[-1]  %}
           {% endif %}
           <div class="nav-block"><p class="dir-text">{{ dir_name }}</p></div>
           <div class="nav-block">
@@ -144,9 +144,9 @@
           {% if settings.out_of_root %}
           {% set back = back + ['..', ] %}
           {% endif %}
-          {% set len_of_user_dir = current_dir.split('cloud')[0].split('/')|length + 1 %}
-          {% for name in back + settings.sort_func(os.listdir(current_dir), current_dir, settings.string)[settings.current_index:settings.current_index + settings.files_num] %}
-          {% set way = '/'.join(['..', current_dir, name]) %}
+          {% set len_of_user_dir = settings.current_dir.split('cloud')[0].split('/')|length + 1 %}
+          {% for name in back + settings.sort_func(os.listdir(settings.current_dir), settings.current_dir, settings.string)[settings.current_index:settings.current_index + settings.files_num] %}
+          {% set way = '/'.join(['..', settings.current_dir, name]) %}
           <div class="file-card">
             <div class="file-card-main">
               {% if name.split('.')[-1] in ['mp3', 'wav', 'ogg'] %}
