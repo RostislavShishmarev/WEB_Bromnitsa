@@ -17,7 +17,7 @@
               <div class="user-block-on-menu">
               {% set photo_name = '../' + current_user.photo %}
                 <div class="main-user-photo" style="background-image: url({{photo_name}})"></div>
-                <div class="username-text">{{ current_user.name }}</div>
+                <div class="username-text">{{ current_user.username }}</div>
               </div>
               <div class="small-block">
                 <form method="POST">
@@ -43,8 +43,8 @@
                 <div class="sort-placeholder">
                   <label class="sort-caption">Сортировка:</label>
                   <select class="sort-selector" name="sort_selector">
-                    <option class="sort-option">По времени создания</option>
                     <option class="sort-option">По названию</option>
+                    <option class="sort-option">По времени создания</option>
                   </select>
                   <div class="checkbox-placeholder">
                     <input type="checkbox" class="custom-checkbox" name="reverse" />
@@ -64,7 +64,7 @@
               <a class="add-button" href="/add_dir">+</a>
               <label class="add-text">Добавить папку</label>
             </div>
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
               <div class="add-block">
                 <div class="input__placeholder">
                   <input
@@ -141,7 +141,7 @@
           {% set back = back + ['..', ] %}
           {% endif %}
           {% set len_of_user_dir = current_dir.split('cloud')[0].split('/')|length + 1 %}
-          {% for name in back + sort_function(os.listdir(current_dir), current_dir) %}
+          {% for name in back + sort_function(os.listdir(current_dir), current_dir)[current_index:current_index + files_num] %}
           {% set way = '/'.join(['..', current_dir, name]) %}
           <div class="file-card">
             <div class="file-card-main">

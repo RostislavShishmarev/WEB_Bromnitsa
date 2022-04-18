@@ -23,7 +23,7 @@
           {% if current_user.is_authenticated %}
               {% set photo_name = '../' + current_user.photo %}
               {% else %}
-              {% set photo_name = '../static/img/No_user.png' %}
+              {% set photo_name = '../static/img/No_user.jpg' %}
               {% endif %}
           <div class="user-photo" style="background-image: url({{photo_name}})"></div>
           <div class="user-list">

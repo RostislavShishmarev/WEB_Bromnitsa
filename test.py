@@ -7,6 +7,7 @@ from flask import send_from_directory
 from forms.forms import RegisterForm, LoginForm, SettingsForm,\
     ChangePasswordForm, MakeDirForm, RenameFileForm, DeleteFileForm,\
     MakePublicationForm
+import flask_login
 from flask_login import login_user
 from flask_login import LoginManager
 from flask_login import login_required, logout_user, current_user
@@ -17,10 +18,7 @@ app.config['JSON_AS_ASCII'] = False
 login_manager = LoginManager()
 login_manager.init_app(app)
 SMALL, BIG = 'small', 'big'
-USER_DIR = 'static/users/1/cloud/'
-DESC = '''Мелодия из игры Отражение'''
-login_manager = LoginManager()
-login_manager.init_app(app)
+USER_PHOTO = 'static/img/No_user.jpg'
 
 
 @login_manager.user_loader
@@ -32,17 +30,6 @@ def load_user(user_id):
 
 class CurrentSet:
     menu_mode = SMALL
-
-
-class Autor:
-    name = 'Моккий Кифович'
-    photo = 'static/users/1/cloud/User_phoenix.jpg'
-    email = 'mokk@mail.ru'
-    is_authenticated = True
-
-
-class flask_login:
-    current_user = Autor
 
 
 '''class Publication:
@@ -80,7 +67,8 @@ def main_page():
             (Publication.author == current_user))
     else:
         publication = db_sess.query(Publication)'''
-    return render_template('TitlePage.html', title='Главная', navigation=nav, current_user=flask_login.current_user)
+    return render_template('TitlePage.html', title='Главная', navigation=nav,
+                           current_user=flask_login.current_user)
 
 
 @app.route('/cloud', methods=['GET', 'POST'])
@@ -91,7 +79,7 @@ def cloud(current_dir=''):
            {'href': '/publications', 'title': 'Публикации'},
            {'href': '/settings', 'title': 'Настройки'},
            {'href': '/logout', 'title': 'Выход'}]
-    current_dir = USER_DIR + current_dir.replace('&', '/')
+    current_dir = 'static/users/1/' + current_dir.replace('&', '/')
     if request.method == 'POST':
         if 'change-menu' in request.form.keys():
             CurrentSet.menu_mode = SMALL if CurrentSet.menu_mode == BIG\
@@ -99,85 +87,63 @@ def cloud(current_dir=''):
         return render_template('Account.html', title='Облако',
                                navigation=nav, menu=CurrentSet.menu_mode,
                                current_dir=current_dir, os=os,
-                               sort_function=sort_function, current_user=flask_login.current_user)
+                               sort_function=sort_function,
+                               current_user=flask_login.current_user,
+                               current_index=0, files_num=6)
     return render_template('Account.html', title='Облако',
                            navigation=nav, menu=CurrentSet.menu_mode,
                            current_dir=current_dir, os=os,
-                           sort_function=sort_function, current_user=flask_login.current_user)
-
-
-@app.route('/publications', methods=['GET', 'POST'])
-def publications():
-    if flask_login.current_user.is_authenticated:
-        nav = [{'href': '/', 'title': 'Главная'},
-               {'href': '/cloud', 'title': 'Облако'},
-               {'href': '/settings', 'title': 'Настройки'},
-               {'href': '/logout', 'title': 'Выход'}]
-    else:
-        nav = [{'href': '/', 'title': 'Главная'},
-               {'href': '/login', 'title': 'Войти'}]
-
-    return render_template('Publications.html', title='Публикации',
-                           navigation=nav,
-                           publications=publs,
-                           os=os, current_user=flask_login.current_user)
-
-
-@app.route('/make_publication/<path:filename>',methods=['GET', 'POST'])
-def make_publication(filename):
-    filename = filename.replace('&', '/')
-    nav = [{'href': '/', 'title': 'Главная'},
-           {'href': '/publications', 'title': 'Публикации'},
-           {'href': '/cloud', 'title': 'Облако'},
-           {'href': '/settings', 'title': 'Настройки'},
-           {'href': '/logout', 'title': 'Выход'}]
-    return render_template('Publication_maker.html',
-                           title='Создать публикацию', navigation=nav, os=os,
-                           publication=publ,
-                           current_user=flask_login.current_user, form=form)
+                           sort_function=sort_function,
+                           current_user=flask_login.current_user,
+                           current_index=0, files_num=6)
 
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-        form = RegisterForm()
-        nav = [{'href': '/login', 'title': 'Войти'},
-               {'href': '/', 'title': 'Главная'},
-               {'href': '/publications', 'title': 'Публикации'}]
-        if form.validate_on_submit():
-            db_session.global_init("db/cloud.sqlite")
-            db_sess = db_session.create_session()
-            user1 = User(
-                username=form.name.data,
-                email=form.email.data,
-                photo=form.photo.data,
-                password=form.password.data,
-                path=USER_DIR
-            )
-            user = db_sess.query(User).filter(User.email == form.email.data).first()
-            if user:
-                form.email.errors = "Вы уже зарегистрированы"
-                return render_template('Form.html',
-                                       message="Вы уже зарегистрированы",
-                                       form=form)
-            if form.password.data != form.password_again.data:
-                form.password.errors = "Не совпадают пароли"
-                return render_template('Form.html',
-                                       message="Не совпадают пароли",
-                                       form=form)
-            db_sess.add(user1)
-            db_sess.commit()
-            a = f'static/users/{user1.id}/cloud'
-            user1.path = a
-            db_sess.add(user1)
-            db_sess.commit()
-            os.chdir('static/users')
-            os.mkdir(str(user1.id))
-            os.chdir(str(user1.id))
-            os.mkdir('cloud')
-            login_user(user1, remember=form.remember_me.data)
-            return redirect("/")
-        return render_template('Form.html', title='Регистрация', navigation=nav,
-                               form=form, current_user=flask_login.current_user)
+    form = RegisterForm()
+    nav = [{'href': '/login', 'title': 'Войти'},
+           {'href': '/', 'title': 'Главная'},
+           {'href': '/publications', 'title': 'Публикации'}]
+    if form.validate_on_submit():
+        db_session.global_init("db/cloud.sqlite")
+        db_sess = db_session.create_session()
+        user = db_sess.query(User).filter(User.email == form.email.data).first()
+        if user:
+            form.email.errors.append("Вы уже зарегистрированы")
+            return render_template('Form.html', title='Регистрация',
+                                   navigation=nav,
+                           form=form, current_user=flask_login.current_user)
+        if form.password.data != form.password_again.data:
+            form.password.errors.append("Не совпадают пароли")
+            return render_template('Form.html', title='Регистрация',
+                                   navigation=nav,
+                           form=form, current_user=flask_login.current_user)
+        user = User(
+            username=form.name.data,
+            email=form.email.data,
+            photo=USER_PHOTO
+        )
+        user.set_password(form.password.data)
+        db_sess.add(user)
+        db_sess.commit()
+        a = 'static/users/{}'.format(user.id)
+        user.path = a
+        os.mkdir(user.path)
+        os.mkdir(user.path + '/cloud')
+        os.mkdir(user.path + '/public')
+        os.mkdir(user.path + '/user_files')
+        f = form.photo.data
+        if f:
+            photoname = user.path + '/user_files/photo.' +\
+                        f.filename.split('.')[-1]
+            f.save(photoname)
+            user.photo = photoname
+        db_sess.add(user)
+        db_sess.commit()
+        login_user(user, remember=form.remember_me.data)
+        return redirect("/")
+    return render_template('Form.html', title='Регистрация', navigation=nav,
+                           form=form, current_user=flask_login.current_user)
 
 
 @app.route('/login', methods=['GET', 'POST'])
