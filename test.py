@@ -11,6 +11,7 @@ import flask_login
 from flask_login import login_user
 from flask_login import LoginManager
 from flask_login import login_required, logout_user, current_user
+import shutil
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'super_Seсret_key_of_devEl0pers'
@@ -79,7 +80,11 @@ def cloud(current_dir=''):
            {'href': '/publications', 'title': 'Публикации'},
            {'href': '/settings', 'title': 'Настройки'},
            {'href': '/logout', 'title': 'Выход'}]
-    current_dir = 'static/users/1/' + current_dir.replace('&', '/')
+    db_session.global_init("db/cloud.sqlite")
+    db_sess = db_session.create_session()
+    if current_user.is_authenticated:
+        user = db_sess.query(User).filter(User.email == current_user.email).first()
+        current_dir = user.path + '/user_files/' + current_dir.replace('&', '/')
     if request.method == 'POST':
         if 'change-menu' in request.form.keys():
             CurrentSet.menu_mode = SMALL if CurrentSet.menu_mode == BIG\
@@ -140,7 +145,7 @@ def register():
             user.photo = photoname
         db_sess.add(user)
         db_sess.commit()
-        login_user(user, remember=form.remember_me.data)
+        login_user(user)
         return redirect("/")
     return render_template('Form.html', title='Регистрация', navigation=nav,
                            form=form, current_user=flask_login.current_user)
@@ -156,8 +161,8 @@ def login():
         db_session.global_init("db/cloud.sqlite")
         db_sess = db_session.create_session()
         user = db_sess.query(User).filter(User.email == form.email.data).first()
-        if user and user.password == form.password.data:
-            login_user(user, remember=form.remember_me.data)
+        if user and user.check_password(form.password.data):
+            login_user(user)
             return redirect("/settings")
         form.email.errors = "Неправильный логин или пароль"
         return render_template('Form.html',
@@ -187,7 +192,12 @@ def settings():
         user = db_sess.query(User).filter(User.email == current_user.email).first()
         user.email = form.email.data
         user.username = form.name.data
-        user.photo = form.photo.data
+        f = form.photo.data
+        if f:
+            photoname = user.path + '/user_files/photo.' + \
+                        f.filename.split('.')[-1]
+            f.save(photoname)
+            user.photo = photoname
         db_sess.add(user)
         db_sess.commit()
     #if type(current_user) == User:
@@ -231,6 +241,12 @@ def add_dir():
            {'href': '/cloud', 'title': 'Облако'},
            {'href': '/settings', 'title': 'Настройки'},
            {'href': '/logout', 'title': 'Выход'}]
+    db_session.global_init("db/cloud.sqlite")
+    db_sess = db_session.create_session()
+    if current_user.is_authenticated and form.validate_on_submit():
+        user = db_sess.query(User).filter(User.email == current_user.email).first()
+        os.mkdir(user.path + '/user_files/' + form.name.data)
+        return redirect('/cloud')
     return render_template('Form.html', title='Создать папку', navigation=nav,
                            form=form, current_user=flask_login.current_user)
 
@@ -245,6 +261,21 @@ def rename_file(filename):
            {'href': '/cloud', 'title': 'Облако'},
            {'href': '/settings', 'title': 'Настройки'},
            {'href': '/logout', 'title': 'Выход'}]
+    db_session.global_init("db/cloud.sqlite")
+    db_sess = db_session.create_session()
+    if current_user.is_authenticated and form.validate_on_submit():
+        user = db_sess.query(User).filter(User.email == current_user.email).first()
+        extension = '.' + filename.split('.')[1]
+        print(extension)
+        print(form.name.data)
+        print(filename)
+        '''os.chdir('static')
+        os.chdir('users')
+        os.chdir(str(user.id))
+        os.chdir('user_files')
+        os.rename(filename, form.name.data + extension)'''
+        os.rename(user.path + '/user_files/' + filename, user.path + '/user_files/' + form.name.data + extension)
+        return redirect('/cloud')
     return render_template('Form.html', title='Переименовать файл', navigation=nav,
                            form=form, current_user=flask_login.current_user)
 
@@ -258,8 +289,57 @@ def delete_file(filename):
            {'href': '/cloud', 'title': 'Облако'},
            {'href': '/settings', 'title': 'Настройки'},
            {'href': '/logout', 'title': 'Выход'}]
+    db_session.global_init("db/cloud.sqlite")
+    db_sess = db_session.create_session()
+    if current_user.is_authenticated and form.validate_on_submit():
+        user = db_sess.query(User).filter(User.email == current_user.email).first()
+        os.remove(user.path + '/user_files/' + filename)
+        return redirect('/cloud')
     return render_template('Form.html',
                            title='Удалить файл ' + filename.split('/')[-1],
+                           navigation=nav,
+                           form=form, current_user=flask_login.current_user)
+
+
+@app.route('/copy_file/<path:filename>', methods=['GET', 'POST'])
+def copy_file(filename):
+    filename = filename.replace('&', '/')
+    form = DeleteFileForm()
+    nav = [{'href': '/', 'title': 'Главная'},
+           {'href': '/publications', 'title': 'Публикации'},
+           {'href': '/cloud', 'title': 'Облако'},
+           {'href': '/settings', 'title': 'Настройки'},
+           {'href': '/logout', 'title': 'Выход'}]
+    db_session.global_init("db/cloud.sqlite")
+    db_sess = db_session.create_session()
+    if current_user.is_authenticated and form.validate_on_submit():
+        user = db_sess.query(User).filter(User.email == current_user.email).first()
+        shutil.copy(user.path + '/user_files/' + filename, user.path + '/user_files/' + filename)
+        return redirect('/cloud')
+    return render_template('Form.html',
+                           title='Копировать файл ' + filename.split('/')[-1],
+                           navigation=nav,
+                           form=form, current_user=flask_login.current_user)
+
+
+@app.route('/cut_file/<path:filename>', methods=['GET', 'POST'])
+def cut_file(filename):
+    filename = filename.replace('&', '/')
+    form = DeleteFileForm()
+    nav = [{'href': '/', 'title': 'Главная'},
+           {'href': '/publications', 'title': 'Публикации'},
+           {'href': '/cloud', 'title': 'Облако'},
+           {'href': '/settings', 'title': 'Настройки'},
+           {'href': '/logout', 'title': 'Выход'}]
+    db_session.global_init("db/cloud.sqlite")
+    db_sess = db_session.create_session()
+    if current_user.is_authenticated and form.validate_on_submit():
+        user = db_sess.query(User).filter(User.email == current_user.email).first()
+        shutil.copy(user.path + '/user_files/' + filename, user.path + '/user_files/' + filename)
+        os.remove(user.path + '/user_files/' + filename)
+        return redirect('/cloud')
+    return render_template('Form.html',
+                           title='Вырезать файл ' + filename.split('/')[-1],
                            navigation=nav,
                            form=form, current_user=flask_login.current_user)
 

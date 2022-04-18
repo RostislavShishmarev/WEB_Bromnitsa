@@ -147,4 +147,5 @@ def cloud(current_dir=''):
 
 
 if __name__ == '__main__':
-    app.run(port=int(SERVER.split(':')[1]), host=SERVER.split(':')[0])
+    app.run(port=8080, host='127.0.0.1')
+    #app.run(port=int(SERVER.split(':')[1]), host=SERVER.split(':')[0])

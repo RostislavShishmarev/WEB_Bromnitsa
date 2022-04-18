@@ -9,7 +9,7 @@ from helpers import make_publ_file
 app = fl.Flask(__name__)
 api = Api(app)
 app.config['SECRET_KEY'] = 'super_Seсret_key_of_devEl0pers'
-SERVER = '127.0.0.1:5000'
+SERVER = '127.0.0.1:8080'
 
 publ_parser = reqparse.RequestParser()
 publ_parser.add_argument('description')
