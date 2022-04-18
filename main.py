@@ -94,6 +94,11 @@ def cloud(current_dir=''):
         elif 'prev' in request.form.keys():
             if cloud_set.current_index - cloud_set.files_num >= 0:
                 cloud_set.current_index -= cloud_set.files_num
+        else:
+            for key in request.form.keys():
+                if key.startswith('copy-file-'):
+                    name = key.split('-')[-1]
+                    print(name)
     return render_template('Account.html', title='Облако',
                            navigation=nav, settings=cloud_set, os=os,
                            current_user=fl_log.current_user)
