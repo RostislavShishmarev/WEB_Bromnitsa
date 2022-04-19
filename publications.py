@@ -1,12 +1,16 @@
 import os
 import flask as fl
 import requests as rq
+import flask_login
 from flask import render_template, request
 from forms.forms import MakePublicationForm
-from helpers import Saver, sort_function
+from helpers import Saver
 
-app = fl.Flask(__name__)
-app.config['SECRET_KEY'] = 'super_Seсret_key_of_devEl0pers'
+app = fl.Blueprint(
+    'news_api',
+    __name__,
+    template_folder='templates'
+)
 FILES_NUMBER = 2
 SERVER = '127.0.0.1:8080'
 PUBL_API = '127.0.0.1:5000'
@@ -19,29 +23,6 @@ def favicon():
     return fl.send_from_directory(os.path.join(app.root_path, 'static'),
                                   'favicon.ico',
                                   mimetype='image/vnd.microsoft.icon')
-
-
-# TEST ><><><><
-SMALL, BIG = 'small', 'big'
-
-
-class Autor:
-    id = 1
-    name = 'Моккий Кифович'
-    photo = 'static/users/1/cloud/User_phoenix.jpg'
-    password = 'hoorey!'
-    email = 'mokk@mail.ru'
-    path = 'static/users/1'
-    is_authenticated = True
-
-
-class flask_login:
-    current_user = Autor
-
-
-class CurrentSet:
-    menu_mode = SMALL
-# TEST ><><><>< ^
 
 
 class TempPubl:
@@ -87,6 +68,7 @@ def publications():
                            os=os, current_user=flask_login.current_user)
 
 
+@flask_login.login_required
 @app.route('/make_publication/<path:filename>',methods=['GET', 'POST'])
 def make_publication(filename):
     filename = filename.replace('&', '/')
@@ -122,30 +104,3 @@ def make_publication(filename):
                            title='Создать публикацию', navigation=nav, os=os,
                            publication=publ,
                            current_user=flask_login.current_user, form=form)
-
-
-# TEST ><><><><
-@app.route('/cloud', methods=['GET', 'POST'])
-@app.route('/cloud/', methods=['GET', 'POST'])
-@app.route('/cloud/<path:current_dir>', methods=['GET', 'POST'])
-def cloud(current_dir=''):
-    nav = [{'href': '/', 'title': 'Главная'},
-           {'href': '/publications', 'title': 'Публикации'},
-           {'href': '/settings', 'title': 'Настройки'},
-           {'href': '/logout', 'title': 'Выход'}]
-    current_dir = 'static/users/1/cloud/' + current_dir.replace('&', '/')
-    if request.method == 'POST':
-        if 'change-menu' in request.form.keys():
-            CurrentSet.menu_mode = SMALL if CurrentSet.menu_mode == BIG\
-                else BIG
-    return render_template('Account.html', title='Облако',
-                           navigation=nav, menu=CurrentSet.menu_mode,
-                           current_dir=current_dir, os=os,
-                           sort_function=sort_function,
-                           current_user=flask_login.current_user)
-# TEST ><><><>< ^
-
-
-if __name__ == '__main__':
-    app.run(port=8080, host='127.0.0.1')
-    #app.run(port=int(SERVER.split(':')[1]), host=SERVER.split(':')[0])

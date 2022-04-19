@@ -9,7 +9,6 @@ from helpers import make_publ_file
 app = fl.Flask(__name__)
 api = Api(app)
 app.config['SECRET_KEY'] = 'super_Seсret_key_of_devEl0pers'
-SERVER = '127.0.0.1:8080'
 
 publ_parser = reqparse.RequestParser()
 publ_parser.add_argument('description')
@@ -67,4 +66,4 @@ class PublApi(Resource):
 api.add_resource(PublApi, '/publ_api/<search_string>', '/publ_api')
 if __name__ == '__main__':
     d_s.global_init('db/cloud.sqlite')
-    app.run(port=int(SERVER.split(':')[1]), host=SERVER.split(':')[0])
+    app.run(port=5000, host='127.0.0.1')
