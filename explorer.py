@@ -12,7 +12,7 @@ class Explorer:
 
     def copy(self, name):
         if not self.boofer:
-            return False
+            return
         onlyname = name.split('/')[-1]
         try:
             self.clean_boofer()
@@ -21,8 +21,7 @@ class Explorer:
             else:
                 shutil.copy(name, self.boofer + '/' + onlyname)
         except Exception as ex:
-             return self.make_error('copy', ex)
-        return True
+             self.make_error('copy', ex)
 
     def delete(self, name):
         try:
@@ -31,28 +30,28 @@ class Explorer:
             else:
                 os.remove(name)
         except Exception as ex:
-            return self.make_error('deletion', ex)
-        return True
+            self.make_error('deletion', ex)
 
     def cut(self, name):
         self.copy(name)
         self.delete(name)
-        return True
 
     def paste(self, dirname):
         old = self.get_file_name()
         if not old or not self.boofer:
-            return False
+            return
         new = dirname + '/' + old.split('/')[-1]
         try:
-            shutil.copy(old, new)
+            if os.path.isdir(old):
+                shutil.copytree(old, new)
+            else:
+                shutil.copy(old, new)
         except Exception as ex:
-            return self.make_error('pasting', ex)
-        return True
+            self.make_error('pasting', ex)
 
     def get_file_name(self):
         list_ = os.listdir(self.boofer)
-        return None if not list_ else list_[0]
+        return None if not list_ else self.boofer + '/' + list_[0]
 
     def make_error(self, where, ex):
         if not os.path.exists('logs'):
@@ -60,7 +59,6 @@ class Explorer:
         with open(self.get_error().format(where), mode='w',
                   encoding='utf8') as f:
             f.write(str(ex))
-        return False
 
     def get_error(self):
         return datetime.datetime.now().strftime('logs/%H_%M_%S-%d_%m_%Y_\

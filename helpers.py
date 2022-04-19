@@ -25,6 +25,7 @@ class CurrentSettings:
         self.out_of_root = False
         self.string = ''
         self.sort_func = alpha_sorter
+        self.reverse_files = False
         self.current_index = 0
         self.files_num = 5
 
@@ -58,40 +59,27 @@ def make_publ_file(filename):
     return user_dir + '/public/' + new_name
 
 
-def sort_function(list_, cur_dir):
-    key_sort = lambda x: x
-    return sorted(list(filter(lambda f: os.path.isdir('/'.join([cur_dir,
-                                                                f])), list_)),
-                  key=key_sort) +\
-           sorted(list(filter(lambda f: os.path.isfile('/'.join([cur_dir,
-                                                                 f])), list_)),
-                  key=key_sort)
+def alpha_sorter(cur_dir, string, reverse=False):
+    return sort_func(cur_dir, lambda x: x, string, reverse)
 
 
-def reverse_dec(sorter):
-    def reverser(*args, **kwargs):
-        return sorter(*args, **kwargs)[::-1]
-
-    return reverser
-
-
-def alpha_sorter(list_, cur_dir, string):
-    key_sort = lambda x: x
-    return sort_func(list_, cur_dir, key_sort, string)
+def time_sorter(cur_dir, string, reverse=False):
+    return sort_func(cur_dir, lambda f: os.path.getmtime('/'.join([cur_dir,
+                                                                   f])),
+                     string, reverse)
 
 
-def time_sorter(list_, cur_dir, string):
-    key_sort = lambda f: os.path.getmtime('/'.join([cur_dir, f]))
-    return sort_func(list_, cur_dir, key_sort, string)
-
-
-def sort_func(list_, cur_dir, key_sort, string):
-    return sorted(list(filter(lambda f: os.path.isdir('/'.join([cur_dir, f]))\
-                                        and string in f.lower(), list_)),
-                  key=key_sort) +\
-           sorted(list(filter(lambda f: os.path.isfile('/'.join([cur_dir, f]))\
-                                        and string in f.lower(), list_)),
-                  key=key_sort)
+def sort_func(cur_dir, key_sort, string, reverse=False):
+    func = reversed if reverse else return_
+    list_ = os.listdir(cur_dir)
+    return list(func(sorted(filter(lambda f: os.path.isdir('/'.join([cur_dir,
+                                                                     f]))\
+                                             and string in f.lower(), list_),
+                       key=key_sort))) +\
+           list(func(sorted(filter(lambda f: os.path.isfile('/'.join([cur_dir,
+                                                                      f]))\
+                                             and string in f.lower(), list_),
+                       key=key_sort)))
 
 
 def format_name(name):
@@ -99,3 +87,7 @@ def format_name(name):
         name = name.replace('//', '/')
     name = name[:-1] if name.endswith('/') else name
     return name
+
+
+def return_(arg):
+    return arg

@@ -11,7 +11,7 @@ import data.db_session as db_session
 from data.users import User
 from publications import app as publ_blueprint
 from helpers import Errors, CurrentSettings, alpha_sorter, time_sorter,\
-    reverse_dec, BAD_DIR_CHARS, format_name
+    BAD_DIR_CHARS, format_name
 from explorer import Explorer
 
 app = fl.Flask(__name__)
@@ -77,7 +77,14 @@ def cloud(current_dir=''):
         elif 'filesubmit' in request.form.keys():
             files = request.files.getlist('file')
             for file in files:
-                file.save(current_dir + '/' + file.filename.replace(' ', '_'))
+                filename = '/' + file.filename.replace(' ', '_')
+                filetype = filename.split('.')[-1]
+                filename = filename[:-len(filetype)]
+                i = 0
+                while os.path.exists(current_dir + filename):
+                    filename = filename + '_' + str(i)
+                    i += 1
+                file.save(current_dir + filename + '.' + filetype)
         elif 'search_string' in request.form.keys():
             cloud_set.string = request.form['search_string'].lower()
             cloud_set.current_index = 0
@@ -87,11 +94,13 @@ def cloud(current_dir=''):
             else:
                 func = time_sorter
             if request.form.get('reverse', False):
-                func = reverse_dec(func)
+                cloud_set.reverse_files = True
+            else:
+                cloud_set.reverse_files = False
             cloud_set.sort_func = func
         elif 'next' in request.form.keys():
-            n = len(cloud_set.sort_func(os.listdir(current_dir), current_dir,
-                                        cloud_set.string))
+            n = len(cloud_set.sort_func(current_dir, cloud_set.string,
+                                        cloud_set.reverse_files))
             if cloud_set.current_index + cloud_set.files_num < n:
                 cloud_set.current_index += cloud_set.files_num
         elif 'prev' in request.form.keys():
@@ -102,8 +111,13 @@ def cloud(current_dir=''):
             for key in request.form.keys():
                 if key.startswith('copy-file-'):
                     name = key.split('-')[-1][3:] # Убираем ../
-                    success = exp.copy(name)
-                    print(success)
+                    exp.copy(name)
+                if key.startswith('cut-file-'):
+                    name = key.split('-')[-1][3:] # Убираем ../
+                    exp.cut(name)
+                if key == 'paste_files':
+                    exp.paste(current_dir)
+                    print('pasted')
     return render_template('Account.html', title='Облако',
                            navigation=nav, settings=cloud_set, os=os,
                            current_user=fl_log.current_user)
