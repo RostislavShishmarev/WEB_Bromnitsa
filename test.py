@@ -84,6 +84,18 @@ def cloud(current_dir=''):
         if 'change-menu' in request.form.keys():
             CurrentSet.menu_mode = SMALL if CurrentSet.menu_mode == BIG\
                 else BIG
+        else:
+            if 'cut-file' in request.form.keys():
+                shutil.rmtree(user.path + '/boofer')
+                os.mkdir(user.path + '/boofer')
+                shutil.copy(user.path + '/cloud/' + request.form['cut-files'],
+                            user.path + '/boofer/' + request.form['cut-files'])
+                os.remove(user.path + '/cloud/' + request.form['cut-files'])
+            if 'copy-file' in request.form.keys():
+                shutil.rmtree(user.path + '/boofer')
+                os.mkdir(user.path + '/boofer')
+                shutil.copy(user.path + '/cloud/' + request.form['copy-files'],
+                            user.path + '/boofer/' + request.form['copy-files'])
         return render_template('Account.html', title='Облако',
                                navigation=nav, menu=CurrentSet.menu_mode,
                                current_dir=current_dir, os=os,
