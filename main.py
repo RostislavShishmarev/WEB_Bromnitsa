@@ -2,14 +2,17 @@ import os
 import shutil
 import flask as fl
 import flask_login as fl_log
+from flask_login import login_user
 from flask import render_template, request, redirect, send_from_directory
 from forms.forms import RegisterForm, LoginForm, SettingsForm,\
     ChangePasswordForm, MakeDirForm, RenameFileForm, DeleteFileForm
 
 import data.db_session as db_session
 from data.users import User
+from publications import app as publ_blueprint
 from helpers import Errors, CurrentSettings, alpha_sorter, time_sorter,\
     reverse_dec, BAD_DIR_CHARS, format_name
+from explorer import Explorer
 
 app = fl.Flask(__name__)
 app.config['SECRET_KEY'] = 'super_Seсret_key_of_devEl0pers'
@@ -95,10 +98,12 @@ def cloud(current_dir=''):
             if cloud_set.current_index - cloud_set.files_num >= 0:
                 cloud_set.current_index -= cloud_set.files_num
         else:
+            exp = Explorer(fl_log.current_user)
             for key in request.form.keys():
                 if key.startswith('copy-file-'):
-                    name = key.split('-')[-1]
-                    print(name)
+                    name = key.split('-')[-1][3:] # Убираем ../
+                    success = exp.copy(name)
+                    print(success)
     return render_template('Account.html', title='Облако',
                            navigation=nav, settings=cloud_set, os=os,
                            current_user=fl_log.current_user)
@@ -144,7 +149,7 @@ def register():
             photo.save(user.photo)
 
         db_sess.commit()
-        fl_log.login_user(user)
+        login_user(user)
         return redirect('/')
     return render_template('Form.html', title='Регистрация', navigation=nav,
                            form=form, current_user=fl_log.current_user)
@@ -169,7 +174,7 @@ def login():
             return render_template('Form.html', title='Авторизация',
                                    navigation=nav, form=form,
                                    current_user=fl_log.current_user)
-        fl_log.login_user(user)
+        login_user(user)
         return redirect('/')
     return render_template('Form.html', title='Авторизация', navigation=nav,
                            form=form, current_user=fl_log.current_user)
@@ -200,7 +205,7 @@ def settings():
         user.email = form.email.data
         db_sess.commit()
         fl_log.logout_user()
-        fl_log.login_user(user)
+        login_user(user)
     form.email.data = fl_log.current_user.email
     form.name.data = fl_log.current_user.username
     return render_template('Settings.html', title='Настройки', navigation=nav,
@@ -333,4 +338,5 @@ def delete_file(filename):
 
 if __name__ == '__main__':
     db_session.global_init("db/cloud.sqlite")
+    app.register_blueprint(publ_blueprint)
     app.run(port=8080, host='127.0.0.1')
