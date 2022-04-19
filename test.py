@@ -68,6 +68,7 @@ def main_page():
 @app.route('/cloud', methods=['GET', 'POST'])
 @app.route('/cloud/', methods=['GET', 'POST'])
 @app.route('/cloud/<path:current_dir>', methods=['GET', 'POST'])
+@flask_login.login_required
 def cloud(current_dir=''):
     nav = [{'href': '/', 'title': 'Главная'},
            {'href': '/publications', 'title': 'Публикации'},
@@ -130,6 +131,7 @@ def register():
         os.mkdir(user.path + '/cloud')
         os.mkdir(user.path + '/public')
         os.mkdir(user.path + '/user_files')
+        os.mkdir(user.path + '/boofer')
         f = form.photo.data
         if f:
             photoname = user.path + '/user_files/photo.' +\
@@ -172,6 +174,7 @@ def logout():
 
 
 @app.route('/settings', methods=['GET', 'POST'])
+@flask_login.login_required
 def settings():
     form = SettingsForm()
     nav = [{'href': '/', 'title': 'Главная'},
@@ -295,7 +298,7 @@ def delete_file(filename):
 @app.route('/copy_file/<path:filename>', methods=['GET', 'POST'])
 def copy_file(filename):
     filename = filename.replace('&', '/')
-    form = DeleteFileForm()
+    form = CopyForm()
     nav = [{'href': '/', 'title': 'Главная'},
            {'href': '/publications', 'title': 'Публикации'},
            {'href': '/cloud', 'title': 'Облако'},
@@ -304,18 +307,18 @@ def copy_file(filename):
     db_sess = db_session.create_session()
     if current_user.is_authenticated and form.validate_on_submit():
         user = db_sess.query(User).filter(User.email == current_user.email).first()
-        shutil.copy(user.path + '/cloud/' + filename, user.path + '/cloud/' + filename)
+        shutil.copy(user.path + '/cloud/' + filename, user.path + '/boofer/' + filename)
         return redirect('/cloud')
-    return render_template('Form.html',
+    '''return render_template('Form.html',
                            title='Копировать файл ' + filename.split('/')[-1],
                            navigation=nav,
-                           form=form, current_user=flask_login.current_user)
+                           form=form, current_user=flask_login.current_user)'''
 
 
 @app.route('/cut_file/<path:filename>', methods=['GET', 'POST'])
 def cut_file(filename):
     filename = filename.replace('&', '/')
-    form = DeleteFileForm()
+    form = CutFileForm()
     nav = [{'href': '/', 'title': 'Главная'},
            {'href': '/publications', 'title': 'Публикации'},
            {'href': '/cloud', 'title': 'Облако'},
@@ -324,7 +327,7 @@ def cut_file(filename):
     db_sess = db_session.create_session()
     if current_user.is_authenticated and form.validate_on_submit():
         user = db_sess.query(User).filter(User.email == current_user.email).first()
-        shutil.copy(user.path + '/cloud/' + filename, user.path + '/cloud/' + filename)
+        shutil.copy(user.path + '/cloud/' + filename, user.path + '/boofer/' + filename)
         os.remove(user.path + '/cloud/' + filename)
         return redirect('/cloud')
     return render_template('Form.html',
