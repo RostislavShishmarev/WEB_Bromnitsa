@@ -2,7 +2,7 @@ import os
 import shutil
 
 IMAGE_TYPES = ('jpg', 'jpeg', 'png', 'svg', 'webp', 'gif', 'ico')
-BAD_DIR_CHARS = {'.', ' ', '/', '\\', '&', '?', '@', '"', "'"}
+BAD_CHARS = {' ', '/', '\\', '&', '?', '@', '"', "'", '(', ')'}
 
 
 class Errors:
@@ -50,6 +50,7 @@ class Saver:
 
 def make_publ_file(filename):
     user_dir, name = filename.split('/cloud/')
+    name = name.split('/')[-1]
     new_name, ind = name, 2
     if os.path.exists(user_dir + '/public/' + new_name):
         new_name = name.split('.')[-2] + '_' + str(ind) + '.' +\
@@ -91,3 +92,16 @@ def format_name(name):
 
 def return_(arg):
     return arg
+
+def make_file(dir_, file):
+    name = file.filename
+    for char in BAD_CHARS:
+        name = name.replace(char, '_')
+    filename = '/' + name
+    filetype = filename.split('.')[-1]
+    filename = filename[:-len(filetype)]
+    i = 0
+    while os.path.exists(dir_ + filename):
+        filename = filename + '_' + str(i)
+        i += 1
+    file.save(dir_ + filename + '.' + filetype)

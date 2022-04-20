@@ -68,8 +68,8 @@ def publications():
                            os=os, current_user=flask_login.current_user)
 
 
-@flask_login.login_required
 @app.route('/make_publication/<path:filename>',methods=['GET', 'POST'])
+@flask_login.login_required
 def make_publication(filename):
     filename = filename.replace('&', '/')
     nav = [{'href': '/', 'title': 'Главная'},

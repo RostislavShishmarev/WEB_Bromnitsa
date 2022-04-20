@@ -11,7 +11,7 @@ import data.db_session as db_session
 from data.users import User
 from publications import app as publ_blueprint
 from helpers import Errors, CurrentSettings, alpha_sorter, time_sorter,\
-    BAD_DIR_CHARS, format_name
+    BAD_CHARS, format_name, make_file
 from explorer import Explorer
 
 app = fl.Flask(__name__)
@@ -30,8 +30,8 @@ def load_user(user_id):
     return db_sess.query(User).get(user_id)
 
 
-@fl_log.login_required
 @app.route('/logout')
+@fl_log.login_required
 def logout():
     global cloud_set
     fl_log.logout_user()
@@ -60,10 +60,10 @@ def main_page():
                            current_user=fl_log.current_user)
 
 
-@fl_log.login_required
 @app.route('/cloud', methods=['GET', 'POST'])
 @app.route('/cloud/', methods=['GET', 'POST'])
 @app.route('/cloud/<path:current_dir>', methods=['GET', 'POST'])
+@fl_log.login_required
 def cloud(current_dir=''):
     nav = [{'href': '/', 'title': 'Главная'},
            {'href': '/publications', 'title': 'Публикации'},
@@ -77,14 +77,7 @@ def cloud(current_dir=''):
         elif 'filesubmit' in request.form.keys():
             files = request.files.getlist('file')
             for file in files:
-                filename = '/' + file.filename.replace(' ', '_')
-                filetype = filename.split('.')[-1]
-                filename = filename[:-len(filetype)]
-                i = 0
-                while os.path.exists(current_dir + filename):
-                    filename = filename + '_' + str(i)
-                    i += 1
-                file.save(current_dir + filename + '.' + filetype)
+                make_file(current_dir, file)
         elif 'search_string' in request.form.keys():
             cloud_set.string = request.form['search_string'].lower()
             cloud_set.current_index = 0
@@ -194,8 +187,8 @@ def login():
                            form=form, current_user=fl_log.current_user)
 
 
-@fl_log.login_required
 @app.route('/settings', methods=['GET', 'POST'])
+@fl_log.login_required
 def settings():
     form = SettingsForm()
     nav = [{'href': '/', 'title': 'Главная'},
@@ -226,8 +219,8 @@ def settings():
                            form=form, current_user=fl_log.current_user)
 
 
-@fl_log.login_required
 @app.route('/change_password', methods=['GET', 'POST'])
+@fl_log.login_required
 def change_password():
     form = ChangePasswordForm()
     nav = [{'href': '/', 'title': 'Главная'},
@@ -251,8 +244,8 @@ def change_password():
                            form=form, current_user=fl_log.current_user)
 
 
-@fl_log.login_required
 @app.route('/add_dir', methods=['GET', 'POST'])
+@fl_log.login_required
 def add_dir():
     form = MakeDirForm()
     nav = [{'href': '/', 'title': 'Главная'},
@@ -264,7 +257,7 @@ def add_dir():
         dirname = form.name.data
         full = cloud_set.current_dir + '/' + dirname
         # Сначала именно символы
-        incor_symb = BAD_DIR_CHARS & set(dirname)
+        incor_symb = BAD_CHARS & set(dirname)
         if incor_symb:
             form.name.errors.append(Errors.BAD_CHAR + '"' +\
                                     '", "'.join(incor_symb) + '"')
@@ -283,8 +276,8 @@ def add_dir():
                            form=form, current_user=fl_log.current_user)
 
 
-@fl_log.login_required
 @app.route('/rename_file/<path:filename>', methods=['GET', 'POST'])
+@fl_log.login_required
 def rename_file(filename):
     filepath = filename.replace('&', '/')
     filename = filepath.split('/')[-1]
@@ -303,16 +296,16 @@ def rename_file(filename):
         if os.path.isfile(full):
             new_full += filetype
         # Сначала именно символы
-        incor_symb = BAD_DIR_CHARS & set(new_name)
+        incor_symb = BAD_CHARS & set(new_name)
         if incor_symb:
             form.name.errors.append(Errors.BAD_CHAR + '"' +\
                                     '", "'.join(incor_symb) + '"')
-            return render_template('Form.html', title='Переименовать файл',
+            return render_template('Form.html', title='Переименование',
                                    navigation=nav, form=form,
                                    current_user=fl_log.current_user)
         if os.path.exists(new_full) and full != new_full:
             form.name.errors.append(Errors.FILE_EXISTS)
-            return render_template('Form.html', title='Переименовать файл',
+            return render_template('Form.html', title='Переименование',
                                    navigation=nav, form=form,
                                    current_user=fl_log.current_user)
         os.rename(full, new_full)
@@ -320,13 +313,13 @@ def rename_file(filename):
                         filepath[:-len(filename) - 1].replace('/', '&'))
     form.name.data = filename[:-len(filetype)] if os.path.isfile(full)\
         else filename
-    return render_template('Form.html', title='Переименовать файл',
+    return render_template('Form.html', title='Переименование',
                            navigation=nav, form=form,
                            current_user=fl_log.current_user)
 
 
-@fl_log.login_required
 @app.route('/delete_file/<path:filename>', methods=['GET', 'POST'])
+@fl_log.login_required
 def delete_file(filename):
     filepath = filename.replace('&', '/')
     filename = filepath.split('/')[-1]
@@ -345,7 +338,7 @@ def delete_file(filename):
         return redirect('/cloud/' +\
                         filepath[:-len(filename) - 1].replace('/', '&'))
     return render_template('Form.html',
-                           title='Удалить файл ' + filename.split('/')[-1],
+                           title='Удалить ' + filename.split('/')[-1],
                            navigation=nav,
                            form=form, current_user=fl_log.current_user)
 

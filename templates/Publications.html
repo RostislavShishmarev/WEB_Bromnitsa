@@ -45,8 +45,8 @@
     {% for new in publications %}
     <div class="publ-card">
       <div class="publ-card-title">
-        <div class="publ-card-title-text">{{new['file_name'].split('/')[-1]}}</div>
-        <div class="publ-card-user-block">
+        <div class="publ-card-title-text publ-card-block">{{new['file_name'].split('/')[-1]}}</div>
+        <div class="publ-card-user-block publ-card-block">
           <div class="publ-card-user-name">{{new['user_name']}}</div>
           {% set photo_name = '../' + new['user_photo'] %}
           <div
@@ -56,7 +56,7 @@
         </div>
       </div>
       <div class="publ-card-main">
-        <div class="publ-card-file">
+        <div class="publ-card-file publ-card-block">
           {% set filename = '../' + new['file_name'] %}
           {% if filename.split('.')[-1] in ['mp3', 'wav', 'ogg'] %}
           <div class="file-card-prevision">

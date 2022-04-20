@@ -81,6 +81,10 @@
   overflow: auto;
 }
 
+.publ-card-block {
+  margin: 5px;
+}
+
 .publ-card-title {
   display: flex;
   justify-content: space-between;
