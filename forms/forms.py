@@ -3,14 +3,14 @@ from wtforms import PasswordField, StringField, \
     SubmitField, EmailField, BooleanField, FileField, TextAreaField
 from wtforms.validators import DataRequired
 from flask_wtf.file import FileAllowed
+from helpers import IMAGE_TYPES
 
 
 class RegisterForm(FlaskForm):
     email = EmailField('Электронная почта', validators=[DataRequired()])
     name = StringField('Имя', validators=[DataRequired()])
     photo = FileField('Аватар',
-                      validators=[FileAllowed(['jpg', 'jpeg', 'png', 'svg',
-                                               'webp', 'gif', 'ico'],
+                      validators=[FileAllowed(IMAGE_TYPES,
                                               'Неверный формат файла.'), ])
     password = PasswordField('Пароль', validators=[DataRequired()])
     password_again = PasswordField('Повторите пароль',
@@ -27,8 +27,7 @@ class LoginForm(FlaskForm):
 class SettingsForm(FlaskForm):
     email = EmailField('Электронная почта', validators=[DataRequired()])
     name = StringField('Имя', validators=[DataRequired()])
-    photo = FileField('', validators=[FileAllowed(['jpg', 'jpeg', 'png', 'svg',
-                                                   'webp', 'gif', 'ico'],
+    photo = FileField('', validators=[FileAllowed(IMAGE_TYPES,
                                                   'Неверный формат файла.'), ])
     submit = SubmitField('Применить')
 

@@ -68,8 +68,8 @@ def publications():
                            os=os, current_user=flask_login.current_user)
 
 
-@flask_login.login_required
 @app.route('/make_publication/<path:filename>',methods=['GET', 'POST'])
+@flask_login.login_required
 def make_publication(filename):
     filename = filename.replace('&', '/')
     nav = [{'href': '/', 'title': 'Главная'},
@@ -87,7 +87,7 @@ def make_publication(filename):
         if 'public' in request.form.keys():
             publ_dict = {
                 'description': publ_maker.description,
-                'filename': flask_login.current_user.path + '/cloud' +\
+                'filename': flask_login.current_user.path + '/cloud/' +\
                             filename,
                 'user_id': flask_login.current_user.id,
             }

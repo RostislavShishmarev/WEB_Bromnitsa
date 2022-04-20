@@ -11,6 +11,8 @@ import data.db_session as db_session
 from data.users import User
 from forms.forms import RegisterForm, LoginForm, SettingsForm,\
     ChangePasswordForm, MakeDirForm, RenameFileForm, DeleteFileForm
+from helpers import CurrentSettings, Errors, BAD_CHARS, make_file,\
+    alpha_sorter, time_sorter
 
 from publications import app as publ_blueprint
 
@@ -19,6 +21,7 @@ app.config['SECRET_KEY'] = 'super_Seсret_key_of_devEl0pers'
 app.config['JSON_AS_ASCII'] = False
 login_manager = LoginManager()
 login_manager.init_app(app)
+cloud_set = CurrentSettings()
 
 SMALL, BIG = 'small', 'big'
 USER_PHOTO = 'static/img/No_user.jpg'
@@ -74,40 +77,54 @@ def cloud(current_dir=''):
            {'href': '/publications', 'title': 'Публикации'},
            {'href': '/settings', 'title': 'Настройки'},
            {'href': '/logout', 'title': 'Выход'}]
-    db_sess = db_session.create_session()
-    # if current_user.is_authenticated:
-    # Если мы в облаке, то мы уже авторизованы.
-    # Не забудь добавить @flask_login.login_required на такие страницы.
-    user = db_sess.query(User).filter(User.email == current_user.email).first()
-    current_dir = user.path + '/cloud/' + current_dir.replace('&', '/')
+    current_dir = cloud_set.update_dir(current_dir.replace('&', '/'),
+                                       flask_login.current_user.path)
     if request.method == 'POST':
         if 'change-menu' in request.form.keys():
-            CurrentSet.menu_mode = SMALL if CurrentSet.menu_mode == BIG\
-                else BIG
+            cloud_set.change_mode()
+        elif 'filesubmit' in request.form.keys():
+            files = request.files.getlist('file')
+            for file in files:
+                make_file(current_dir, file)
+        elif 'search_string' in request.form.keys():
+            cloud_set.string = request.form['search_string'].lower()
+            cloud_set.current_index = 0
+        elif 'sort_selector' in request.form.keys():
+            if 'По названию' in request.form['sort_selector']:
+                func = alpha_sorter
+            else:
+                func = time_sorter
+            if request.form.get('reverse', False):
+                cloud_set.reverse_files = True
+            else:
+                cloud_set.reverse_files = False
+            cloud_set.sort_func = func
+        elif 'next' in request.form.keys():
+            n = len(cloud_set.sort_func(current_dir, cloud_set.string,
+                                        cloud_set.reverse_files))
+            if cloud_set.current_index + cloud_set.files_num < n:
+                cloud_set.current_index += cloud_set.files_num
+        elif 'prev' in request.form.keys():
+            if cloud_set.current_index - cloud_set.files_num >= 0:
+                cloud_set.current_index -= cloud_set.files_num
         else:
+            path = flask_login.current_user.path
             if 'cut-file' in request.form.keys():
-                shutil.rmtree(user.path + '/boofer')
-                os.mkdir(user.path + '/boofer')
-                shutil.copy(user.path + '/cloud/' + request.form['cut-files'],
-                            user.path + '/boofer/' + request.form['cut-files'])
-                os.remove(user.path + '/cloud/' + request.form['cut-files'])
+                shutil.rmtree(path + '/boofer')
+                os.mkdir(path + '/boofer')
+                filename = request.form['cut-file'].replace('&', '/')
+                shutil.copy(path + '/cloud/' + filename,
+                            path + '/boofer/' + filename)
+                os.remove(path + '/cloud/' + filename)
             if 'copy-file' in request.form.keys():
-                shutil.rmtree(user.path + '/boofer')
-                os.mkdir(user.path + '/boofer')
-                shutil.copy(user.path + '/cloud/' + request.form['copy-files'],
-                            user.path + '/boofer/' + request.form['copy-files'])
-        return render_template('Account.html', title='Облако',
-                               navigation=nav, menu=CurrentSet.menu_mode,
-                               current_dir=current_dir, os=os,
-                               sort_function=sort_function,
-                               current_user=flask_login.current_user,
-                               current_index=0, files_num=6)
+                shutil.rmtree(path + '/boofer')
+                os.mkdir(path + '/boofer')
+                filename = request.form['copy-file'].replace('&', '/')
+                shutil.copy(path + '/cloud/' + filename,
+                            path + '/boofer/' + filename)
     return render_template('Account.html', title='Облако',
-                           navigation=nav, menu=CurrentSet.menu_mode,
-                           current_dir=current_dir, os=os,
-                           sort_function=sort_function,
-                           current_user=flask_login.current_user,
-                           current_index=0, files_num=6)
+                           navigation=nav, settings=cloud_set, os=os,
+                           current_user=flask_login.current_user)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -179,9 +196,11 @@ def login():
 
 
 @app.route('/logout')
-@login_required
+@flask_login.login_required
 def logout():
-    logout_user()
+    global cloud_set
+    flask_login.logout_user()
+    cloud_set = CurrentSettings()
     return redirect("/")
 
 
@@ -243,6 +262,7 @@ def change_password():
 
 
 @app.route('/add_dir', methods=['GET', 'POST'])
+@flask_login.login_required
 def add_dir():
     form = MakeDirForm()
     nav = [{'href': '/', 'title': 'Главная'},
@@ -250,11 +270,25 @@ def add_dir():
            {'href': '/cloud', 'title': 'Облако'},
            {'href': '/settings', 'title': 'Настройки'},
            {'href': '/logout', 'title': 'Выход'}]
-    db_sess = db_session.create_session()
-    if current_user.is_authenticated and form.validate_on_submit():
-        user = db_sess.query(User).filter(User.email == current_user.email).first()
-        os.mkdir(user.path + '/cloud/' + form.name.data)
-        return redirect('/cloud')
+    if form.validate_on_submit():
+        dirname = form.name.data
+        full = cloud_set.current_dir + '/' + dirname
+        # Сначала именно символы
+        incor_symb = BAD_CHARS & set(dirname)
+        if incor_symb:
+            form.name.errors.append(Errors.BAD_CHAR + '"' +\
+                                    '", "'.join(incor_symb) + '"')
+            return render_template('Form.html', title='Создать папку',
+                                   navigation=nav, form=form,
+                                   current_user=flask_login.current_user)
+        if os.path.exists(full):
+            form.name.errors.append(Errors.DIR_EXIST)
+            return render_template('Form.html', title='Создать папку',
+                                   navigation=nav, form=form,
+                                   current_user=flask_login.current_user)
+        os.mkdir(full)
+        return redirect('/cloud/' +\
+                        cloud_set.cur_dir_from_user.replace('/', '&'))
     return render_template('Form.html', title='Создать папку', navigation=nav,
                            form=form, current_user=flask_login.current_user)
 

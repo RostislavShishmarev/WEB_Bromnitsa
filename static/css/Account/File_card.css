@@ -76,6 +76,7 @@
 .file-card-menu-list {
   display: none;
   position: absolute;
+  margin-left: -100px;
 }
 
 .file-card-menu {
@@ -102,6 +103,8 @@
   position: relative;
   text-align: center;
   margin-left: auto;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .file-card-menu-el {
@@ -117,6 +120,10 @@
   padding: 3px;
   min-width: 124px;
   margin-top: 2px;
+}
+
+.file-card-menu-el-form {
+  min-width: 130px;
 }
 
 .file-card-menu-el:hover {

@@ -2,15 +2,16 @@
 {% block content %}
 <link rel="stylesheet" href="../static/css/Account/Account.css" />
     <link rel="stylesheet" href="../static/css/Account/File_card.css" />
-    {% if menu == 'big' %}
+    {% if settings.menu_mode == 'big' %}
     <link rel="stylesheet" href="../static/css/Account/Big_left_menu.css" />
     <link rel="stylesheet" href="../static/css/Form.css" />
     {% else %}
     <link rel="stylesheet" href="../static/css/Account/Small_left_menu.css" />
     {% endif %}
     <section class="page">
+      {% set len_of_user_dir = settings.current_dir.split('cloud')[0].split('/')|length + 1 %}
       <div class="cloud br-container">
-        {% if menu == 'big' %}
+        {% if settings.menu_mode == 'big' %}
         <div class="left-menu Block1">
           <div class="menu-container">
             <div class="up-menu">
@@ -35,6 +36,7 @@
                     class="search-string"
                     size="1"
                     name="search_string"
+                    value="{{settings.string}}"
                   />
                   <input type="submit" value="🔍" class="user-button" />
                 </div>
@@ -70,7 +72,6 @@
                   <input
                     name="file"
                     type="file"
-                    name="file"
                     id="input__file"
                     class="input input__file"
                     multiple
@@ -80,7 +81,7 @@
                     <span class="add-text input__file-button-text"
                       >Добавить файлы</span
                     >
-                    <input type="submit" class="submit-file-button" value="✓" />
+                    <input name="filesubmit" type="submit" class="submit-file-button" value="✓" />
                   </label>
                 </div>
               </div>
@@ -100,8 +101,11 @@
             </form>
           </div>
           <div class="small-menu-block">
+            <a class="user-button small-menu-link" href="/{{'cloud/' + settings.current_dir.split('/')[len_of_user_dir - 1:-1]|join('&') }}">..</a>
+          </div>
+          <div class="small-menu-block">
             <form method="POST">
-              <input name="paste-files" class="none" />
+              <input name="paste_files" class="none" />
               <input
                 type="submit"
                 value="⎀"
@@ -123,7 +127,11 @@
               />
             </form>
           </div>
-          <div class="nav-block"><p class="dir-text">{{ current_dir.split('/')[-1] }}</p></div>
+          {% set dir_name = '' %}
+          {% if settings.out_of_root %}
+          {% set dir_name = settings.current_dir.split('/')[-1]  %}
+          {% endif %}
+          <div class="nav-block"><p class="dir-text">{{ dir_name }}</p></div>
           <div class="nav-block">
             <form method="POST">
               <input name="next" class="none" />
@@ -136,13 +144,8 @@
           </div>
         </div>
         <div class="dirs-placeholder">
-          {% set back = [] %}
-          {% if current_dir.split('/')[-1] %}
-          {% set back = back + ['..', ] %}
-          {% endif %}
-          {% set len_of_user_dir = current_dir.split('cloud')[0].split('/')|length + 1 %}
-          {% for name in back + sort_function(os.listdir(current_dir), current_dir)[current_index:current_index + files_num] %}
-          {% set way = '/'.join(['..', current_dir, name]) %}
+          {% for name in settings.sort_func(settings.current_dir, settings.string, settings.reverse_files)[settings.current_index:settings.current_index + settings.files_num] %}
+          {% set way = '/'.join(['..', settings.current_dir, name]) %}
           <div class="file-card">
             <div class="file-card-main">
               {% if name.split('.')[-1] in ['mp3', 'wav', 'ogg'] %}
@@ -190,12 +193,7 @@
               {% endif %}
               <div class="file-card-title">{{ name }}</div>
             </div>
-            {% if name == '..' %}
-            <div class="file-card-functions" style="justify-content: flex-end;">
-            {% set class_ = 'none' %}
-            {% else %}
             <div class="file-card-functions">
-            {% endif %}
               <div class="file-card-user-list {{class_}}">
                 <ul class="file-card-user-list-el">
                   <li class="file-card-menu">
@@ -219,21 +217,21 @@
                       </div>
                       <div class="file-card-menu-el-place">
                         <form method="POST">
-                          <input name="copy-file-{{ way }}" class="none" />
+                          <input name="copy-file" value="{{way}}" class="none" />
                           <input
                             type="submit"
                             value="Копировать"
-                            class="file-card-menu-el"
+                            class="file-card-menu-el file-card-menu-el-form"
                           />
                         </form>
                       </div>
                       <div class="file-card-menu-el-place">
                         <form method="POST">
-                          <input name="cut-file-{{ way }}" class="none" />
+                          <input name="cut-file" value="{{way}}" class="none" />
                           <input
                             type="submit"
                             value="Вырезать"
-                            class="file-card-menu-el"
+                            class="file-card-menu-el file-card-menu-el-form"
                           />
                         </form>
                       </div>
@@ -252,8 +250,6 @@
               <div>
                 {% if os.path.isfile(way[3:]) %}
                 <a class="download-button" href="/{{ way }}" download="">↓</a>
-                {% elif name == '..' %}
-                <a class="opendir-button" href="/{{'cloud/' + way.split('/')[len_of_user_dir:-2]|join('&') }}">📂</a>
                 {% else %}
                 <a class="opendir-button" href="/{{'cloud/' + way.split('/')[len_of_user_dir:]|join('&') }}">📂</a>
                 {% endif %}
