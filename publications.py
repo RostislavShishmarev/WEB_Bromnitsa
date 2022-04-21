@@ -11,9 +11,15 @@ app = fl.Blueprint(
     __name__,
     template_folder='templates'
 )
-FILES_NUMBER = 2
-SERVER = '127.0.0.1:8080'
-PUBL_API = '127.0.0.1:5000'
+FILES_NUMBER = 6
+PUBL_API = '127.0.0.1'  # 'bromnitsa.herokuapp.com'
+while True:
+    try:
+        with open('work_files/publ_api_port.txt', encoding='utf8') as f:
+            PUBL_API += ':' + f.read()
+        break
+    except FileNotFoundError as ex:
+        continue
 publ_maker = Saver(description='', show_email=False)
 publ_shower = Saver(current_index=0, string='')
 
@@ -48,7 +54,7 @@ def publications():
     if request.method == 'POST':
         if 'search_string' in request.form.keys():
             publ_shower.string = request.form['search_string'].lower()
-    json_publs = rq.get('http://{}/publ_api'.format(PUBL_API) +\
+    json_publs = rq.get('http://{}/api'.format(PUBL_API) +\
                         ('/' + publ_shower.string
                          if publ_shower.string else '')).json()
 
@@ -93,7 +99,7 @@ def make_publication(filename):
             }
             if publ_maker.show_email:
                 publ_dict['show_email'] = publ_maker.show_email
-            res = rq.post('http://{}/publ_api'.format(PUBL_API),
+            res = rq.post('http://{}/api'.format(PUBL_API),
                           params=publ_dict).json()
             print(res)
             return fl.redirect('/publications')

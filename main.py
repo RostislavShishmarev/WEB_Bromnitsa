@@ -15,7 +15,8 @@ from helpers import Errors, CurrentSettings, alpha_sorter, time_sorter,\
 from explorer import Explorer
 
 app = fl.Flask(__name__)
-app.config['SECRET_KEY'] = 'super_Seсret_key_of_devEl0pers'
+with open('work_files/t.txt', encoding='utf8') as f:
+    app.config['SECRET_KEY'] = f.read()
 app.config['JSON_AS_ASCII'] = False
 login_manager = fl_log.LoginManager()
 login_manager.init_app(app)
@@ -102,15 +103,14 @@ def cloud(current_dir=''):
         else:
             exp = Explorer(fl_log.current_user)
             for key in request.form.keys():
-                if key.startswith('copy-file-'):
-                    name = key.split('-')[-1][3:] # Убираем ../
+                if key == 'copy-file':
+                    name = request.form[key]
                     exp.copy(name)
-                if key.startswith('cut-file-'):
-                    name = key.split('-')[-1][3:] # Убираем ../
+                if key == 'cut-file':
+                    name = request.form[key]
                     exp.cut(name)
                 if key == 'paste_files':
                     exp.paste(current_dir)
-                    print('pasted')
     return render_template('Account.html', title='Облако',
                            navigation=nav, settings=cloud_set, os=os,
                            current_user=fl_log.current_user)
@@ -346,4 +346,5 @@ def delete_file(filename):
 if __name__ == '__main__':
     db_session.global_init("db/cloud.sqlite")
     app.register_blueprint(publ_blueprint)
-    app.run(port=8080, host='127.0.0.1')
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host='0.0.0.0', port=port)

@@ -217,7 +217,7 @@
                       </div>
                       <div class="file-card-menu-el-place">
                         <form method="POST">
-                          <input name="copy-file-{{ way }}" class="none" />
+                          <input name="copy-file" value="{{ way[3:] }}" class="none" />
                           <input
                             type="submit"
                             value="Копировать"
@@ -227,7 +227,7 @@
                       </div>
                       <div class="file-card-menu-el-place">
                         <form method="POST">
-                          <input name="cut-file-{{ way }}" class="none" />
+                          <input name="cut-file" value="{{ way[3:] }}" class="none" />
                           <input
                             type="submit"
                             value="Вырезать"

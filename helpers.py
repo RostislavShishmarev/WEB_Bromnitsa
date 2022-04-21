@@ -27,7 +27,7 @@ class CurrentSettings:
         self.sort_func = alpha_sorter
         self.reverse_files = False
         self.current_index = 0
-        self.files_num = 5
+        self.files_num = 12
 
     def change_mode(self):
         if self.menu_mode == CurrentSettings.BIG:
