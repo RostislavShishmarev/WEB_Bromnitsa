@@ -113,15 +113,21 @@ def cloud(current_dir=''):
                 shutil.rmtree(path + '/boofer')
                 os.mkdir(path + '/boofer')
                 filename = request.form['cut-file'].replace('&', '/')
+                filename = filename.split('/')[-1]
                 shutil.copy(path + '/cloud/' + filename,
                             path + '/boofer/' + filename)
                 os.remove(path + '/cloud/' + filename)
             if 'copy-file' in request.form.keys():
                 shutil.rmtree(path + '/boofer')
                 os.mkdir(path + '/boofer')
-                filename = request.form['copy-file'].replace('&', '/')
+                filename = request.form['copy-file'].replace('&', '/').split('/')[-1]
                 shutil.copy(path + '/cloud/' + filename,
                             path + '/boofer/' + filename)
+            if 'paste-files' in request.form.keys():
+                files = path + '/boofer'
+                print(files)
+                for file in files:
+                    make_file(current_dir, file)
     return render_template('Account.html', title='Облако',
                            navigation=nav, settings=cloud_set, os=os,
                            current_user=flask_login.current_user)
@@ -297,7 +303,7 @@ def add_dir():
 def rename_file(filename):
     filename = filename.replace('&', '/')
     form = RenameFileForm()
-    form.name.data = filename.split('/')[-1].split('.')[0]
+    #form.name.data = filename.split('/')[-1].split('.')[0]
     nav = [{'href': '/', 'title': 'Главная'},
            {'href': '/publications', 'title': 'Публикации'},
            {'href': '/cloud', 'title': 'Облако'},
@@ -306,15 +312,7 @@ def rename_file(filename):
     db_sess = db_session.create_session()
     if current_user.is_authenticated and form.validate_on_submit():
         user = db_sess.query(User).filter(User.email == current_user.email).first()
-        extension = '.' + filename.split('.')[1]
-        print(extension)
-        print(form.name.data)
-        print(filename)
-        '''os.chdir('static')
-        os.chdir('users')
-        os.chdir(str(user.id))
-        os.chdir('user_files')
-        os.rename(filename, form.name.data + extension)'''
+        extension = '.' + filename.split('.')[-1]
         os.rename(user.path + '/cloud/' + filename, user.path + '/cloud/' + form.name.data + extension)
         return redirect('/cloud')
     return render_template('Form.html', title='Переименовать файл', navigation=nav,
@@ -337,47 +335,6 @@ def delete_file(filename):
         return redirect('/cloud')
     return render_template('Form.html',
                            title='Удалить файл ' + filename.split('/')[-1],
-                           navigation=nav,
-                           form=form, current_user=flask_login.current_user)
-
-
-@app.route('/copy_file/<path:filename>', methods=['GET', 'POST'])
-def copy_file(filename):
-    filename = filename.replace('&', '/')
-    form = CopyForm()
-    nav = [{'href': '/', 'title': 'Главная'},
-           {'href': '/publications', 'title': 'Публикации'},
-           {'href': '/cloud', 'title': 'Облако'},
-           {'href': '/settings', 'title': 'Настройки'},
-           {'href': '/logout', 'title': 'Выход'}]
-    db_sess = db_session.create_session()
-    if current_user.is_authenticated and form.validate_on_submit():
-        user = db_sess.query(User).filter(User.email == current_user.email).first()
-        shutil.copy(user.path + '/cloud/' + filename, user.path + '/boofer/' + filename)
-        return redirect('/cloud')
-    '''return render_template('Form.html',
-                           title='Копировать файл ' + filename.split('/')[-1],
-                           navigation=nav,
-                           form=form, current_user=flask_login.current_user)'''
-
-
-@app.route('/cut_file/<path:filename>', methods=['GET', 'POST'])
-def cut_file(filename):
-    filename = filename.replace('&', '/')
-    form = CutFileForm()
-    nav = [{'href': '/', 'title': 'Главная'},
-           {'href': '/publications', 'title': 'Публикации'},
-           {'href': '/cloud', 'title': 'Облако'},
-           {'href': '/settings', 'title': 'Настройки'},
-           {'href': '/logout', 'title': 'Выход'}]
-    db_sess = db_session.create_session()
-    if current_user.is_authenticated and form.validate_on_submit():
-        user = db_sess.query(User).filter(User.email == current_user.email).first()
-        shutil.copy(user.path + '/cloud/' + filename, user.path + '/boofer/' + filename)
-        os.remove(user.path + '/cloud/' + filename)
-        return redirect('/cloud')
-    return render_template('Form.html',
-                           title='Вырезать файл ' + filename.split('/')[-1],
                            navigation=nav,
                            form=form, current_user=flask_login.current_user)
 
