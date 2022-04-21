@@ -12,7 +12,7 @@ app = fl.Blueprint(
     template_folder='templates'
 )
 FILES_NUMBER = 6
-PUBL_API = '127.0.0.1'  # 'bromnitsa.herokuapp.com'
+PUBL_API = 'bromnitsa.herokuapp.com'
 while True:
     try:
         with open('work_files/publ_api_port.txt', encoding='utf8') as f:
