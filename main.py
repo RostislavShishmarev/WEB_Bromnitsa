@@ -113,20 +113,29 @@ def cloud(current_dir=''):
                 shutil.rmtree(path + '/boofer')
                 os.mkdir(path + '/boofer')
                 filename = request.form['cut-file'].replace('&', '/')
-                filename = filename.split('/')[-1]
-                shutil.copy(path + '/cloud/' + filename,
-                            path + '/boofer/' + filename)
-                os.remove(path + '/cloud/' + filename)
+                print(filename)
+                filename1 = filename.split('/')[-1]
+                try:
+                    shutil.copy(filename[3:], path + '/boofer/' + filename1)
+                    os.remove(filename[3:])
+                except PermissionError:
+                    shutil.copytree(filename[3:], path + '/boofer/' + filename1)
+                    shutil.rmtree(filename[3:])
             if 'copy-file' in request.form.keys():
                 shutil.rmtree(path + '/boofer')
                 os.mkdir(path + '/boofer')
-                filename = request.form['copy-file'].replace('&', '/').split('/')[-1]
-                shutil.copy(path + '/cloud/' + filename,
-                            path + '/boofer/' + filename)
+                filename = request.form['copy-file'].replace('&', '/')
+                print(filename)
+                filename1 = filename.split('/')[-1]
+                try:
+                    shutil.copy(filename[3:], path + '/boofer/' + filename1)
+                    files = path + '/boofer'
+                    print(files)
+                except PermissionError:
+                    shutil.copytree(filename[3:], path + '/boofer/' + filename1)
             if 'paste-files' in request.form.keys():
-                files = path + '/boofer'
-                print(files)
-                for file in files:
+                os.chdir(path + '/boofer')
+                for file in os.listdir():
                     make_file(current_dir, file)
     return render_template('Account.html', title='Облако',
                            navigation=nav, settings=cloud_set, os=os,
