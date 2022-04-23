@@ -107,7 +107,6 @@ def cloud(operpath=''):
                 shutil.rmtree(path + '/boofer')
                 os.mkdir(path + '/boofer')
                 filename = request.form['cut-file'].replace('&', '/')
-                print(filename)
                 filename1 = filename.split('/')[-1]
                 try:
                     shutil.copy(filename[3:], path + '/boofer/' + filename1)
@@ -120,19 +119,22 @@ def cloud(operpath=''):
                 shutil.rmtree(path + '/boofer')
                 os.mkdir(path + '/boofer')
                 filename = request.form['copy-file'].replace('&', '/')
-                print(filename)
                 filename1 = filename.split('/')[-1]
                 try:
-                    shutil.copy(filename[3:], path + '/boofer/' + filename1)
+                    shutil.copy(filename, path + '/boofer/' + filename1)
                     files = path + '/boofer'
-                    print(files)
                 except PermissionError:
-                    shutil.copytree(filename[3:], path + '/boofer/' +
+                    shutil.copytree(filename, path + '/boofer/' +
                                     filename1)
-            if 'paste-files' in request.form.keys():  # Ключ paste_files
-                os.chdir(path + '/boofer')  # См. инструкцию, в сообщениях я мог ошибиться.
-                for file in os.listdir():
-                    make_file(current_dir, file)
+            if 'paste_files' in request.form.keys():
+                for file in os.listdir(path + '/boofer'):
+                    print(file)
+                    try:
+                        shutil.move(path + '/boofer/' + file, path + '/cloud/' + file)
+                    except PermissionError:
+                        shutil.copytree(path + '/boofer/' + file, path + '/cloud/' +
+                                        file)
+                        shutil.rmtree(path + '/boofer/' + file)
     return render_template('Account.html', title='Облако',
                            navigation=nav, settings=cloud_set, os=os,
                            current_user=fl_log.current_user)
@@ -187,7 +189,7 @@ def register():
             user.photo = photoname
         db_sess.commit()
         login_user(user)
-        return redirect('/')
+        return redirect('/cloud')
     return render_template('Form.html', title='Регистрация', navigation=nav,
                            form=form, current_user=fl_log.current_user)
 
@@ -213,7 +215,7 @@ def login():
                                    navigation=nav, form=form,
                                    current_user=fl_log.current_user)
         login_user(user)
-        return redirect('/')
+        return redirect('/cloud')
     return render_template('Form.html', title='Авторизация', navigation=nav,
                            form=form, current_user=fl_log.current_user)
 
@@ -277,7 +279,7 @@ def change_password():
                                           fl_log.current_user.id).first()
         user.set_password(form.password.data)
         db_sess.commit()
-        return redirect('/')
+        return redirect('/cloud')
     return render_template('Form.html', title='Сменить пароль', navigation=nav,
                            form=form, current_user=fl_log.current_user)
 
