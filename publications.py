@@ -44,7 +44,7 @@ def publications():
     if request.method == 'POST':
         if 'search_string' in request.form.keys():
             publ_shower.string = request.form['search_string'].lower()
-    json_publs = rq.get('http://{}/api'.format(PUBL_API) +\
+    json_publs = rq.get('http://{}/api'.format(PUBL_API) +
                         ('/' + publ_shower.string
                          if publ_shower.string else '')).json()
 
@@ -64,7 +64,7 @@ def publications():
                            os=os, current_user=flask_login.current_user)
 
 
-@app.route('/make_publication/<path:operpath>',methods=['GET', 'POST'])
+@app.route('/make_publication/<path:operpath>', methods=['GET', 'POST'])
 @flask_login.login_required
 def make_publication(operpath):
     filename = operpath.replace('&', '/')
@@ -84,10 +84,10 @@ def make_publication(operpath):
 
     if request.method == 'POST':
         if 'public' in request.form.keys():
+            path = flask_login.current_user.path
             publ_dict = {
                 'description': publ_maker.description,
-                'filename': flask_login.current_user.path + '/cloud/' +\
-                            filename,
+                'filename': path + '/cloud/' + filename,
                 'user_id': flask_login.current_user.id,
             }
             if publ_maker.show_email:

@@ -1,10 +1,13 @@
 import os
 import shutil
 from flask_restful import abort
+from random import choices
 
 IMAGE_TYPES = ('jpg', 'jpeg', 'png', 'svg', 'webp', 'gif', 'ico')
 BAD_CHARS = {' ', '/', '\\', '&', '?', '@', '"', "'", '(', ')'}
 DEFAULT_PHOTO = 'static/img/No_user.jpg'
+SYMBOLS = '1234567890!@#$%^&*()~`-=_+ qwertyuiop[]asdfghjkl;zxcvbnm,./\
+QWERTYUIOP{}ASDFGHJKL:"ZXCVBNM<>?'
 
 
 class Errors:
@@ -70,14 +73,14 @@ def time_sorter(cur_dir, string, reverse=False):
 def sort_func(cur_dir, key_sort, string, reverse=False):
     func = reversed if reverse else return_
     list_ = os.listdir(cur_dir)
-    return list(func(sorted(filter(lambda f: os.path.isdir('/'.join([cur_dir,
-                                                                     f]))\
-                                             and string in f.lower(), list_),
-                       key=key_sort))) +\
-           list(func(sorted(filter(lambda f: os.path.isfile('/'.join([cur_dir,
-                                                                      f]))\
-                                             and string in f.lower(), list_),
-                       key=key_sort)))
+    return (list(func(sorted(filter(lambda f: os.path.isdir('/'.join([cur_dir,
+                                                                      f])) and
+                                    string in f.lower(), list_),
+                             key=key_sort))) +
+            list(func(sorted(filter(lambda f: os.path.isfile('/'.join([cur_dir,
+                                                                       f])) and
+                                    string in f.lower(), list_),
+                             key=key_sort))))
 
 
 def return_(arg):
@@ -130,3 +133,6 @@ def make_publ_file(filename):
         ind += 1
     shutil.copy(filename, user_dir + '/public/' + new_name)
     return user_dir + '/public/' + new_name
+
+def generate_secret_key():
+    return ''.join(choices(list(SYMBOLS), k=500))

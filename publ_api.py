@@ -8,8 +8,12 @@ from helpers import make_publ_file
 
 app = fl.Flask(__name__)
 api = Api(app)
-with open('work_files/t.txt', encoding='utf8') as f:
-    app.config['SECRET_KEY'] = f.read()
+while not os.path.exists('work_files/t.txt'):
+    try:
+        with open('work_files/t.txt', encoding='utf8') as f:
+            app.config['SECRET_KEY'] = f.read()
+    except FileNotFoundError as ex:
+        pass
 app.config['JSON_AS_ASCII'] = False
 
 publ_parser = reqparse.RequestParser()

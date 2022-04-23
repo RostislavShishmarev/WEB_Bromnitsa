@@ -24,7 +24,7 @@ class Explorer:
             else:
                 shutil.copy(name, self.boofer + '/' + onlyname)
         except Exception as ex:
-             self.make_error(where, ex)
+            self.make_error(where, ex)
 
     def delete(self, name):
         try:
