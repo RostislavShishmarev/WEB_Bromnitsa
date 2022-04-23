@@ -10,6 +10,7 @@ app = fl.Flask(__name__)
 api = Api(app)
 with open('work_files/t.txt', encoding='utf8') as f:
     app.config['SECRET_KEY'] = f.read()
+app.config['JSON_AS_ASCII'] = False
 
 publ_parser = reqparse.RequestParser()
 publ_parser.add_argument('description')
@@ -68,6 +69,4 @@ api.add_resource(PublApi, '/api/<search_string>', '/api')
 if __name__ == '__main__':
     d_s.global_init('db/cloud.sqlite')
     port = int(os.environ.get("PORT", 5000))
-    with open('work_files/publ_api_port.txt', mode='w', encoding='utf8') as f:
-        f.write(str(port))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='127.0.0.1', port=port)

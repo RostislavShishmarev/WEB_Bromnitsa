@@ -7,7 +7,7 @@
   </div>
 </div>
 <div class="Block2">
-  <div class="br-container">
+  <div class="br-container publ-container">
     <div class="nav-placeholder">
       <div class="connector">
         <div class="nav-block">
@@ -40,7 +40,7 @@
     </div>
   </div>
 </div>
-<div class="br-container">
+<div class="br-container publ-container">
   <div class="publications-list">
     {% for new in publications %}
     <div class="publ-card">
@@ -59,13 +59,13 @@
         <div class="publ-card-file publ-card-block">
           {% set filename = '../' + new['file_name'] %}
           {% if filename.split('.')[-1] in ['mp3', 'wav', 'ogg'] %}
-          <div class="file-card-prevision">
+          <div class="file-card-prevision publ-card-prevision">
             <audio src="{{filename}}" controls></audio>
           </div>
           {% elif filename.split('.')[-1] in ['jpg', 'jpeg', 'png', 'svg', 'webp',
           'gif', 'ico'] %}
           <div
-            class="file-card-prevision"
+            class="file-card-prevision publ-card-prevision"
             style="background-image: url({{filename}});"
           ></div>
           {% else %}
@@ -73,7 +73,7 @@
           {% for type_ in os.listdir('static/img/file_types') %} 
           {% if filename.split('.')[-1] in type_.split('.')[0].split('_') and not types['exist'] %}
           {% set image_way = '../static/img/file_types/' + type_ %}
-          <div class="file-card-prevision">
+          <div class="file-card-prevision publ-card-prevision">
             <div
               class="file-card-icon"
               style="background-image: url({{image_way}});"
@@ -90,9 +90,9 @@
           </div>
           </div>
           <div class="publ-card-bottom">
-        <a class="download-button publ-download-button" href="/{{ filename }}" download="">↓</a>
+        <a class="download-button publ-download-button publ-card-block" href="/{{ filename }}" download="">↓</a>
         {% if new['show_email'] %}
-          <div class="publ-card-email">{{ new['user_email'] }}</div>
+          <div class="publ-card-email publ-card-block">{{ new['user_email'] }}</div>
           {% endif %}</div></div>
       </div>
       {% endfor %}

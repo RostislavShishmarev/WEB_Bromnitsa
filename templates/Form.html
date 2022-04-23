@@ -6,8 +6,9 @@
       <div class="form-title">{{ title }}</div>
       <form action="" method="post" enctype="multipart/form-data">
         <div class="fields-placeholder">
-          {{ form.hidden_tag() }} {% for field in form if field.name not in
-          ['csrf_token', 'submit'] %} {% if field.name == 'photo' %}
+          {{ form.hidden_tag() }}
+          {% for field in form if field.name not in ['csrf_token', 'submit'] %}
+          {% if field.name == 'photo' %}
           <div class="form-field">
             {{ field.label(class="field-label") }}
             <div class="input__placeholder form-field-input">
@@ -19,20 +20,25 @@
                 >
               </label>
             </div>
-          </div>
-          {% elif field.name == "remember_me" %}
-          <div class="checkbox-placeholder form-field-checkbox">
-            {{ field(class="custom-checkbox") }} {{
-            field.label(class="check-text") }}
-          </div>
-          {% else %}
-          <div class="form-field">
-            {{ field.label(class="field-label") }} {{
-            field(class="form-text-field") }} {% for error in field.errors %}
+            {% for error in field.errors %}
             <div class="error-message">{{ error }}</div>
             {% endfor %}
           </div>
-          {% endif %} {% endfor %}
+          {% elif field.name == "remember_me" %}
+          <div class="checkbox-placeholder form-field-checkbox">
+            {{ field(class="custom-checkbox") }}
+            {{ field.label(class="check-text") }}
+          </div>
+          {% else %}
+          <div class="form-field">
+            {{ field.label(class="field-label") }}
+            {{ field(class="form-text-field") }}
+            {% for error in field.errors %}
+            <div class="error-message">{{ error }}</div>
+            {% endfor %}
+          </div>
+          {% endif %}
+          {% endfor %}
           <p>{{ form.submit(type="submit", class="user-button") }}</p>
         </div>
       </form>

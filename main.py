@@ -4,6 +4,7 @@ import flask as fl
 import flask_login as fl_log
 from flask_login import login_user
 from flask import render_template, request, redirect, send_from_directory
+from flask_restful import abort
 from forms.forms import RegisterForm, LoginForm, SettingsForm,\
     ChangePasswordForm, MakeDirForm, RenameFileForm, DeleteFileForm
 
@@ -11,7 +12,7 @@ import data.db_session as db_session
 from data.users import User
 from publications import app as publ_blueprint
 from helpers import Errors, CurrentSettings, alpha_sorter, time_sorter,\
-    BAD_CHARS, format_name, make_file
+    BAD_CHARS, format_name, make_file, make_photo, DEFAULT_PHOTO
 from explorer import Explorer
 
 app = fl.Flask(__name__)
@@ -21,8 +22,6 @@ app.config['JSON_AS_ASCII'] = False
 login_manager = fl_log.LoginManager()
 login_manager.init_app(app)
 cloud_set = CurrentSettings()
-
-DEFAULT_PHOTO = 'static/img/No_user.jpg'
 
 
 @login_manager.user_loader
@@ -53,8 +52,8 @@ def main_page():
         nav = [{'href': '/login', 'title': 'Войти'},
                {'href': '/publications', 'title': 'Публикации'}]
     else:
-        nav = [{'href': '/publications', 'title': 'Публикации'},
-               {'href': '/cloud', 'title': 'Облако'},
+        nav = [{'href': '/cloud', 'title': 'Облако'},
+               {'href': '/publications', 'title': 'Публикации'},
                {'href': '/settings', 'title': 'Настройки'},
                {'href': '/logout', 'title': 'Выход'}]
     return render_template('TitlePage.html', title='Главная', navigation=nav,
@@ -63,14 +62,14 @@ def main_page():
 
 @app.route('/cloud', methods=['GET', 'POST'])
 @app.route('/cloud/', methods=['GET', 'POST'])
-@app.route('/cloud/<path:current_dir>', methods=['GET', 'POST'])
+@app.route('/cloud/<path:operpath>', methods=['GET', 'POST'])
 @fl_log.login_required
-def cloud(current_dir=''):
+def cloud(operpath=''):
     nav = [{'href': '/', 'title': 'Главная'},
            {'href': '/publications', 'title': 'Публикации'},
            {'href': '/settings', 'title': 'Настройки'},
            {'href': '/logout', 'title': 'Выход'}]
-    current_dir = cloud_set.update_dir(current_dir.replace('&', '/'),
+    current_dir = cloud_set.update_dir(operpath.replace('&', '/'),
                                        fl_log.current_user.path)
     if request.method == 'POST':
         if 'change-menu' in request.form.keys():
@@ -146,15 +145,23 @@ def register():
         db_sess.commit()
         user = db_sess.query(User).filter(User.email == user.email).first()
 
-        user.path = 'static/users/' + str(user.id)
+        path = 'static/users/' + str(user.id)
+        user.path = path
+        if not os.path.exists('static/users'):
+            os.mkdir('static/users')
         for directory in ['', '/boofer', '/cloud', '/public', '/user_files']:
-            os.mkdir(user.path + directory)
+            os.mkdir(path + directory)
         photo = form.photo.data
         if photo:
-            user.photo = user.path + '/user_files/user_photo.' +\
-                         photo.filename.split('.')[-1]
-            photo.save(user.photo)
-
+            photoname = make_photo(photo, path)
+            if photoname is None:
+                db_sess.delete(user)
+                db_sess.commit()
+                form.photo.errors.append(Errors.BAD_FORMAT)
+                return render_template('Form.html', title='Регистрация',
+                                       navigation=nav, form=form,
+                                       current_user=fl_log.current_user)
+            user.photo = photoname
         db_sess.commit()
         login_user(user)
         return redirect('/')
@@ -165,12 +172,13 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
-    nav = [{'href': '/register', 'title': 'Регистрация'},
-           {'href': '/', 'title': 'Главная'},
-           {'href': '/publications', 'title': 'Публикации'}]
+    nav = [{'href': '/', 'title': 'Главная'},
+           {'href': '/publications', 'title': 'Публикации'},
+           {'href': '/register', 'title': 'Регистрация'}]
     if form.validate_on_submit():
         db_sess = db_session.create_session()
-        user = db_sess.query(User).filter(User.email == form.email.data).first()
+        user = db_sess.query(User).filter(User.email ==\
+                                          form.email.data).first()
         if not user:
             form.email.errors.append(Errors.NO_USER)
             return render_template('Form.html', title='Авторизация',
@@ -192,8 +200,8 @@ def login():
 def settings():
     form = SettingsForm()
     nav = [{'href': '/', 'title': 'Главная'},
-           {'href': '/publications', 'title': 'Публикации'},
            {'href': '/cloud', 'title': 'Облако'},
+           {'href': '/publications', 'title': 'Публикации'},
            {'href': '/logout', 'title': 'Выход'}]
     if form.validate_on_submit():
         db_sess = db_session.create_session()
@@ -203,14 +211,21 @@ def settings():
             return render_template('Settings.html', title='Настройки',
                                    navigation=nav, form=form,
                                    current_user=fl_log.current_user)
-        photo = form.photo.data
-        if photo:
-            photo.save(fl_log.current_user.photo)
         user = db_sess.query(User).filter(User.id ==\
                                           fl_log.current_user.id).first()
+        photo = form.photo.data
+        if photo:
+            photoname = make_photo(photo, fl_log.current_user.path)
+            if photoname is None:
+                form.photo.errors.append(Errors.BAD_FORMAT)
+                return render_template('Settings.html', title='Настройки',
+                                       navigation=nav, form=form,
+                                       current_user=fl_log.current_user)
+            user.photo = photoname
         user.username = form.name.data
         user.email = form.email.data
         db_sess.commit()
+        # Чтобы увидеть изменения в том же окне.
         fl_log.logout_user()
         login_user(user)
     form.email.data = fl_log.current_user.email
@@ -224,8 +239,8 @@ def settings():
 def change_password():
     form = ChangePasswordForm()
     nav = [{'href': '/', 'title': 'Главная'},
-           {'href': '/publications', 'title': 'Публикации'},
            {'href': '/cloud', 'title': 'Облако'},
+           {'href': '/publications', 'title': 'Публикации'},
            {'href': '/settings', 'title': 'Настройки'},
            {'href': '/logout', 'title': 'Выход'}]
     if form.validate_on_submit():
@@ -249,8 +264,8 @@ def change_password():
 def add_dir():
     form = MakeDirForm()
     nav = [{'href': '/', 'title': 'Главная'},
-           {'href': '/publications', 'title': 'Публикации'},
            {'href': '/cloud', 'title': 'Облако'},
+           {'href': '/publications', 'title': 'Публикации'},
            {'href': '/settings', 'title': 'Настройки'},
            {'href': '/logout', 'title': 'Выход'}]
     if form.validate_on_submit():
@@ -276,19 +291,21 @@ def add_dir():
                            form=form, current_user=fl_log.current_user)
 
 
-@app.route('/rename_file/<path:filename>', methods=['GET', 'POST'])
+@app.route('/rename/<path:operpath>', methods=['GET', 'POST'])
 @fl_log.login_required
-def rename_file(filename):
-    filepath = filename.replace('&', '/')
+def rename(operpath):
+    filepath = operpath.replace('&', '/')
+    full = format_name(fl_log.current_user.path + '/cloud/' + filepath)
+    if not os.path.exists(full):
+        abort(404, message='Файл не найден')
     filename = filepath.split('/')[-1]
     filetype = '.' + filename.split('.')[-1]
     form = RenameFileForm()
     nav = [{'href': '/', 'title': 'Главная'},
-           {'href': '/publications', 'title': 'Публикации'},
            {'href': '/cloud', 'title': 'Облако'},
+           {'href': '/publications', 'title': 'Публикации'},
            {'href': '/settings', 'title': 'Настройки'},
            {'href': '/logout', 'title': 'Выход'}]
-    full = format_name(fl_log.current_user.path + '/cloud/' + filepath)
     if form.validate_on_submit():
         new_name = form.name.data
         new_full = format_name(fl_log.current_user.path + '/cloud/' +\
@@ -318,18 +335,20 @@ def rename_file(filename):
                            current_user=fl_log.current_user)
 
 
-@app.route('/delete_file/<path:filename>', methods=['GET', 'POST'])
+@app.route('/delete/<path:operpath>', methods=['GET', 'POST'])
 @fl_log.login_required
-def delete_file(filename):
-    filepath = filename.replace('&', '/')
+def delete(operpath):
+    filepath = operpath.replace('&', '/')
+    full = format_name(fl_log.current_user.path + '/cloud/' + filepath)
+    if not os.path.exists(full):
+        abort(404, message='Файл не найден')
     filename = filepath.split('/')[-1]
     form = DeleteFileForm()
     nav = [{'href': '/', 'title': 'Главная'},
-           {'href': '/publications', 'title': 'Публикации'},
            {'href': '/cloud', 'title': 'Облако'},
+           {'href': '/publications', 'title': 'Публикации'},
            {'href': '/settings', 'title': 'Настройки'},
            {'href': '/logout', 'title': 'Выход'}]
-    full = format_name(fl_log.current_user.path + '/cloud/' + filepath)
     if form.validate_on_submit():
         if os.path.isfile(full):
             os.remove(full)
@@ -343,8 +362,28 @@ def delete_file(filename):
                            form=form, current_user=fl_log.current_user)
 
 
+@app.before_request
+def protector():
+    path = request.path
+    if not path.startswith('/static/users/'):
+        return
+    path = path[len('/static/users/'):]
+    userdir, dir_, *list_path = path.split('/')
+    user_path = 'static/users/' + userdir
+    db_sess = db_session.create_session()
+    user = db_sess.query(User).filter(User.path == user_path).first()
+    if user:
+        if dir_ in ['cloud', 'boofer']:
+            if not fl_log.current_user.is_authenticated:
+                abort(401, message='Вы не авторизованы')
+            if user.id != fl_log.current_user.id:
+                abort(403, message='У вас нет доступа к этим данным')
+        return
+    abort(404, message='Файл не найден')
+
+
 if __name__ == '__main__':
     db_session.global_init("db/cloud.sqlite")
     app.register_blueprint(publ_blueprint)
     port = int(os.environ.get("PORT", 8080))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='127.0.0.1', port=port)

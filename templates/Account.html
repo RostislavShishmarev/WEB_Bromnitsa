@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "Base.html" %}
 {% block content %}
 <link rel="stylesheet" href="../static/css/Account/Account.css" />
     <link rel="stylesheet" href="../static/css/Account/File_card.css" />
@@ -211,7 +211,7 @@
                       <div class="file-card-menu-el-place">
                         <a
                           class="file-card-menu-el"
-                          href="/rename_file/{{ way.split('/')[len_of_user_dir:]|join('&') }}"
+                          href="/rename/{{ way.split('/')[len_of_user_dir:]|join('&') }}"
                           >Переименовать</a
                         >
                       </div>
@@ -240,7 +240,7 @@
                       >
                       <a
                       class="file-card-menu-el"
-                      href="/delete_file/{{ way.split('/')[len_of_user_dir:]|join('&') }}"
+                      href="/delete/{{ way.split('/')[len_of_user_dir:]|join('&') }}"
                       >Удалить</a>
                       </div>
                     </ul>

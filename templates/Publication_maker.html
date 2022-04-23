@@ -22,14 +22,14 @@
     </div>
   </div>
 </div>
-<div class="br-container">
+<div class="br-container publ-container">
   <div class="publ-card">
     <div class="publ-card-title">
-      <div class="publ-card-title-text">
+      <div class="publ-card-title-text publ-card-block">
         {{publication.filename.split('/')[-1]}}
       </div>
-      <div class="publ-card-user-block">
-        <div class="publ-card-user-name">{{publication.autor.name}}</div>
+      <div class="publ-card-user-block publ-card-block">
+        <div class="publ-card-user-name">{{publication.autor.username}}</div>
         {% set photo_name = '../' + publication.autor.photo %}
         <div
           class="publ-card-user-photo"
@@ -38,23 +38,23 @@
       </div>
     </div>
     <div class="publ-card-main">
-      <div class="publ-card-file">
+      <div class="publ-card-file publ-card-block">
         {% set filename = '../' + publication.filename %} {% if
         filename.split('.')[-1] in ['mp3', 'wav', 'ogg'] %}
-        <div class="file-card-prevision">
+        <div class="file-card-prevision publ-card-prevision">
           <audio src="{{filename}}" controls></audio>
         </div>
         {% elif filename.split('.')[-1] in ['jpg', 'jpeg', 'png', 'svg', 'webp',
         'gif', 'ico'] %}
         <div
-          class="file-card-prevision"
+          class="file-card-prevision publ-card-prevision"
           style="background-image: url({{filename}});"
         ></div>
         {% else %} {% set types = {'exist': False} %} {% for type_ in
         os.listdir('static/img/file_types') %} {% if filename.split('.')[-1] in
         type_.split('.')[0].split('_') and not types['exist'] %} {% set
         image_way = '../static/img/file_types/' + type_ %}
-        <div class="file-card-prevision">
+        <div class="file-card-prevision publ-card-prevision">
           <div
             class="file-card-icon"
             style="background-image: url({{image_way}});"
@@ -70,13 +70,13 @@
       </div>
       <div class="publ-card-bottom">
         <a
-          class="download-button publ-download-button"
+          class="download-button publ-download-button publ-card-block"
           href="/{{ filename }}"
           download=""
           >↓</a
         >
         {% if publication.show_email %}
-        <div class="publ-card-email">{{ publication.autor.email }}</div>
+        <div class="publ-card-email publ-card-block">{{ publication.autor.email }}</div>
         {% endif %}
       </div>
     </div>
@@ -91,7 +91,7 @@
       </form>
     </div>
     <div class="maker-bottom-button-block">
-      <a class="maker-button bottom-button" href="/cloud">Отмена</a>
+      <a class="maker-button bottom-button" href="/{{'cloud/' + '&'.join(filename.split('/cloud/')[1].split('/')[:-1])}}">Отмена</a>
     </div>
   </div>
 </div>

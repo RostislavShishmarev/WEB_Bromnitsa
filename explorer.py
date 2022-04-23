@@ -1,6 +1,6 @@
 import os
 import shutil
-import datetime
+from flask_restful import abort
 
 
 class Explorer:
@@ -10,18 +10,21 @@ class Explorer:
         else:
             self.boofer = None
 
-    def copy(self, name):
+    def copy(self, name, where='копирование'):
         if not self.boofer:
             return
+        if not os.path.exists(self.boofer):
+            os.mkdir(self.boofer)
+        else:
+            self.clean_boofer()
         onlyname = name.split('/')[-1]
         try:
-            self.clean_boofer()
             if os.path.isdir(name):
                 shutil.copytree(name, self.boofer + '/' + onlyname)
             else:
                 shutil.copy(name, self.boofer + '/' + onlyname)
         except Exception as ex:
-             self.make_error('copy', ex)
+             self.make_error(where, ex)
 
     def delete(self, name):
         try:
@@ -30,10 +33,10 @@ class Explorer:
             else:
                 os.remove(name)
         except Exception as ex:
-            self.make_error('deletion', ex)
+            self.make_error('удаление', ex)
 
     def cut(self, name):
-        self.copy(name)
+        self.copy(name, where='вырезание')
         self.delete(name)
 
     def paste(self, dirname):
@@ -47,22 +50,19 @@ class Explorer:
             else:
                 shutil.copy(old, new)
         except Exception as ex:
-            self.make_error('pasting', ex)
+            self.make_error('вставка', ex)
 
     def get_file_name(self):
+        if not self.boofer:
+            return
+        if not os.path.exists(self.boofer):
+            os.mkdir(self.boofer)
         list_ = os.listdir(self.boofer)
         return None if not list_ else self.boofer + '/' + list_[0]
 
     def make_error(self, where, ex):
-        if not os.path.exists('logs'):
-            os.mkdir('logs')
-        with open(self.get_error().format(where), mode='w',
-                  encoding='utf8') as f:
-            f.write(str(ex))
-
-    def get_error(self):
-        return datetime.datetime.now().strftime('logs/%H_%M_%S-%d_%m_%Y_\
-_{}_error.txt')
+        print('>>>>Exception>>>>', ex)
+        abort(520, message='Ошибка проводника: ' + where)
 
     def clean_boofer(self):
         for name in os.listdir(self.boofer):

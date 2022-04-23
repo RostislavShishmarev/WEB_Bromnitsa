@@ -3,23 +3,13 @@ import flask as fl
 import requests as rq
 import flask_login
 from flask import render_template, request
+from flask_restful import abort
 from forms.forms import MakePublicationForm
-from helpers import Saver
+from helpers import Saver, format_name
 
-app = fl.Blueprint(
-    'news_api',
-    __name__,
-    template_folder='templates'
-)
-FILES_NUMBER = 6
-PUBL_API = 'bromnitsa.herokuapp.com'
-while True:
-    try:
-        with open('work_files/publ_api_port.txt', encoding='utf8') as f:
-            PUBL_API += ':' + f.read()
-        break
-    except FileNotFoundError as ex:
-        continue
+app = fl.Blueprint('news_api',  __name__, template_folder='templates')
+PUBL_NUMBER = 6
+PUBL_API = '127.0.0.1:5000'
 publ_maker = Saver(description='', show_email=False)
 publ_shower = Saver(current_index=0, string='')
 
@@ -60,13 +50,13 @@ def publications():
 
     if request.method == 'POST':
         if 'next' in request.form.keys():
-            if publ_shower.current_index + FILES_NUMBER < len(json_publs):
-                publ_shower.current_index += FILES_NUMBER
+            if publ_shower.current_index + PUBL_NUMBER < len(json_publs):
+                publ_shower.current_index += PUBL_NUMBER
         elif 'prev' in request.form.keys():
-            if publ_shower.current_index - FILES_NUMBER >= 0:
-                publ_shower.current_index -= FILES_NUMBER
+            if publ_shower.current_index - PUBL_NUMBER >= 0:
+                publ_shower.current_index -= PUBL_NUMBER
     ind = publ_shower.current_index
-    publs = json_publs[ind:ind + FILES_NUMBER]
+    publs = json_publs[ind:ind + PUBL_NUMBER]
 
     return render_template('Publications.html', title='Публикации',
                            navigation=nav,
@@ -74,13 +64,16 @@ def publications():
                            os=os, current_user=flask_login.current_user)
 
 
-@app.route('/make_publication/<path:filename>',methods=['GET', 'POST'])
+@app.route('/make_publication/<path:operpath>',methods=['GET', 'POST'])
 @flask_login.login_required
-def make_publication(filename):
-    filename = filename.replace('&', '/')
+def make_publication(operpath):
+    filename = operpath.replace('&', '/')
+    full = format_name(flask_login.current_user.path + '/cloud/' + filename)
+    if not os.path.exists(full) or not os.path.isfile(full):
+        abort(404, message='Файл не найден')
     nav = [{'href': '/', 'title': 'Главная'},
-           {'href': '/publications', 'title': 'Публикации'},
            {'href': '/cloud', 'title': 'Облако'},
+           {'href': '/publications', 'title': 'Публикации'},
            {'href': '/settings', 'title': 'Настройки'},
            {'href': '/logout', 'title': 'Выход'}]
 
