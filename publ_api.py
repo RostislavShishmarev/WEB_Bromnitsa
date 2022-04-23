@@ -8,8 +8,13 @@ from helpers import make_publ_file
 
 app = fl.Flask(__name__)
 api = Api(app)
-app.config['SECRET_KEY'] = 'super_Seсret_key_of_devEl0pers'
-SERVER = '127.0.0.1:5000'
+while not os.path.exists('work_files/t.txt'):
+    try:
+        with open('work_files/t.txt', encoding='utf8') as f:
+            app.config['SECRET_KEY'] = f.read()
+    except FileNotFoundError as ex:
+        pass
+app.config['JSON_AS_ASCII'] = False
 
 publ_parser = reqparse.RequestParser()
 publ_parser.add_argument('description')
@@ -64,7 +69,8 @@ class PublApi(Resource):
                string in publ.filename.split('/')[-1].lower()
 
 
-api.add_resource(PublApi, '/publ_api/<search_string>', '/publ_api')
+api.add_resource(PublApi, '/api/<search_string>', '/api')
 if __name__ == '__main__':
     d_s.global_init('db/cloud.sqlite')
-    app.run(port=int(SERVER.split(':')[1]), host=SERVER.split(':')[0])
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='127.0.0.1', port=port)

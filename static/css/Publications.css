@@ -139,6 +139,10 @@
   flex-wrap: wrap;
 }
 
+.publ-card-prevision {
+  margin: 0px;
+}
+
 .publ-download-button {
   width: 17px;
   margin-left: 5px;
@@ -163,4 +167,11 @@
   font-size: 18px;
   font-weight: 700;
   color: #c9b7a5;
+}
+
+@media screen and (max-width: 520px) {
+  .publ-container {
+    padding-left: 0px;
+    padding-right: 0px;
+  }
 }

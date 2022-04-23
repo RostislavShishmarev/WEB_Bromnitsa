@@ -30,7 +30,6 @@ body::-webkit-scrollbar-thumb,
   border: 3px solid black;
 }
 
-/* Не container, чтобы не мешать адаптивной сетке */
 .br-container {
   box-sizing: border-box;
   max-width: 1219px;

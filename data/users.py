@@ -10,14 +10,12 @@ class User(SqlAlchemyBase, UserMixin):
 
     id = sqlalchemy.Column(sqlalchemy.Integer,
                            primary_key=True, autoincrement=True)
-    username = sqlalchemy.Column(sqlalchemy.String,
-                                nullable=True)
+    username = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     email = sqlalchemy.Column(sqlalchemy.String,
                               nullable=True,
                               index=True,
                               unique=True)
-    password = sqlalchemy.Column(sqlalchemy.String,
-                                        nullable=True)
+    password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     photo = sqlalchemy.Column(sqlalchemy.String,
                               nullable=True)
     path = sqlalchemy.Column(sqlalchemy.String)

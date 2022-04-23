@@ -3,16 +3,12 @@ import flask as fl
 import requests as rq
 import flask_login
 from flask import render_template, request
+from flask_restful import abort
 from forms.forms import MakePublicationForm
-from helpers import Saver
+from helpers import Saver, format_name
 
-app = fl.Blueprint(
-    'news_api',
-    __name__,
-    template_folder='templates'
-)
-FILES_NUMBER = 2
-SERVER = '127.0.0.1:8080'
+app = fl.Blueprint('news_api',  __name__, template_folder='templates')
+PUBL_NUMBER = 6
 PUBL_API = '127.0.0.1:5000'
 publ_maker = Saver(description='', show_email=False)
 publ_shower = Saver(current_index=0, string='')
@@ -48,19 +44,19 @@ def publications():
     if request.method == 'POST':
         if 'search_string' in request.form.keys():
             publ_shower.string = request.form['search_string'].lower()
-    json_publs = rq.get('http://{}/publ_api'.format(PUBL_API) +\
+    json_publs = rq.get('http://{}/api'.format(PUBL_API) +
                         ('/' + publ_shower.string
                          if publ_shower.string else '')).json()
 
     if request.method == 'POST':
         if 'next' in request.form.keys():
-            if publ_shower.current_index + FILES_NUMBER < len(json_publs):
-                publ_shower.current_index += FILES_NUMBER
+            if publ_shower.current_index + PUBL_NUMBER < len(json_publs):
+                publ_shower.current_index += PUBL_NUMBER
         elif 'prev' in request.form.keys():
-            if publ_shower.current_index - FILES_NUMBER >= 0:
-                publ_shower.current_index -= FILES_NUMBER
+            if publ_shower.current_index - PUBL_NUMBER >= 0:
+                publ_shower.current_index -= PUBL_NUMBER
     ind = publ_shower.current_index
-    publs = json_publs[ind:ind + FILES_NUMBER]
+    publs = json_publs[ind:ind + PUBL_NUMBER]
 
     return render_template('Publications.html', title='Публикации',
                            navigation=nav,
@@ -68,13 +64,16 @@ def publications():
                            os=os, current_user=flask_login.current_user)
 
 
-@app.route('/make_publication/<path:filename>',methods=['GET', 'POST'])
+@app.route('/make_publication/<path:operpath>', methods=['GET', 'POST'])
 @flask_login.login_required
-def make_publication(filename):
-    filename = filename.replace('&', '/')
+def make_publication(operpath):
+    filename = operpath.replace('&', '/')
+    full = format_name(flask_login.current_user.path + '/cloud/' + filename)
+    if not os.path.exists(full) or not os.path.isfile(full):
+        abort(404, message='Файл не найден')
     nav = [{'href': '/', 'title': 'Главная'},
-           {'href': '/publications', 'title': 'Публикации'},
            {'href': '/cloud', 'title': 'Облако'},
+           {'href': '/publications', 'title': 'Публикации'},
            {'href': '/settings', 'title': 'Настройки'},
            {'href': '/logout', 'title': 'Выход'}]
 
@@ -85,15 +84,15 @@ def make_publication(filename):
 
     if request.method == 'POST':
         if 'public' in request.form.keys():
+            path = flask_login.current_user.path
             publ_dict = {
                 'description': publ_maker.description,
-                'filename': flask_login.current_user.path + '/cloud/' +\
-                            filename,
+                'filename': path + '/cloud/' + filename,
                 'user_id': flask_login.current_user.id,
             }
             if publ_maker.show_email:
                 publ_dict['show_email'] = publ_maker.show_email
-            res = rq.post('http://{}/publ_api'.format(PUBL_API),
+            res = rq.post('http://{}/api'.format(PUBL_API),
                           params=publ_dict).json()
             print(res)
             return fl.redirect('/publications')
