@@ -6,25 +6,26 @@ from flask_login import login_user
 from flask import render_template, request, redirect, send_from_directory
 from flask_restful import abort
 from forms.forms import RegisterForm, LoginForm, SettingsForm,\
-    ChangePasswordForm, MakeDirForm, RenameFileForm, DeleteFileForm
+    ChangePasswordForm, MakeDirForm, RenameFileForm, DeleteFileForm,\
+    MakePublicationForm
 
 import data.db_session as db_session
 from data.users import User
-from publications import app as publ_blueprint
+from data.publication import Publication
 from helpers import Errors, CurrentSettings, alpha_sorter, time_sorter,\
     BAD_CHARS, format_name, make_file, make_photo, DEFAULT_PHOTO,\
-    generate_secret_key
+    generate_secret_key, Saver, make_publ_file
 from explorer import Explorer
 
 app = fl.Flask(__name__)
-key = generate_secret_key()
-app.config['SECRET_KEY'] = key
-with open('work_files/t.txt', mode='w', encoding='utf8') as f:
-    f.write(key)
+app.config['SECRET_KEY'] = generate_secret_key()
 app.config['JSON_AS_ASCII'] = False
 login_manager = fl_log.LoginManager()
 login_manager.init_app(app)
 cloud_set = CurrentSettings()
+PUBL_NUMBER = 6
+publ_maker = Saver(description='', show_email=False)
+publ_shower = Saver(current_index=0, string='')
 
 
 @login_manager.user_loader
@@ -120,6 +121,7 @@ def cloud(operpath=''):
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    db_session.global_init("db/cloud.sqlite")
     form = RegisterForm()
     nav = [{'href': '/login', 'title': 'Войти'},
            {'href': '/', 'title': 'Главная'},
@@ -174,13 +176,14 @@ def register():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    db_session.global_init("db/cloud.sqlite")
     form = LoginForm()
     nav = [{'href': '/', 'title': 'Главная'},
            {'href': '/publications', 'title': 'Публикации'},
            {'href': '/register', 'title': 'Регистрация'}]
     if form.validate_on_submit():
         db_sess = db_session.create_session()
-        user = db_sess.query(User).filter(User.email ==
+        user = db_sess.query(User).filter(User.email ==\
                                           form.email.data).first()
         if not user:
             form.email.errors.append(Errors.NO_USER)
@@ -201,6 +204,7 @@ def login():
 @app.route('/settings', methods=['GET', 'POST'])
 @fl_log.login_required
 def settings():
+    db_session.global_init("db/cloud.sqlite")
     form = SettingsForm()
     nav = [{'href': '/', 'title': 'Главная'},
            {'href': '/cloud', 'title': 'Облако'},
@@ -214,7 +218,7 @@ def settings():
             return render_template('Settings.html', title='Настройки',
                                    navigation=nav, form=form,
                                    current_user=fl_log.current_user)
-        user = db_sess.query(User).filter(User.id ==
+        user = db_sess.query(User).filter(User.id ==\
                                           fl_log.current_user.id).first()
         photo = form.photo.data
         if photo:
@@ -240,6 +244,7 @@ def settings():
 @app.route('/change_password', methods=['GET', 'POST'])
 @fl_log.login_required
 def change_password():
+    db_session.global_init("db/cloud.sqlite")
     form = ChangePasswordForm()
     nav = [{'href': '/', 'title': 'Главная'},
            {'href': '/cloud', 'title': 'Облако'},
@@ -253,7 +258,7 @@ def change_password():
             return render_template('Form.html', title='Сменить пароль',
                                    navigation=nav, form=form,
                                    current_user=fl_log.current_user)
-        user = db_sess.query(User).filter(User.id ==
+        user = db_sess.query(User).filter(User.id ==\
                                           fl_log.current_user.id).first()
         user.set_password(form.password.data)
         db_sess.commit()
@@ -277,7 +282,7 @@ def add_dir():
         # Сначала именно символы
         incor_symb = BAD_CHARS & set(dirname)
         if incor_symb:
-            form.name.errors.append(Errors.BAD_CHAR + '"' +
+            form.name.errors.append(Errors.BAD_CHAR + '"' +\
                                     '", "'.join(incor_symb) + '"')
             return render_template('Form.html', title='Создать папку',
                                    navigation=nav, form=form,
@@ -288,7 +293,7 @@ def add_dir():
                                    navigation=nav, form=form,
                                    current_user=fl_log.current_user)
         os.mkdir(full)
-        return redirect('/cloud/' +
+        return redirect('/cloud/' +\
                         cloud_set.cur_dir_from_user.replace('/', '&'))
     return render_template('Form.html', title='Создать папку', navigation=nav,
                            form=form, current_user=fl_log.current_user)
@@ -311,14 +316,14 @@ def rename(operpath):
            {'href': '/logout', 'title': 'Выход'}]
     if form.validate_on_submit():
         new_name = form.name.data
-        new_full = format_name(fl_log.current_user.path + '/cloud/' +
+        new_full = format_name(fl_log.current_user.path + '/cloud/' +\
                                filepath[:-len(filename)] + new_name)
         if os.path.isfile(full):
             new_full += filetype
         # Сначала именно символы
         incor_symb = BAD_CHARS & set(new_name)
         if incor_symb:
-            form.name.errors.append(Errors.BAD_CHAR + '"' +
+            form.name.errors.append(Errors.BAD_CHAR + '"' +\
                                     '", "'.join(incor_symb) + '"')
             return render_template('Form.html', title='Переименование',
                                    navigation=nav, form=form,
@@ -329,7 +334,7 @@ def rename(operpath):
                                    navigation=nav, form=form,
                                    current_user=fl_log.current_user)
         os.rename(full, new_full)
-        return redirect('/cloud/' +
+        return redirect('/cloud/' +\
                         filepath[:-len(filename) - 1].replace('/', '&'))
     form.name.data = filename[:-len(filetype)] if os.path.isfile(full)\
         else filename
@@ -357,7 +362,7 @@ def delete(operpath):
             os.remove(full)
         else:
             shutil.rmtree(full)
-        return redirect('/cloud/' +
+        return redirect('/cloud/' +\
                         filepath[:-len(filename) - 1].replace('/', '&'))
     return render_template('Form.html',
                            title='Удалить ' + filename.split('/')[-1],
@@ -385,8 +390,101 @@ def protector():
     abort(404, message='Файл не найден')
 
 
+class TempPubl:
+    def __init__(self, filename, description, show_email=False,
+                 author=fl_log.current_user):
+        self.autor = author
+        self.filename = fl_log.current_user.path + '/cloud/' + filename
+        self.description = description
+        self.show_email = show_email
+
+
+@app.route('/publications', methods=['GET', 'POST'])
+def publications():
+    if fl_log.current_user.is_authenticated:
+        nav = [{'href': '/', 'title': 'Главная'},
+               {'href': '/cloud', 'title': 'Облако'},
+               {'href': '/settings', 'title': 'Настройки'},
+               {'href': '/logout', 'title': 'Выход'}]
+    else:
+        nav = [{'href': '/login', 'title': 'Войти'},
+               {'href': '/', 'title': 'Главная'}]
+
+    if request.method == 'POST':
+        if 'search_string' in request.form.keys():
+            publ_shower.string = request.form['search_string'].lower()
+    db_session.global_init("db/cloud.sqlite")
+    db_sess = db_session.create_session()
+    all_publs = db_sess.query(Publication).all()[::-1]
+    filter_publs = [{'description': publ.description,
+                     'file_name': publ.filename,
+                     'show_email': publ.show_email,
+                     'user_name': publ.author.username,
+                     'user_photo': publ.author.photo,
+                     'user_email': publ.author.email} for publ in all_publs
+                    if check_publ(publ, publ_shower.string)]
+
+    if request.method == 'POST':
+        if 'next' in request.form.keys():
+            if publ_shower.current_index + PUBL_NUMBER < len(filter_publs):
+                publ_shower.current_index += PUBL_NUMBER
+        elif 'prev' in request.form.keys():
+            if publ_shower.current_index - PUBL_NUMBER >= 0:
+                publ_shower.current_index -= PUBL_NUMBER
+    ind = publ_shower.current_index
+    sliced_publs = filter_publs[ind:ind + PUBL_NUMBER]
+    return render_template('Publications.html', title='Публикации',
+                           navigation=nav,
+                           publications=sliced_publs,
+                           os=os, current_user=fl_log.current_user)
+
+
+def check_publ(publ, string):
+    return string in publ.description.lower()or\
+            string in publ.author.username.lower() or\
+            string in publ.filename.split('/')[-1].lower()
+
+
+@app.route('/make_publication/<path:operpath>', methods=['GET', 'POST'])
+@fl_log.login_required
+def make_publication(operpath):
+    db_session.global_init("db/cloud.sqlite")
+    filename = operpath.replace('&', '/')
+    full = format_name(fl_log.current_user.path + '/cloud/' + filename)
+    if not os.path.exists(full) or not os.path.isfile(full):
+        abort(404, message='Файл не найден')
+    nav = [{'href': '/', 'title': 'Главная'},
+           {'href': '/cloud', 'title': 'Облако'},
+           {'href': '/publications', 'title': 'Публикации'},
+           {'href': '/settings', 'title': 'Настройки'},
+           {'href': '/logout', 'title': 'Выход'}]
+
+    form = MakePublicationForm()
+    if form.validate_on_submit():
+        publ_maker.description = form.description.data
+        publ_maker.show_email = form.show_email.data
+
+    if request.method == 'POST':
+        if 'public' in request.form.keys():
+            new_filename = make_publ_file(full)
+            db_sess = db_session.create_session()
+            publ = Publication(description=publ_maker.description,
+                               show_email=publ_maker.show_email,
+                               filename=new_filename,
+                               user_id=fl_log.current_user.id)
+            db_sess.add(publ)
+            db_sess.commit()
+            return fl.redirect('/publications')
+    form.description.data = publ_maker.description
+    form.show_email.data = publ_maker.show_email
+    publ = TempPubl(filename, publ_maker.description, publ_maker.show_email)
+    return render_template('Publication_maker.html',
+                           title='Создать публикацию', navigation=nav, os=os,
+                           publication=publ,
+                           current_user=fl_log.current_user, form=form)
+
+
 if __name__ == '__main__':
     db_session.global_init("db/cloud.sqlite")
-    app.register_blueprint(publ_blueprint)
     port = int(os.environ.get("PORT", 8080))
-    app.run(host='127.0.0.1', port=port)
+    app.run(host='0.0.0.0', port=port)
