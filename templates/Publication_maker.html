@@ -50,18 +50,31 @@
           class="file-card-prevision publ-card-prevision"
           style="background-image: url({{filename}});"
         ></div>
-        {% else %} {% set types = {'exist': False} %} {% for type_ in
-        os.listdir('static/img/file_types') %} {% if filename.split('.')[-1] in
-        type_.split('.')[0].split('_') and not types['exist'] %} {% set
-        image_way = '../static/img/file_types/' + type_ %}
+        {% else %}
+        {% set types = {'exist': False} %}
+        {% for type_ in os.listdir('static/img/file_types') %}
+        {% if filename.split('.')[-1] in type_.split('.')[0].split('_') and not types['exist'] %}
+        {% set image_way = '../static/img/file_types/' + type_ %}
         <div class="file-card-prevision publ-card-prevision">
           <div
             class="file-card-icon"
             style="background-image: url({{image_way}});"
           ></div>
         </div>
-        {% set _ = types.update({'exist': True}) %} {% endif %} {% endfor %} {%
-        endif %}
+        {% set _ = types.update({'exist': True}) %}
+        {% endif %}
+        {% endfor %}
+        {% if not types['exist'] %}
+              <div class="file-card-prevision">
+                <div
+                  class="file-card-icon"
+                  style="
+                    background-image: url(../static/img/file_types/file.png);
+                  "
+                ></div>
+              </div>
+              {% endif %}
+        {% endif %}
         <div class="publ-card-description">
           {% for p in publication.description.split('\n') %}
           <p class="publ-card-description-text">{{ p }}</p>
