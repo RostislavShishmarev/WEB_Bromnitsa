@@ -82,6 +82,16 @@
           {% set _ = types.update({'exist': True}) %}
           {% endif %}
           {% endfor %}
+          {% if not types['exist'] %}
+              <div class="file-card-prevision">
+                <div
+                  class="file-card-icon"
+                  style="
+                    background-image: url(../static/img/file_types/file.png);
+                  "
+                ></div>
+              </div>
+              {% endif %}
           {% endif %}
           <div class="publ-card-description">
             {% for p in new['description'].split('\n') %}

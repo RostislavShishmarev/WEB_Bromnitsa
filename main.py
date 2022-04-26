@@ -109,12 +109,12 @@ def cloud(operpath=''):
                 filename = request.form['cut-file'].replace('&', '/')
                 filename1 = filename.split('/')[-1]
                 try:
-                    shutil.copy(filename[3:], path + '/boofer/' + filename1)
-                    os.remove(filename[3:])
+                    shutil.copy(filename, path + '/boofer/' + filename1)
+                    os.remove(filename)
                 except PermissionError:
-                    shutil.copytree(filename[3:], path + '/boofer/' +
+                    shutil.copytree(filename, path + '/boofer/' +
                                     filename1)
-                    shutil.rmtree(filename[3:])
+                    shutil.rmtree(filename)
             if 'copy-file' in request.form.keys():
                 shutil.rmtree(path + '/boofer')
                 print(current_dir)
@@ -131,9 +131,11 @@ def cloud(operpath=''):
                 for file in os.listdir(path + '/boofer'):
                     print(file)
                     try:
-                        shutil.move(path + '/boofer/' + file, current_dir + '/' + file)
+                        shutil.move(path + '/boofer/' + file,
+                                    current_dir + '/' + file)
                     except PermissionError:
-                        shutil.copytree(path + '/boofer/' + file, current_dir + '/' +
+                        shutil.copytree(path + '/boofer/' + file,
+                                        current_dir + '/' +
                                         file)
                         shutil.rmtree(path + '/boofer/' + file)
     return render_template('Account.html', title='Облако',
