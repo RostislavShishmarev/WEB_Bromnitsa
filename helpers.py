@@ -96,6 +96,8 @@ def format_name(name):
 
 def make_file(dir_, file):
     name = file.filename
+    if not name:
+        return
     for char in BAD_CHARS:
         name = name.replace(char, '_')
     dir_ += '/'
