@@ -14,6 +14,7 @@ from publications import app as publ_blueprint
 from helpers import Errors, CurrentSettings, alpha_sorter, time_sorter,\
     BAD_CHARS, format_name, make_file, make_photo, DEFAULT_PHOTO,\
     generate_secret_key
+from explorer import Explorer
 
 app = fl.Flask(__name__)
 key = generate_secret_key()
@@ -102,42 +103,16 @@ def cloud(operpath=''):
             if cloud_set.current_index - cloud_set.files_num >= 0:
                 cloud_set.current_index -= cloud_set.files_num
         else:
-            path = fl_log.current_user.path
-            if 'cut-file' in request.form.keys():
-                shutil.rmtree(path + '/boofer')
-                os.mkdir(path + '/boofer')
-                filename = request.form['cut-file'].replace('&', '/')
-                filename1 = filename.split('/')[-1]
-                try:
-                    shutil.copy(filename, path + '/boofer/' + filename1)
-                    os.remove(filename)
-                except PermissionError:
-                    shutil.copytree(filename, path + '/boofer/' +
-                                    filename1)
-                    shutil.rmtree(filename)
-            if 'copy-file' in request.form.keys():
-                shutil.rmtree(path + '/boofer')
-                print(current_dir)
-                os.mkdir(path + '/boofer')
-                filename = request.form['copy-file'].replace('&', '/')
-                filename1 = filename.split('/')[-1]
-                try:
-                    shutil.copy(filename, path + '/boofer/' + filename1)
-                    files = path + '/boofer'
-                except PermissionError:
-                    shutil.copytree(filename, path + '/boofer/' +
-                                    filename1)
-            if 'paste_files' in request.form.keys():
-                for file in os.listdir(path + '/boofer'):
-                    print(file)
-                    try:
-                        shutil.move(path + '/boofer/' + file,
-                                    current_dir + '/' + file)
-                    except PermissionError:
-                        shutil.copytree(path + '/boofer/' + file,
-                                        current_dir + '/' +
-                                        file)
-                        shutil.rmtree(path + '/boofer/' + file)
+            exp = Explorer(fl_log.current_user)
+            for key in request.form.keys():
+                if key == 'copy-file':
+                    name = request.form[key]
+                    exp.copy(name)
+                if key == 'cut-file':
+                    name = request.form[key]
+                    exp.cut(name)
+                if key == 'paste_files':
+                    exp.paste(current_dir)
     return render_template('Account.html', title='Облако',
                            navigation=nav, settings=cloud_set, os=os,
                            current_user=fl_log.current_user)
@@ -192,7 +167,7 @@ def register():
             user.photo = photoname
         db_sess.commit()
         login_user(user)
-        return redirect('/cloud')
+        return redirect('/')
     return render_template('Form.html', title='Регистрация', navigation=nav,
                            form=form, current_user=fl_log.current_user)
 
@@ -218,7 +193,7 @@ def login():
                                    navigation=nav, form=form,
                                    current_user=fl_log.current_user)
         login_user(user)
-        return redirect('/cloud')
+        return redirect('/')
     return render_template('Form.html', title='Авторизация', navigation=nav,
                            form=form, current_user=fl_log.current_user)
 
@@ -282,7 +257,7 @@ def change_password():
                                           fl_log.current_user.id).first()
         user.set_password(form.password.data)
         db_sess.commit()
-        return redirect('/cloud')
+        return redirect('/')
     return render_template('Form.html', title='Сменить пароль', navigation=nav,
                            form=form, current_user=fl_log.current_user)
 
@@ -414,4 +389,4 @@ if __name__ == '__main__':
     db_session.global_init("db/cloud.sqlite")
     app.register_blueprint(publ_blueprint)
     port = int(os.environ.get("PORT", 8080))
-    app.run(host='127.0.0.1', port=port)
+    app.run(host='0.0.0.0', port=port)
