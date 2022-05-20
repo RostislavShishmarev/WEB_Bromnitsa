@@ -1,26 +1,14 @@
 import os
 import flask as fl
-from flask_restful import reqparse, abort, Api, Resource
+from flask_restful import abort, Api, Resource
 from data import db_session as d_s
 from data.publication import Publication
 from data.users import User
-from helpers import make_publ_file
+from rq_parsers import publ_post_parser
 
 app = fl.Flask(__name__)
 api = Api(app)
-while not os.path.exists('work_files/t.txt'):
-    try:
-        with open('work_files/t.txt', encoding='utf8') as f:
-            app.config['SECRET_KEY'] = f.read()
-    except FileNotFoundError as ex:
-        pass
 app.config['JSON_AS_ASCII'] = False
-
-publ_parser = reqparse.RequestParser()
-publ_parser.add_argument('description')
-publ_parser.add_argument('filename', required=True)
-publ_parser.add_argument('show_email', type=bool)
-publ_parser.add_argument('user_id', required=True, type=int)
 
 
 def abort_if_no_user(args):
@@ -29,11 +17,6 @@ def abort_if_no_user(args):
         abort(404, message='User with id {} \
 isn`t found.'.format(args.user_id))
 
-
-def abort_if_no_file(args):
-    if not os.path.exists(args.filename):
-        abort(404, message='File with path {} \
-isn`t found.'.format(args.filename))
 
 
 class PublApi(Resource):
@@ -50,27 +33,25 @@ class PublApi(Resource):
         return fl.jsonify(filter_publs)
 
     def post(self, search_string=''):
-        args = publ_parser.parse_args()
+        args = publ_post_parser.parse_args()
         abort_if_no_user(args)
-        abort_if_no_file(args)
         db_sess = d_s.create_session()
-        new_filename = make_publ_file(args.filename)
         publ = Publication(description=args.description,
                            show_email=args.show_email,
-                           filename=new_filename,
+                           filename=args.filename,
                            user_id=args.user_id)
         db_sess.add(publ)
         db_sess.commit()
         return fl.jsonify({'success': 'OK'})
 
     def check_publ(self, publ, string):
-        return string in publ.description.lower()or\
+        return string in publ.description.lower() or\
                string in publ.author.username.lower() or\
                string in publ.filename.split('/')[-1].lower()
 
 
-api.add_resource(PublApi, '/api/<search_string>', '/api')
+api.add_resource(PublApi, '/api/publ/<search_string>', '/api/publ')
 if __name__ == '__main__':
-    d_s.global_init('db/cloud.sqlite')
+    d_s.global_init('../db/cloud.sqlite')
     port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='127.0.0.1', port=port)

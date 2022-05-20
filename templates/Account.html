@@ -144,7 +144,7 @@
           </div>
         </div>
         <div class="dirs-placeholder">
-          {% for name in settings.sort_func(settings.current_dir, settings.string, settings.reverse_files)[settings.current_index:settings.current_index + settings.files_num] %}
+          {% for name in func_holder.sort_func(settings.current_dir, settings.string, settings.reverse_files)[settings.current_index:settings.current_index + settings.files_num] %}
           {% set way = '/'.join(['..', settings.current_dir, name]) %}
           <div class="file-card">
             <div class="file-card-main">

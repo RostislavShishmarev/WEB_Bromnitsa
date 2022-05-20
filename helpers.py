@@ -1,5 +1,6 @@
 import os
 import shutil
+import flask as fl
 from flask_restful import abort
 from random import choices
 
@@ -21,19 +22,25 @@ class Errors:
     BAD_FORMAT = "Некорректный формат файла."
 
 
-class CurrentSettings:
-    SMALL, BIG = 'small', 'big'
+class FuncHolder:
+    def __init__(self, func):
+        self.sort_func = func
 
-    def __init__(self):
-        self.current_dir = ''
-        self.cur_dir_from_user = ''
-        self.menu_mode = CurrentSettings.SMALL
-        self.out_of_root = False
-        self.string = ''
-        self.sort_func = alpha_sorter
-        self.reverse_files = False
-        self.current_index = 0
-        self.files_num = 10
+
+class CloudSettingsDefault:
+    current_dir = ''
+    cur_dir_from_user = ''
+    menu_mode = 'small'
+    out_of_root = False
+    string = ''
+    func_type = 'alpha'
+    reverse_files = False
+    current_index = 0
+    files_num = 10
+
+
+class CloudSettings:
+    SMALL, BIG = 'small', 'big'
 
     def change_mode(self):
         if self.menu_mode == CurrentSettings.BIG:
@@ -53,11 +60,41 @@ class CurrentSettings:
         self.out_of_root = bool(dir_)
         return self.current_dir
 
+    def __setattr__(self, key, value):
+        if 'cloud_set' not in fl.session.keys():
+            fl.session['cloud_set'] = {}
+        fl.session['cloud_set'][key] = value
+
+    def __getattr__(self, item):
+        if 'cloud_set' not in fl.session.keys():
+            fl.session['cloud_set'] = {}
+        return fl.session[
+            'cloud_set'].get(item, getattr(CloudSettingsDefault, item))
+
 
 class Saver:
     def __init__(self, **kwargs):
         for key, val in kwargs.items():
             setattr(self, key, val)
+
+
+def get_func(key):
+    dict_ = {'alpha': alpha_sorter,
+             'time': time_sorter}
+    return dict_.get(key, alpha_sorter)
+
+
+def update_dir(dir_, path):
+    dir_ = format_name(dir_)
+    cur_dir = format_name(path + '/cloud/' + dir_)
+    if not os.path.exists(cur_dir):
+        abort(404, message='Директория не найдена')
+    if dir_ != fl.session['cur_dir_from_user']:
+        fl.session['current_index'] = 0
+    fl.session['cur_dir_from_user'] = dir_
+    fl.session['current_dir'] = cur_dir
+    fl.session['out_of_root'] = bool(dir_)
+    return fl.session['current_dir']
 
 
 def alpha_sorter(cur_dir, string, reverse=False):
@@ -135,6 +172,7 @@ def make_publ_file(filename):
         ind += 1
     shutil.copy(filename, user_dir + '/public/' + new_name)
     return user_dir + '/public/' + new_name
+
 
 def generate_secret_key():
     return ''.join(choices(list(SYMBOLS), k=500))

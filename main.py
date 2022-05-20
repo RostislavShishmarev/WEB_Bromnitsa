@@ -11,9 +11,9 @@ from forms.forms import RegisterForm, LoginForm, SettingsForm,\
 import data.db_session as db_session
 from data.users import User
 from publications import app as publ_blueprint
-from helpers import Errors, CurrentSettings, alpha_sorter, time_sorter,\
+from helpers import Errors, CloudSettings,\
     BAD_CHARS, format_name, make_file, make_photo, DEFAULT_PHOTO,\
-    generate_secret_key
+    generate_secret_key, get_func, FuncHolder
 from explorer import Explorer
 
 app = fl.Flask(__name__)
@@ -24,7 +24,7 @@ with open('work_files/t.txt', mode='w', encoding='utf8') as f:
 app.config['JSON_AS_ASCII'] = False
 login_manager = fl_log.LoginManager()
 login_manager.init_app(app)
-cloud_set = CurrentSettings()
+cloud_set = CloudSettings()
 
 
 @login_manager.user_loader
@@ -86,17 +86,18 @@ def cloud(operpath=''):
             cloud_set.current_index = 0
         elif 'sort_selector' in request.form.keys():
             if 'По названию' in request.form['sort_selector']:
-                func = alpha_sorter
+                func_type = 'alpha'
             else:
-                func = time_sorter
+                func_type = 'time'
             if request.form.get('reverse', False):
                 cloud_set.reverse_files = True
             else:
                 cloud_set.reverse_files = False
-            cloud_set.sort_func = func
+            cloud_set.func_type = func_type
         elif 'next' in request.form.keys():
-            n = len(cloud_set.sort_func(current_dir, cloud_set.string,
-                                        cloud_set.reverse_files))
+            func = get_func(cloud_set.func_type)
+            n = len(func(current_dir, cloud_set.string,
+                         cloud_set.reverse_files))
             if cloud_set.current_index + cloud_set.files_num < n:
                 cloud_set.current_index += cloud_set.files_num
         elif 'prev' in request.form.keys():
@@ -113,9 +114,11 @@ def cloud(operpath=''):
                     exp.cut(name)
                 if key == 'paste_files':
                     exp.paste(current_dir)
+    holder = FuncHolder(get_func(cloud_set.func_type))
     return render_template('Account.html', title='Облако',
-                           navigation=nav, settings=cloud_set, os=os,
-                           current_user=fl_log.current_user)
+                           navigation=nav, settings=cloud_set,
+                           func_holder=holder,
+                           os=os, current_user=fl_log.current_user)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -389,4 +392,4 @@ if __name__ == '__main__':
     db_session.global_init("db/cloud.sqlite")
     app.register_blueprint(publ_blueprint)
     port = int(os.environ.get("PORT", 8080))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='127.0.0.1', port=port)

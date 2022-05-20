@@ -5,11 +5,11 @@ import flask_login
 from flask import render_template, request
 from flask_restful import abort
 from forms.forms import MakePublicationForm
-from helpers import Saver, format_name
+from helpers import Saver, format_name, make_publ_file
 
 app = fl.Blueprint('news_api',  __name__, template_folder='templates')
 PUBL_NUMBER = 6
-PUBL_API = '127.0.0.1:5000'
+PUBL_API = '127.0.0.1:5000/api/publ'
 publ_maker = Saver(description='', show_email=False)
 publ_shower = Saver(current_index=0, string='')
 
@@ -30,6 +30,12 @@ class TempPubl:
         self.show_email = show_email
 
 
+def abort_if_no_file(args):
+    if not os.path.exists(args.filename):
+        abort(404, message='File with path {} \
+isn`t found.'.format(args.filename))
+
+
 @app.route('/publications', methods=['GET', 'POST'])
 def publications():
     if flask_login.current_user.is_authenticated:
@@ -44,7 +50,7 @@ def publications():
     if request.method == 'POST':
         if 'search_string' in request.form.keys():
             publ_shower.string = request.form['search_string'].lower()
-    json_publs = rq.get('http://{}/api'.format(PUBL_API) +
+    json_publs = rq.get('http://{}'.format(PUBL_API) +
                         ('/' + publ_shower.string
                          if publ_shower.string else '')).json()
 
@@ -87,12 +93,12 @@ def make_publication(operpath):
             path = flask_login.current_user.path
             publ_dict = {
                 'description': publ_maker.description,
-                'filename': path + '/cloud/' + filename,
+                'filename': make_publ_file(path + '/cloud/' + filename),
                 'user_id': flask_login.current_user.id,
             }
             if publ_maker.show_email:
                 publ_dict['show_email'] = publ_maker.show_email
-            res = rq.post('http://{}/api'.format(PUBL_API),
+            res = rq.post('http://{}'.format(PUBL_API),
                           params=publ_dict).json()
             print(res)
             return fl.redirect('/publications')
