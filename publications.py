@@ -5,20 +5,14 @@ import flask_login
 from flask import render_template, request
 from flask_restful import abort
 from forms.forms import MakePublicationForm
-from helpers import Saver, format_name, make_publ_file
+from helpers import BaseSettings, format_name, make_publ_file
 
 app = fl.Blueprint('news_api',  __name__, template_folder='templates')
 PUBL_NUMBER = 6
 PUBL_API = '127.0.0.1:5000/api/publ'
-publ_maker = Saver(description='', show_email=False)
-publ_shower = Saver(current_index=0, string='')
-
-
-@app.route('/favicon.ico')
-def favicon():
-    return fl.send_from_directory(os.path.join(app.root_path, 'static'),
-                                  'favicon.ico',
-                                  mimetype='image/vnd.microsoft.icon')
+publ_maker = BaseSettings('publ_maker', {'description': '',
+                                         'show_email': False})
+publ_shower = BaseSettings('publ_shower', {'current_index': 0, 'string': ''})
 
 
 class TempPubl:
@@ -32,8 +26,8 @@ class TempPubl:
 
 def abort_if_no_file(args):
     if not os.path.exists(args.filename):
-        abort(404, message='File with path {} \
-isn`t found.'.format(args.filename))
+        abort(404, message='File with path {} isn`t found.'.format(
+            args.filename))
 
 
 @app.route('/publications', methods=['GET', 'POST'])

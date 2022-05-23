@@ -1,14 +1,28 @@
 import os
 import shutil
 import flask as fl
+import logging as lg
 from flask_restful import abort
 from random import choices
 
+LOG_FORMAT = '%(asctime)s %(levelname)s %(filename)s %(message)s'
 IMAGE_TYPES = ('jpg', 'jpeg', 'png', 'svg', 'webp', 'gif', 'ico')
 BAD_CHARS = {' ', '/', '\\', '&', '?', '@', '"', "'", '(', ')'}
 DEFAULT_PHOTO = 'static/img/No_user.jpg'
 SYMBOLS = '1234567890!@#$%^&*()~`-=_+ qwertyuiop[]asdfghjkl;zxcvbnm,./\
 QWERTYUIOP{}ASDFGHJKL:"ZXCVBNM<>?'
+DEFAULT_CLOUD_SET = {
+    'current_dir': '',
+    'cur_dir_from_user': '',
+    'menu_mode': 'small',
+    'out_of_root': False,
+    'string': '',
+    'func_type': 'alpha',
+    'reverse_files': False,
+    'current_index': 0,
+    'files_num': 10}
+
+lg.basicConfig(level='DEBUG', format=LOG_FORMAT)
 
 
 class Errors:
@@ -27,26 +41,48 @@ class FuncHolder:
         self.sort_func = func
 
 
-class CloudSettingsDefault:
-    current_dir = ''
-    cur_dir_from_user = ''
-    menu_mode = 'small'
-    out_of_root = False
-    string = ''
-    func_type = 'alpha'
-    reverse_files = False
-    current_index = 0
-    files_num = 10
+class BaseSettings:
+    def __init__(self, name, base):
+        self.__dict__['name'] = name
+        self.__dict__['base'] = base
+
+    def _make_dict_if_not_exists(self):
+        if self.name not in fl.session.keys():
+            lg.debug('{} dict has remade'.format(self.name))
+            fl.session[self.name] = self.base
+
+    def __setattr__(self, key, value):
+        self._make_dict_if_not_exists()
+        fl.session[self.name][key] = value
+        fl.session.modified = True
+
+    def __getattr__(self, item):
+        self._make_dict_if_not_exists()
+        return fl.session[self.name][item]
+
+    def serialized(self):
+        self._make_dict_if_not_exists()
+        lg.debug('Serializing {}'.format(self.name))
+        return fl.session[self.name]
+
+    def log_self(self):
+        self._make_dict_if_not_exists()
+        lg.debug('SETTINGS DATA: \n  flask.session["{}"]:\n  >> {}'.format(
+            self.name, '\n  >> '.join(['{}: {}'.format(k, v)
+                                       for k, v in fl.session[
+                                           self.name].items()])))
 
 
-class CloudSettings:
+class CloudSettings(BaseSettings):
     SMALL, BIG = 'small', 'big'
 
     def change_mode(self):
-        if self.menu_mode == CurrentSettings.BIG:
-            self.menu_mode = CurrentSettings.SMALL
+        lg.debug('Changing menu_mode: begin: {}'.format(self.menu_mode))
+        if self.menu_mode == CloudSettings.BIG:
+            self.menu_mode = CloudSettings.SMALL
         else:
-            self.menu_mode = CurrentSettings.BIG
+            self.menu_mode = CloudSettings.BIG
+        lg.debug('Changing menu_mode: end: {}'.format(self.menu_mode))
 
     def update_dir(self, dir_, path):
         dir_ = format_name(dir_)
@@ -59,23 +95,6 @@ class CloudSettings:
         self.current_dir = cur_dir
         self.out_of_root = bool(dir_)
         return self.current_dir
-
-    def __setattr__(self, key, value):
-        if 'cloud_set' not in fl.session.keys():
-            fl.session['cloud_set'] = {}
-        fl.session['cloud_set'][key] = value
-
-    def __getattr__(self, item):
-        if 'cloud_set' not in fl.session.keys():
-            fl.session['cloud_set'] = {}
-        return fl.session[
-            'cloud_set'].get(item, getattr(CloudSettingsDefault, item))
-
-
-class Saver:
-    def __init__(self, **kwargs):
-        for key, val in kwargs.items():
-            setattr(self, key, val)
 
 
 def get_func(key):

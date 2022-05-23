@@ -11,20 +11,20 @@ from forms.forms import RegisterForm, LoginForm, SettingsForm,\
 import data.db_session as db_session
 from data.users import User
 from publications import app as publ_blueprint
-from helpers import Errors, CloudSettings,\
+from helpers import lg, Errors, CloudSettings,\
     BAD_CHARS, format_name, make_file, make_photo, DEFAULT_PHOTO,\
-    generate_secret_key, get_func, FuncHolder
+    generate_secret_key, get_func, FuncHolder, DEFAULT_CLOUD_SET
 from explorer import Explorer
 
 app = fl.Flask(__name__)
 key = generate_secret_key()
 app.config['SECRET_KEY'] = key
-with open('work_files/t.txt', mode='w', encoding='utf8') as f:
-    f.write(key)
+#with open('work_files/t.txt', mode='w', encoding='utf8') as f:
+#    f.write(key)
 app.config['JSON_AS_ASCII'] = False
 login_manager = fl_log.LoginManager()
 login_manager.init_app(app)
-cloud_set = CloudSettings()
+cloud_set = CloudSettings('cloud_set', DEFAULT_CLOUD_SET)
 
 
 @login_manager.user_loader
@@ -36,9 +36,7 @@ def load_user(user_id):
 @app.route('/logout')
 @fl_log.login_required
 def logout():
-    global cloud_set
     fl_log.logout_user()
-    cloud_set = CurrentSettings()
     return redirect("/")
 
 
@@ -68,6 +66,8 @@ def main_page():
 @app.route('/cloud/<path:operpath>', methods=['GET', 'POST'])
 @fl_log.login_required
 def cloud(operpath=''):
+    lg.debug('><><><>< RELOAD cloud window ><><><><')
+    lg.debug('flask.session (BEGIN): {}'.format(fl.session))
     nav = [{'href': '/', 'title': 'Главная'},
            {'href': '/publications', 'title': 'Публикации'},
            {'href': '/settings', 'title': 'Настройки'},
@@ -115,8 +115,9 @@ def cloud(operpath=''):
                 if key == 'paste_files':
                     exp.paste(current_dir)
     holder = FuncHolder(get_func(cloud_set.func_type))
+    lg.debug('flask.session (END): {}'.format(fl.session))
     return render_template('Account.html', title='Облако',
-                           navigation=nav, settings=cloud_set,
+                           navigation=nav, settings=cloud_set.serialized(),
                            func_holder=holder,
                            os=os, current_user=fl_log.current_user)
 
