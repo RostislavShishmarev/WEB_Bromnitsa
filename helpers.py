@@ -103,19 +103,6 @@ def get_func(key):
     return dict_.get(key, alpha_sorter)
 
 
-def update_dir(dir_, path):
-    dir_ = format_name(dir_)
-    cur_dir = format_name(path + '/cloud/' + dir_)
-    if not os.path.exists(cur_dir):
-        abort(404, message='Директория не найдена')
-    if dir_ != fl.session['cur_dir_from_user']:
-        fl.session['current_index'] = 0
-    fl.session['cur_dir_from_user'] = dir_
-    fl.session['current_dir'] = cur_dir
-    fl.session['out_of_root'] = bool(dir_)
-    return fl.session['current_dir']
-
-
 def alpha_sorter(cur_dir, string, reverse=False):
     return sort_func(cur_dir, lambda x: x, string, reverse)
 

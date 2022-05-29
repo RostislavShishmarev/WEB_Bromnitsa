@@ -1,38 +1,20 @@
 import os
 import flask as fl
-from flask_restful import abort, Api, Resource
+import logging as lg
+from flask_restful import Api, Resource
 from data import db_session as d_s
-from data.publication import Publication
 from data.users import User
-from rq_parsers import publ_get_parser, only_key_parser, publ_post_parser, publ_put_parser
-from helpers import generate_secret_key
+from data.publication import Publication
+from rq_parsers import publ_get_parser, only_key_parser, publ_post_parser,\
+    publ_put_parser, user_post_parser, user_put_parser, check_password_parser
+from helpers import abort_if_no_user, abort_if_no_publ,abort_if_wrong_key,\
+    abort_if_wrong_email, USER_FIELDS, PUBL_FIELDS
 
 app = fl.Flask(__name__)
 api = Api(app)
 app.config['JSON_AS_ASCII'] = False
-SECRET_KEYS = [generate_secret_key() for _ in range(1)]
-with open('secret_keys.txt', mode='w', encoding='utf8') as f:
-    f.write('\n'.join(SECRET_KEYS))
-USER_FIELDS = ['username', 'email', 'photo', 'path', 'password']
-PUBL_FIELDS = ['description', 'filename', 'show_email', 'user_id']
-
-
-def abort_if_no_user(user_id):
-    sess = d_s.create_session()
-    if not sess.query(User).get(user_id):
-        abort(404, message='User with id {} isn`t found.'.format(user_id))
-
-
-def abort_if_no_publ(publ_id):
-    sess = d_s.create_session()
-    if not sess.query(Publication).get(publ_id):
-        abort(404, message='Publication with id {} \
-isn`t found.'.format(publ_id))
-
-
-def abort_if_wrong_key(secret_key):
-    if secret_key not in SECRET_KEYS:
-        abort(403, message='Wrong secret key')
+lg.basicConfig(level='DEBUG',
+               format='%(asctime)s %(levelname)s %(filename)s %(message)s')
 
 
 class UserResource(Resource):
@@ -46,10 +28,35 @@ class UserResource(Resource):
         return fl.jsonify(result)
 
     def put(self, user_id):
-        pass
+        args = user_put_parser.parse_args()
+        abort_if_wrong_key(args.secret_key)
+        abort_if_no_user(user_id)
+        db_sess = d_s.create_session()
+        user = db_sess.query(User).get(user_id)
+        lg.debug('PUT in users:')
+        for field in USER_FIELDS:
+            if field in args:
+                val = args[field]
+                lg.debug('>>  {}: {} -- start'.format(field, val))
+                if field == 'password':
+                    user.set_password(val)
+                    continue
+                elif field == 'email':
+                    abort_if_wrong_email(val, user_id=user_id)
+                setattr(user, field, val)
+                lg.debug('    {}: {} -- end'.format(field, val))
+        db_sess.commit()
+        return fl.jsonify({'success': True})
 
     def delete(self, user_id):
-        pass
+        args = only_key_parser.parse_args()
+        abort_if_wrong_key(args.secret_key)
+        abort_if_no_user(user_id)
+        db_sess = d_s.create_session()
+        user = db_sess.query(User).get(user_id)
+        db_sess.delete(user)
+        db_sess.commit()
+        return fl.jsonify({'success': True})
 
 
 class UserListResource(Resource):
@@ -63,8 +70,35 @@ class UserListResource(Resource):
         return fl.jsonify(result)
 
     def post(self):
-        pass
+        args = user_post_parser.parse_args()
+        abort_if_wrong_key(args.secret_key)
+        abort_if_wrong_email(args.email)
+        db_sess = d_s.create_session()
+        user = User(
+            username=args.username,
+            email=args.email,
+            photo=args.photo,
+            path=''
+        )
+        user.set_password(args.password)
+        db_sess.add(user)
+        user_with_id = db_sess.query(User).filter(User.email ==
+                                                  args.email).first()
+        path = 'static/users/' + str(user_with_id.id)
+        user_with_id.path = path
+        db_sess.commit()
+        return fl.jsonify({'success': True})
 
+
+class CheckUserResource(Resource):
+    def get(self, user_id):
+        args = check_password_parser.parse_args()
+        abort_if_wrong_key(args.secret_key)
+        abort_if_no_user(user_id)
+        db_sess = d_s.create_session()
+        user = db_sess.query(User).get(user_id)
+        return fl.jsonify({'success': user.check_password(args.password)})
+        
 
 class BasePublResourse:
     def check_publ(self, publ, string):
@@ -95,14 +129,17 @@ class PublResource(Resource, BasePublResourse):
         abort_if_no_publ(publ_id)
         db_sess = d_s.create_session()
         publ = db_sess.query(Publication).get(publ_id)
+        lg.debug('PUT in publications:')
         for field in PUBL_FIELDS:
             if field in args:
                 val = args[field]
+                lg.debug('>>  {}: {} -- start'.format(field, val))
                 if field == 'user_id':
                     abort_if_no_user(val)
                 setattr(publ, field, val)
+                lg.debug('    {}: {} -- end'.format(field, val))
         db_sess.commit()
-        return fl.jsonify({'success': 'OK'})
+        return fl.jsonify({'success': True})
 
     def delete(self, publ_id):
         args = only_key_parser.parse_args()
@@ -111,7 +148,7 @@ class PublResource(Resource, BasePublResourse):
         db_sess = d_s.create_session()
         db_sess.delete(db_sess.query(Publication).get(publ_id))
         db_sess.commit()
-        return fl.jsonify({'success': 'OK'})
+        return fl.jsonify({'success': True})
 
 
 class PublListResource(Resource, BasePublResourse):
@@ -141,12 +178,16 @@ class PublListResource(Resource, BasePublResourse):
                            user_id=args.user_id)
         db_sess.add(publ)
         db_sess.commit()
-        return fl.jsonify({'success': 'OK'})
+        return fl.jsonify({'success': True})
 
 
-api.add_resource(UserApi, '/api/users')
+api.add_resource(UserListResource, '/api/users')
+api.add_resource(UserResource, '/api/users/<int:user_id>')
+api.add_resource(CheckUserResource, '/api/users/check_password/<int:user_id>')
 api.add_resource(PublListResource, '/api/publications')
+api.add_resource(PublResource, '/api/publications/<int:publ_id>')
+
 if __name__ == '__main__':
-    d_s.global_init('../db/cloud.sqlite')
+    d_s.global_init('db/cloud.sqlite')
     port = int(os.environ.get("PORT", 5000))
     app.run(host='127.0.0.1', port=port)

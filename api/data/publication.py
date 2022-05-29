@@ -1,7 +1,7 @@
-import sqlalchemy
-from sqlalchemy import orm
-from data.db_session import SqlAlchemyBase
 import datetime
+import sqlalchemy
+from data.db_session import SqlAlchemyBase
+from sqlalchemy import orm
 
 
 class Publication(SqlAlchemyBase):
