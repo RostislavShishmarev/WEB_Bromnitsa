@@ -8,7 +8,8 @@ DEFAULT_PHOTO = 'static/img/No_user.jpg'
 SYMBOLS = list('1234567890!@#$%^&*()~`-=_+ qwertyuiop[]asdfghjkl;zxcvbnm,./\
 QWERTYUIOP{}ASDFGHJKL:"ZXCVBNM<>?')
 USER_FIELDS = ['id', 'username', 'email', 'photo', 'path', 'password']
-PUBL_FIELDS = ['id', 'description', 'filename', 'show_email', 'user_id']
+PUBL_FIELDS = ['id', 'description', 'filename', 'show_email', 'user_id',
+               'modified_date']
 SECRET_KEYS = [''.join(choices(SYMBOLS, k=50)) for _ in range(1)]
 with open('secret_keys.txt', mode='w', encoding='utf8') as f:
     f.write('\n'.join(SECRET_KEYS))

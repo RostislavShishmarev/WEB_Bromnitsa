@@ -4,10 +4,12 @@ import unittest as ut
 ut.TestLoader.sortTestMethodsUsing = None
 with open('secret_keys.txt', encoding='utf8') as f:
     KEY = f.read().split('\n')[0]
-RQ_USERS_START = 'http://127.0.0.1:5000/api/users'
+SERVER = 'apibromnitsy.pythonanywhere.com'
+RQ_USERS_START = 'http://{}/api/users'.format(SERVER)
+RQ_PUBLS_START = 'http://{}/api/publications'.format(SERVER)
 
 
-class TestUserApi(ut.TestCase):
+class Test1UserApi(ut.TestCase):
     def test_01_get_all_users(self):
         res = rq.get(RQ_USERS_START, params={'secret_key': KEY}).json()
         self.assertEqual(res, [])
@@ -118,6 +120,120 @@ class TestUserApi(ut.TestCase):
         }).json()
         self.assertEqual(res, {'success': True})
 
+
+class Test2PublApi(ut.TestCase):
+    def test_01_get_all_publs(self):
+        res = rq.get(RQ_PUBLS_START, params={'secret_key': KEY}).json()
+        self.assertEqual(res, [])
+
+    def test_02_post_publ(self):
+        res = rq.post(RQ_PUBLS_START, params={'secret_key': KEY,
+                                              'description': 'First publ',
+                                              'filename': '<path>',
+                                              'show_email': True,
+                                              'user_id': 1}).json()
+        self.assertEqual(res, {'success': True})
+
+    def test_03_get_all_publs_after_adding(self):
+        res = rq.get(RQ_PUBLS_START, params={'secret_key': KEY}).json()
+        del res[0]['modified_date']
+        self.assertEqual(res, [{'id': 1,
+                                'description': 'First publ',
+                                'filename': '<path>',
+                                'show_email': True,
+                                'user_id': 1}])
+
+    def test_04_get_publ(self):
+        res = rq.get(RQ_PUBLS_START + '/1', params={'secret_key': KEY}).json()
+        del res['modified_date']
+        self.assertEqual(res, {'id': 1,
+                               'description': 'First publ',
+                               'filename': '<path>',
+                               'show_email': True,
+                               'user_id': 1})
+
+    def test_05_put_publ(self):
+        res = rq.put(RQ_PUBLS_START + '/1', params={
+            'secret_key': KEY,
+            'description': 'None',
+            'filename': '<path2>',
+            'show_email': False,
+            'user_id': 2
+        }).json()
+        self.assertEqual(res, {'success': True})
+
+    def test_08_get_all_publs_after_adding(self):
+        res = rq.get(RQ_PUBLS_START, params={'secret_key': KEY}).json()
+        del res[0]['modified_date']
+        self.assertEqual(res, [{'id': 1,
+                                'description': 'None',
+                                'filename': '<path2>',
+                                'show_email': False,
+                                'user_id': 2}])
+
+    def test_09_get_publ(self):
+        res = rq.get(RQ_PUBLS_START + '/1', params={'secret_key': KEY}).json()
+        del res['modified_date']
+        self.assertEqual(res, {'id': 1,
+                               'description': 'None',
+                               'filename': '<path2>',
+                               'show_email': False,
+                               'user_id': 2})
+
+    def test_12_bad_key(self):
+        res = rq.get(RQ_PUBLS_START, params={'secret_key': 'qwerty'})
+        self.assertEqual(res.ok, False)
+        self.assertEqual(res.json(), {'message': 'Wrong secret key'})
+
+    def test_13_bad_post_no_user(self):
+        res = rq.post(RQ_PUBLS_START, params={
+            'secret_key': KEY,
+            'user_id': 3,
+            'description': 'None',
+            'filename': '<path2>',
+            'show_email': False
+        })
+        self.assertEqual(res.ok, False)
+        self.assertEqual(res.json(),
+                         {'message': 'User with id 3 isn`t found'})
+
+    def test_14_bad_put_existing_email(self):
+        res = rq.put(RQ_PUBLS_START + '/1', params={
+            'secret_key': KEY,
+            'user_id': 3
+        })
+        self.assertEqual(res.ok, False)
+        self.assertEqual(res.json(),
+                         {'message': 'User with id 3 isn`t found'})
+
+    def test_15_bad_put_no_id(self):
+        res = rq.put(RQ_PUBLS_START + '/2', params={
+            'secret_key': KEY,
+            'filename': '<path3>'
+        })
+        self.assertEqual(res.ok, False)
+        self.assertEqual(res.json(),
+                         {'message': 'Publication with id 2 isn`t found'})
+
+    def test_15_bad_delete(self):
+        res = rq.delete(RQ_PUBLS_START + '/2', params={
+            'secret_key': KEY
+        })
+        self.assertEqual(res.ok, False)
+        self.assertEqual(res.json(),
+                         {'message': 'Publication with id 2 isn`t found'})
+
+    def test_16_delete_publ(self):
+        res = rq.delete(RQ_PUBLS_START + '/1', params={
+            'secret_key': KEY
+        }).json()
+        self.assertEqual(res, {'success': True})
+
+    def test_17_get_al_publss(self):
+        self.test_01_get_all_publs()
+
+
+class Test3UserApi(ut.TestCase):
     def test_14_1_bad_put_existing_email(self):
         res = rq.put(RQ_USERS_START + '/2', params={
             'secret_key': KEY,
@@ -146,21 +262,22 @@ class TestUserApi(ut.TestCase):
         self.assertEqual(res.json(),
                          {'message': 'User with id 2 isn`t found'})
 
-    def test_15_bad_delete(self):
+    def test_16_bad_delete(self):
         res = rq.delete(RQ_USERS_START + '/2', params={
             'secret_key': KEY
         })
         self.assertEqual(res.ok, False)
         self.assertEqual(res.json(), {'message': 'User with id 2 isn`t found'})
 
-    def test_16_delete_user(self):
+    def test_17_delete_user(self):
         res = rq.delete(RQ_USERS_START + '/1', params={
             'secret_key': KEY
         }).json()
         self.assertEqual(res, {'success': True})
 
-    def test_17_get_al_users(self):
-        self.test_01_get_all_users()
+    def test_18_get_al_users(self):
+        res = rq.get(RQ_USERS_START, params={'secret_key': KEY}).json()
+        self.assertEqual(res, [])
 
 
 if __name__ == '__main__':

@@ -19,6 +19,7 @@ lg.basicConfig(level='DEBUG',
 
 class UserResource(Resource):
     def get(self, user_id):
+        d_s.global_init('db/cloud.sqlite')
         args = only_key_parser.parse_args()
         abort_if_wrong_key(args.secret_key)
         abort_if_no_user(user_id)
@@ -28,6 +29,7 @@ class UserResource(Resource):
         return fl.jsonify(result)
 
     def put(self, user_id):
+        d_s.global_init('db/cloud.sqlite')
         args = user_put_parser.parse_args()
         abort_if_wrong_key(args.secret_key)
         abort_if_no_user(user_id)
@@ -37,7 +39,10 @@ class UserResource(Resource):
         for field in USER_FIELDS:
             if field in args:
                 val = args[field]
-                lg.debug('>>  {}: {} -- start'.format(field, val))
+                if val is None:
+                    continue
+                lg.debug('>>  {}: {} -- start'.format(field,
+                                                      getattr(user, field)))
                 if field == 'password':
                     user.set_password(val)
                     continue
@@ -49,6 +54,7 @@ class UserResource(Resource):
         return fl.jsonify({'success': True})
 
     def delete(self, user_id):
+        d_s.global_init('db/cloud.sqlite')
         args = only_key_parser.parse_args()
         abort_if_wrong_key(args.secret_key)
         abort_if_no_user(user_id)
@@ -61,6 +67,7 @@ class UserResource(Resource):
 
 class UserListResource(Resource):
     def get(self):
+        d_s.global_init('db/cloud.sqlite')
         args = only_key_parser.parse_args()
         abort_if_wrong_key(args.secret_key)
         db_sess = d_s.create_session()
@@ -70,6 +77,7 @@ class UserListResource(Resource):
         return fl.jsonify(result)
 
     def post(self):
+        d_s.global_init('db/cloud.sqlite')
         args = user_post_parser.parse_args()
         abort_if_wrong_key(args.secret_key)
         abort_if_wrong_email(args.email)
@@ -92,6 +100,7 @@ class UserListResource(Resource):
 
 class CheckUserResource(Resource):
     def get(self, user_id):
+        d_s.global_init('db/cloud.sqlite')
         args = check_password_parser.parse_args()
         abort_if_wrong_key(args.secret_key)
         abort_if_no_user(user_id)
@@ -109,31 +118,31 @@ class BasePublResourse:
 
 class PublResource(Resource, BasePublResourse):
     def get(self, publ_id):
+        d_s.global_init('db/cloud.sqlite')
         args = only_key_parser.parse_args()
         abort_if_wrong_key(args.secret_key)
         abort_if_no_publ(publ_id)
         db_sess = d_s.create_session()
         publ = db_sess.query(Publication).get(publ_id)
-        result = {'id': publ.id,
-                  'description': publ.description,
-                  'file_name': publ.filename,
-                  'show_email': publ.show_email,
-                  'user_name': publ.author.username,
-                  'user_photo': publ.author.photo,
-                  'user_email': publ.author.email}
+        result = {field: getattr(publ, field) for field in PUBL_FIELDS}
         return fl.jsonify(result)
 
     def put(self, publ_id):
+        d_s.global_init('db/cloud.sqlite')
         args = publ_put_parser.parse_args()
         abort_if_wrong_key(args.secret_key)
         abort_if_no_publ(publ_id)
         db_sess = d_s.create_session()
         publ = db_sess.query(Publication).get(publ_id)
+        print(args['show_email'], args.show_email, getattr(args, 'show_email'))
         lg.debug('PUT in publications:')
         for field in PUBL_FIELDS:
             if field in args:
                 val = args[field]
-                lg.debug('>>  {}: {} -- start'.format(field, val))
+                if val is None:
+                    continue
+                lg.debug('>>  {}: {} -- start'.format(field,
+                                                      getattr(publ, field)))
                 if field == 'user_id':
                     abort_if_no_user(val)
                 setattr(publ, field, val)
@@ -142,6 +151,7 @@ class PublResource(Resource, BasePublResourse):
         return fl.jsonify({'success': True})
 
     def delete(self, publ_id):
+        d_s.global_init('db/cloud.sqlite')
         args = only_key_parser.parse_args()
         abort_if_wrong_key(args.secret_key)
         abort_if_no_publ(publ_id)
@@ -153,21 +163,18 @@ class PublResource(Resource, BasePublResourse):
 
 class PublListResource(Resource, BasePublResourse):
     def get(self):
+        d_s.global_init('db/cloud.sqlite')
         args = publ_get_parser.parse_args()
         abort_if_wrong_key(args.secret_key)
         db_sess = d_s.create_session()
         all_publs = db_sess.query(Publication).all()[::-1]
-        filter_publs = [{'id': publ.id,
-                         'description': publ.description,
-                         'file_name': publ.filename,
-                         'show_email': publ.show_email,
-                         'user_name': publ.author.username,
-                         'user_photo': publ.author.photo,
-                         'user_email': publ.author.email} for publ in all_publs
+        filter_publs = [{field: getattr(publ, field) for field in PUBL_FIELDS}
+                        for publ in all_publs
                         if self.check_publ(publ, args.search_string)]
         return fl.jsonify(filter_publs)
 
     def post(self):
+        d_s.global_init('db/cloud.sqlite')
         args = publ_post_parser.parse_args()
         abort_if_wrong_key(args.secret_key)
         abort_if_no_user(args.user_id)
