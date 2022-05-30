@@ -29,8 +29,8 @@
         {{publication.filename.split('/')[-1]}}
       </div>
       <div class="publ-card-user-block publ-card-block">
-        <div class="publ-card-user-name">{{publication.autor.username}}</div>
-        {% set photo_name = '../' + publication.autor.photo %}
+        <div class="publ-card-user-name">{{publication.author.username}}</div>
+        {% set photo_name = '../' + publication.author.photo %}
         <div
           class="publ-card-user-photo"
           style="background-image: url({{photo_name}})"
@@ -89,7 +89,7 @@
           >↓</a
         >
         {% if publication.show_email %}
-        <div class="publ-card-email publ-card-block">{{ publication.autor.email }}</div>
+        <div class="publ-card-email publ-card-block">{{ publication.author.email }}</div>
         {% endif %}
       </div>
     </div>

@@ -45,10 +45,10 @@
     {% for new in publications %}
     <div class="publ-card">
       <div class="publ-card-title">
-        <div class="publ-card-title-text publ-card-block">{{new['file_name'].split('/')[-1]}}</div>
+        <div class="publ-card-title-text publ-card-block">{{new['filename'].split('/')[-1]}}</div>
         <div class="publ-card-user-block publ-card-block">
-          <div class="publ-card-user-name">{{new['user_name']}}</div>
-          {% set photo_name = '../' + new['user_photo'] %}
+          <div class="publ-card-user-name">{{new['author']['username']}}</div>
+          {% set photo_name = '../' + new['author']['photo'] %}
           <div
             class="publ-card-user-photo"
             style="background-image: url({{photo_name}})"
@@ -57,7 +57,7 @@
       </div>
       <div class="publ-card-main">
         <div class="publ-card-file publ-card-block">
-          {% set filename = '../' + new['file_name'] %}
+          {% set filename = '../' + new['filename'] %}
           {% if filename.split('.')[-1] in ['mp3', 'wav', 'ogg'] %}
           <div class="file-card-prevision publ-card-prevision">
             <audio src="{{filename}}" controls></audio>
@@ -102,7 +102,7 @@
           <div class="publ-card-bottom">
         <a class="download-button publ-download-button publ-card-block" href="/{{ filename }}" download="">↓</a>
         {% if new['show_email'] %}
-          <div class="publ-card-email publ-card-block">{{ new['user_email'] }}</div>
+          <div class="publ-card-email publ-card-block">{{ new['author']['email'] }}</div>
           {% endif %}</div></div>
       </div>
       {% endfor %}

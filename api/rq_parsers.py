@@ -4,6 +4,11 @@ from helpers import DEFAULT_PHOTO
 only_key_parser = reqparse.RequestParser()
 only_key_parser.add_argument('secret_key', type=str, required=True)
 
+user_get_parser = reqparse.RequestParser()
+user_get_parser.add_argument('secret_key', type=str, required=True)
+user_get_parser.add_argument('email', type=str)
+user_get_parser.add_argument('path', type=str)
+
 user_post_parser = reqparse.RequestParser()
 user_post_parser.add_argument('secret_key', type=str, required=True)
 user_post_parser.add_argument('username', type=str, required=True)

@@ -1,14 +1,15 @@
 import os
 import flask as fl
 import logging as lg
-from flask_restful import Api, Resource
+from flask_restful import Api, Resource, abort
 from data import db_session as d_s
 from data.users import User
 from data.publication import Publication
-from rq_parsers import publ_get_parser, only_key_parser, publ_post_parser,\
-    publ_put_parser, user_post_parser, user_put_parser, check_password_parser
+from rq_parsers import only_key_parser, publ_get_parser, publ_post_parser,\
+    publ_put_parser, user_get_parser, user_post_parser, user_put_parser,\
+    check_password_parser
 from helpers import abort_if_no_user, abort_if_no_publ,abort_if_wrong_key,\
-    abort_if_wrong_email, USER_FIELDS, PUBL_FIELDS
+    abort_if_wrong_email, abort_if_wrong_item, USER_FIELDS, PUBL_FIELDS
 
 app = fl.Flask(__name__)
 api = Api(app)
@@ -68,13 +69,24 @@ class UserResource(Resource):
 class UserListResource(Resource):
     def get(self):
         d_s.global_init('db/cloud.sqlite')
-        args = only_key_parser.parse_args()
+        args = user_get_parser.parse_args()
         abort_if_wrong_key(args.secret_key)
         db_sess = d_s.create_session()
-        users = db_sess.query(User).all()
-        result = [{field: getattr(user, field) for field in USER_FIELDS}
-                  for user in users]
-        return fl.jsonify(result)
+        if args.email is not None:
+            user = db_sess.query(User).filter(User.email == args.email).first()
+            result = {field: getattr(user, field) for field in USER_FIELDS
+                      if user is not None}
+            return fl.jsonify(result if result else None)
+        elif args.path is not None:
+            user = db_sess.query(User).filter(User.path == args.path).first()
+            result = {field: getattr(user, field) for field in USER_FIELDS
+                      if user is not None}
+            return fl.jsonify(result if result else None)
+        else:
+            users = db_sess.query(User).all()
+            result = [{field: getattr(user, field) for field in USER_FIELDS}
+                      for user in users]
+            return fl.jsonify(result)
 
     def post(self):
         d_s.global_init('db/cloud.sqlite')
@@ -109,6 +121,23 @@ class CheckUserResource(Resource):
         return fl.jsonify({'success': user.check_password(args.password)})
 
 
+class UserGetByResource(Resource):
+    def get(self, item):
+        d_s.global_init('db/cloud.sqlite')
+        args = user_get_parser.parse_args()
+        abort_if_wrong_key(args.secret_key)
+        items = ['email', 'path']
+        abort_if_wrong_item(item, items)
+        db_sess = d_s.create_session()
+        val = getattr(args, item)
+        if val is None:
+            abort(400, message='No parameter {}'.format(item))
+        user = db_sess.query(User).filter(getattr(User, item) == val).first()
+        result = {field: getattr(user, field) for field in USER_FIELDS
+                  if user is not None}
+        return fl.jsonify(result if result else None)
+
+
 class BasePublResourse:
     def check_publ(self, publ, string):
         return string in publ.description.lower() or\
@@ -124,8 +153,11 @@ class PublResource(Resource, BasePublResourse):
         abort_if_no_publ(publ_id)
         db_sess = d_s.create_session()
         publ = db_sess.query(Publication).get(publ_id)
-        result = {field: getattr(publ, field) for field in PUBL_FIELDS}
-        return fl.jsonify(result)
+        dict_ = {field: getattr(publ, field) for field in PUBL_FIELDS
+                 if field != 'user_id'}
+        dict_['author'] = {field: getattr(publ.author, field)
+                           for field in USER_FIELDS}
+        return fl.jsonify(dict_)
 
     def put(self, publ_id):
         d_s.global_init('db/cloud.sqlite')
@@ -134,7 +166,6 @@ class PublResource(Resource, BasePublResourse):
         abort_if_no_publ(publ_id)
         db_sess = d_s.create_session()
         publ = db_sess.query(Publication).get(publ_id)
-        print(args['show_email'], args.show_email, getattr(args, 'show_email'))
         lg.debug('PUT in publications:')
         for field in PUBL_FIELDS:
             if field in args:
@@ -168,10 +199,15 @@ class PublListResource(Resource, BasePublResourse):
         abort_if_wrong_key(args.secret_key)
         db_sess = d_s.create_session()
         all_publs = db_sess.query(Publication).all()[::-1]
-        filter_publs = [{field: getattr(publ, field) for field in PUBL_FIELDS}
-                        for publ in all_publs
-                        if self.check_publ(publ, args.search_string)]
-        return fl.jsonify(filter_publs)
+        filtered_publs = []
+        for publ in all_publs:
+            if self.check_publ(publ, args.search_string):
+                dict_ = {field: getattr(publ, field) for field in PUBL_FIELDS
+                         if field != 'user_id'}
+                dict_['author'] = {field: getattr(publ.author, field)
+                                   for field in USER_FIELDS}
+                filtered_publs += [dict_, ]
+        return fl.jsonify(filtered_publs)
 
     def post(self):
         d_s.global_init('db/cloud.sqlite')
@@ -191,10 +227,11 @@ class PublListResource(Resource, BasePublResourse):
 api.add_resource(UserListResource, '/api/users')
 api.add_resource(UserResource, '/api/users/<int:user_id>')
 api.add_resource(CheckUserResource, '/api/users/check_password/<int:user_id>')
+api.add_resource(UserGetByResource, '/api/users/get_by/<string:item>')
 api.add_resource(PublListResource, '/api/publications')
 api.add_resource(PublResource, '/api/publications/<int:publ_id>')
 
 if __name__ == '__main__':
     d_s.global_init('db/cloud.sqlite')
     port = int(os.environ.get("PORT", 5000))
-    app.run(host='127.0.0.1', port=port)
+    app.run(host='0.0.0.0', port=port)

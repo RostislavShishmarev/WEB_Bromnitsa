@@ -1,6 +1,6 @@
 import os
 import shutil
-from flask_restful import abort
+from helpers import lg
 
 
 class Explorer:
@@ -24,7 +24,7 @@ class Explorer:
             else:
                 shutil.copy(name, self.boofer + '/' + onlyname)
         except Exception as ex:
-            self.make_error(where, ex)
+            self.log_error(where, ex)
 
     def delete(self, name):
         try:
@@ -33,7 +33,7 @@ class Explorer:
             else:
                 os.remove(name)
         except Exception as ex:
-            self.make_error('удаление', ex)
+            self.log_error('удаление', ex)
 
     def cut(self, name):
         self.copy(name, where='вырезание')
@@ -46,11 +46,13 @@ class Explorer:
         new = dirname + '/' + old.split('/')[-1]
         try:
             if os.path.isdir(old):
+                if os.path.exists(new):
+                    self.delete(new)
                 shutil.copytree(old, new)
             else:
                 shutil.copy(old, new)
         except Exception as ex:
-            self.make_error('вставка', ex)
+            self.log_error('вставка', ex)
 
     def get_file_name(self):
         if not self.boofer:
@@ -60,9 +62,9 @@ class Explorer:
         list_ = os.listdir(self.boofer)
         return None if not list_ else self.boofer + '/' + list_[0]
 
-    def make_error(self, where, ex):
-        print('>>>>Exception>>>>', ex)
-        abort(520, message='Ошибка проводника: ' + where)
+    def log_error(self, where, ex):
+        lg.error('Ошибка проводника. Процесс: {}. Ошибка:\n{}'.format(where,
+                                                                      ex))
 
     def clean_boofer(self):
         for name in os.listdir(self.boofer):

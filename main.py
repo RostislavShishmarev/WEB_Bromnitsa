@@ -1,26 +1,23 @@
 import os
 import shutil
+import requests as rq
 import flask as fl
 import flask_login as fl_log
 from flask_login import login_user
 from flask import render_template, request, redirect, send_from_directory
-from flask_restful import abort
 from forms.forms import RegisterForm, LoginForm, SettingsForm,\
     ChangePasswordForm, MakeDirForm, RenameFileForm, DeleteFileForm
 
-import data.db_session as db_session
-from data.users import User
 from publications import app as publ_blueprint
 from helpers import lg, Errors, CloudSettings,\
     BAD_CHARS, format_name, make_file, make_photo, DEFAULT_PHOTO,\
-    generate_secret_key, get_func, FuncHolder, DEFAULT_CLOUD_SET
+    generate_secret_key, get_func, FuncHolder, DEFAULT_CLOUD_SET,\
+    Api, FileFormatError, TempUser
 from explorer import Explorer
 
 app = fl.Flask(__name__)
 key = generate_secret_key()
 app.config['SECRET_KEY'] = key
-#with open('work_files/t.txt', mode='w', encoding='utf8') as f:
-#    f.write(key)
 app.config['JSON_AS_ASCII'] = False
 login_manager = fl_log.LoginManager()
 login_manager.init_app(app)
@@ -29,8 +26,10 @@ cloud_set = CloudSettings('cloud_set', DEFAULT_CLOUD_SET)
 
 @login_manager.user_loader
 def load_user(user_id):
-    db_sess = db_session.create_session()
-    return db_sess.query(User).get(user_id)
+    res = rq.get(Api.SERVER + '/users/' + str(user_id), params={
+        'secret_key': Api.KEY,
+    })
+    return TempUser(res.json())
 
 
 @app.route('/logout')
@@ -80,7 +79,10 @@ def cloud(operpath=''):
         elif 'filesubmit' in request.form.keys():
             files = request.files.getlist('file')
             for file in files:
-                make_file(current_dir, file)
+                try:
+                    make_file(current_dir, file)
+                except FileFormatError as ex:
+                    pass
         elif 'search_string' in request.form.keys():
             cloud_set.string = request.form['search_string'].lower()
             cloud_set.current_index = 0
@@ -129,47 +131,52 @@ def register():
            {'href': '/', 'title': 'Главная'},
            {'href': '/publications', 'title': 'Публикации'}]
     if form.validate_on_submit():
-        db_sess = db_session.create_session()
         if form.password.data != form.password_again.data:
             form.password_again.errors.append(Errors.DIFF_PASS)
             return render_template('Form.html', title='Регистрация',
                                    navigation=nav,
                                    form=form, current_user=fl_log.current_user)
-        if db_sess.query(User).filter(User.email == form.email.data).first():
+        user = TempUser(rq.get(Api.SERVER + '/users/get_by/email', params={
+            'secret_key': Api.KEY,
+            'email': form.email.data}).json())
+        if user:
             form.email.errors.append(Errors.USER_EXIST)
             return render_template('Form.html', title='Регистрация',
                                    navigation=nav,
                                    form=form, current_user=fl_log.current_user)
-        user = User(
-            username=form.name.data,
-            email=form.email.data,
-            photo=DEFAULT_PHOTO
-        )
-        user.set_password(form.password.data)
+        res = rq.post(Api.SERVER + '/users', params={
+            'secret_key': Api.KEY,
+            'username': form.name.data,
+            'email': form.email.data,
+            'photo': DEFAULT_PHOTO,
+            'password': form.password.data
+        })
 
-        # Отделено, чтобы узнать id пользователя
-        db_sess.add(user)
-        db_sess.commit()
-        user = db_sess.query(User).filter(User.email == user.email).first()
+        # Отделено для создания нужных директорий и файлов
+        user = TempUser(rq.get(Api.SERVER + '/users', params={
+            'secret_key': Api.KEY,
+            'email': form.email.data}).json())
 
-        path = 'static/users/' + str(user.id)
-        user.path = path
+        path = user.path
         if not os.path.exists('static/users'):
             os.mkdir('static/users')
         for directory in ['', '/boofer', '/cloud', '/public', '/user_files']:
             os.mkdir(path + directory)
-        photo = form.photo.data
-        if photo:
-            photoname = make_photo(photo, path)
-            if photoname is None:
-                db_sess.delete(user)
-                db_sess.commit()
+        photo_file = form.photo.data
+        if photo_file:
+            try:
+                photoname = make_photo(photo_file, path)
+            except FileFormatError as ex:
+                rq.delete(Api.SERVER + '/users/' + str(user.id), params={
+                    'secret_key': Api.KEY
+                })
                 form.photo.errors.append(Errors.BAD_FORMAT)
                 return render_template('Form.html', title='Регистрация',
                                        navigation=nav, form=form,
                                        current_user=fl_log.current_user)
-            user.photo = photoname
-        db_sess.commit()
+            res = rq.put(Api.SERVER + '/users/' + str(user.id),
+                         params={'secret_key': Api.KEY,
+                                 'photo': photoname})
         login_user(user)
         return redirect('/')
     return render_template('Form.html', title='Регистрация', navigation=nav,
@@ -183,9 +190,9 @@ def login():
            {'href': '/publications', 'title': 'Публикации'},
            {'href': '/register', 'title': 'Регистрация'}]
     if form.validate_on_submit():
-        db_sess = db_session.create_session()
-        user = db_sess.query(User).filter(User.email ==
-                                          form.email.data).first()
+        user = TempUser(rq.get(Api.SERVER + '/users/get_by/email', params={
+            'secret_key': Api.KEY,
+            'email': form.email.data}).json())
         if not user:
             form.email.errors.append(Errors.NO_USER)
             return render_template('Form.html', title='Авторизация',
@@ -211,29 +218,34 @@ def settings():
            {'href': '/publications', 'title': 'Публикации'},
            {'href': '/logout', 'title': 'Выход'}]
     if form.validate_on_submit():
-        db_sess = db_session.create_session()
-        usrs = db_sess.query(User).filter(User.email == form.email.data).all()
-        if len(usrs) >= 2:
+        user = TempUser(rq.get(Api.SERVER + '/users/get_by/email', params={
+            'secret_key': Api.KEY,
+            'email': form.email.data}).json())
+        if user and user.id != fl_log.current_user.id:
             form.email.errors.append(Errors.USER_EXIST)
             return render_template('Settings.html', title='Настройки',
                                    navigation=nav, form=form,
                                    current_user=fl_log.current_user)
-        user = db_sess.query(User).filter(User.id ==
-                                          fl_log.current_user.id).first()
         photo = form.photo.data
+        photoname = fl_log.current_user.photo
         if photo:
-            photoname = make_photo(photo, fl_log.current_user.path)
-            if photoname is None:
+            try:
+                photoname = make_photo(photo, fl_log.current_user.path)
+            except FileFormatError as ex:
                 form.photo.errors.append(Errors.BAD_FORMAT)
                 return render_template('Settings.html', title='Настройки',
                                        navigation=nav, form=form,
                                        current_user=fl_log.current_user)
-            user.photo = photoname
-        user.username = form.name.data
-        user.email = form.email.data
-        db_sess.commit()
-        # Чтобы увидеть изменения в том же окне.
-        fl_log.logout_user()
+        lg.debug('Создание фото. Путь: {}'.format(photoname))
+        res = rq.put(Api.SERVER + '/users/' + str(fl_log.current_user.id),
+                     params={'secret_key': Api.KEY,
+                             'photo': photoname,
+                             'username': form.name.data,
+                             'email': form.email.data})
+        id_ = fl_log.current_user.id
+        fl_log.logout_user()  # Чтобы увидеть изменения в том же окне.
+        user = TempUser(rq.get(Api.SERVER + '/users/' + str(id_),
+                               params={'secret_key': Api.KEY}).json())
         login_user(user)
     form.email.data = fl_log.current_user.email
     form.name.data = fl_log.current_user.username
@@ -251,16 +263,14 @@ def change_password():
            {'href': '/settings', 'title': 'Настройки'},
            {'href': '/logout', 'title': 'Выход'}]
     if form.validate_on_submit():
-        db_sess = db_session.create_session()
         if form.password.data != form.password_again.data:
             form.password_again.errors.append(Errors.DIFF_PASS)
             return render_template('Form.html', title='Сменить пароль',
                                    navigation=nav, form=form,
                                    current_user=fl_log.current_user)
-        user = db_sess.query(User).filter(User.id ==
-                                          fl_log.current_user.id).first()
-        user.set_password(form.password.data)
-        db_sess.commit()
+        res = rq.put(Api.SERVER + '/users/' + str(fl_log.current_user.id),
+                     params={'secret_key': Api.KEY,
+                             'password': form.password.data})
         return redirect('/')
     return render_template('Form.html', title='Сменить пароль', navigation=nav,
                            form=form, current_user=fl_log.current_user)
@@ -304,7 +314,7 @@ def rename(operpath):
     filepath = operpath.replace('&', '/')
     full = format_name(fl_log.current_user.path + '/cloud/' + filepath)
     if not os.path.exists(full):
-        abort(404, message='Файл не найден')
+        fl.abort(404, message='Файл не найден')
     filename = filepath.split('/')[-1]
     filetype = '.' + filename.split('.')[-1]
     form = RenameFileForm()
@@ -348,7 +358,7 @@ def delete(operpath):
     filepath = operpath.replace('&', '/')
     full = format_name(fl_log.current_user.path + '/cloud/' + filepath)
     if not os.path.exists(full):
-        abort(404, message='Файл не найден')
+        fl.abort(404, message='Файл не найден')
     filename = filepath.split('/')[-1]
     form = DeleteFileForm()
     nav = [{'href': '/', 'title': 'Главная'},
@@ -377,20 +387,20 @@ def protector():
     path = path[len('/static/users/'):]
     userdir, dir_, *list_path = path.split('/')
     user_path = 'static/users/' + userdir
-    db_sess = db_session.create_session()
-    user = db_sess.query(User).filter(User.path == user_path).first()
+    user = TempUser(rq.get(Api.SERVER + '/users/get_by/path', params={
+        'secret_key': Api.KEY,
+        'path': user_path}).json())
     if user:
         if dir_ in ['cloud', 'boofer']:
             if not fl_log.current_user.is_authenticated:
-                abort(401, message='Вы не авторизованы')
+                fl.abort(401, message='Вы не авторизованы')
             if user.id != fl_log.current_user.id:
-                abort(403, message='У вас нет доступа к этим данным')
+                fl.abort(403, message='У вас нет доступа к этим данным')
         return
-    abort(404, message='Файл не найден')
+    fl.abort(404, message='Файл не найден')
 
 
 if __name__ == '__main__':
-    db_session.global_init("db/cloud.sqlite")
     app.register_blueprint(publ_blueprint)
     port = int(os.environ.get("PORT", 8080))
-    app.run(host='127.0.0.1', port=port)
+    app.run(host='0.0.0.0', port=port)

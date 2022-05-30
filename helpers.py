@@ -2,27 +2,34 @@ import os
 import shutil
 import flask as fl
 import logging as lg
-from flask_restful import abort
+import requests as rq
+from flask_login import UserMixin
 from random import choices
+from csv import DictReader
 
+# Константы и сборники констант
 LOG_FORMAT = '%(asctime)s %(levelname)s %(filename)s %(message)s'
 IMAGE_TYPES = ('jpg', 'jpeg', 'png', 'svg', 'webp', 'gif', 'ico')
 BAD_CHARS = {' ', '/', '\\', '&', '?', '@', '"', "'", '(', ')'}
 DEFAULT_PHOTO = 'static/img/No_user.jpg'
 SYMBOLS = '1234567890!@#$%^&*()~`-=_+ qwertyuiop[]asdfghjkl;zxcvbnm,./\
 QWERTYUIOP{}ASDFGHJKL:"ZXCVBNM<>?'
-DEFAULT_CLOUD_SET = {
-    'current_dir': '',
-    'cur_dir_from_user': '',
-    'menu_mode': 'small',
-    'out_of_root': False,
-    'string': '',
-    'func_type': 'alpha',
-    'reverse_files': False,
-    'current_index': 0,
-    'files_num': 10}
+DEFAULT_CLOUD_SET = {'current_dir': '', 'cur_dir_from_user': '',
+                     'menu_mode': 'small', 'out_of_root': False, 'string': '',
+                     'func_type': 'alpha', 'reverse_files': False,
+                     'current_index': 0, 'files_num': 10}
 
 lg.basicConfig(level='DEBUG', format=LOG_FORMAT)
+
+
+class Api:
+    with open('settings.csv', encoding='utf8') as f:
+        settings = list(DictReader(f, delimiter=';', quotechar='"'))[0]
+    SERVER = settings['api_server']
+    with open('api/secret_keys.txt', encoding='utf8') as f:
+        keys = f.read().split('\n')
+    KEY = keys[0]
+    #os.remove('secret_keys.txt')
 
 
 class Errors:
@@ -36,6 +43,7 @@ class Errors:
     BAD_FORMAT = "Некорректный формат файла."
 
 
+# Вспомогательные классы
 class FuncHolder:
     def __init__(self, func):
         self.sort_func = func
@@ -97,6 +105,35 @@ class CloudSettings(BaseSettings):
         return self.current_dir
 
 
+class FileFormatError(Exception):
+    pass
+
+
+class TempUser(UserMixin):
+    def __init__(self, dict_):
+        if dict_ is None:
+            self.exist = False
+            return
+        self.id = dict_['id']
+        self.email = dict_['email']
+        self.username = dict_['username']
+        self.photo = dict_['photo']
+        self.path = dict_['path']
+        self.exist = True
+
+    def check_password(self, password):
+        res = rq.get(Api.SERVER + '/users/check_password/' + str(self.id),
+                     params={'secret_key': Api.KEY,
+                             'password': password})
+        lg.debug('Result of checking user {}`s password: '.format(self.id) +
+                 str(res.json()))
+        return res.json()['success']
+
+    def __bool__(self):
+        return self.exist
+
+
+# Функции сортировки
 def get_func(key):
     dict_ = {'alpha': alpha_sorter,
              'time': time_sorter}
@@ -130,6 +167,7 @@ def return_(arg):
     return arg
 
 
+# Вспомогательные функции
 def format_name(name):
     while '//' in name:
         name = name.replace('//', '/')
@@ -140,7 +178,7 @@ def format_name(name):
 def make_file(dir_, file):
     name = file.filename
     if not name:
-        return
+        raise FileFormatError('Отсутствует имя файла')
     for char in BAD_CHARS:
         name = name.replace(char, '_')
     dir_ += '/'
@@ -156,7 +194,7 @@ def make_file(dir_, file):
 def make_photo(file, user_path):
     type_ = file.filename.split('.')[-1]
     if type_ not in IMAGE_TYPES:
-        return None
+        raise FileFormatError('Неверное расширение фото: {}'.format(type_))
     if not os.path.exists(user_path + '/user_files'):
         os.mkdir(user_path + '/user_files')
     for old in os.listdir(user_path + '/user_files'):
@@ -168,7 +206,7 @@ def make_photo(file, user_path):
 
 def make_publ_file(filename):
     if not os.path.exists(filename):
-        abort(404, message='Файл не найден')
+        fl.abort(404, message='Файл не найден')
     user_dir, name = filename.split('/cloud/')
     name = name.split('/')[-1]
     new_name, ind = name, 2
@@ -180,5 +218,6 @@ def make_publ_file(filename):
     return user_dir + '/public/' + new_name
 
 
+# Генерация ключа для формы
 def generate_secret_key():
-    return ''.join(choices(list(SYMBOLS), k=500))
+    return ''.join(choices(list(SYMBOLS), k=250))

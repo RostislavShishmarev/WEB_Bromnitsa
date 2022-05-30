@@ -28,6 +28,12 @@ def abort_if_wrong_email(email, user_id=None):
         abort(400, message='Email {} already exists'.format(email))
 
 
+def abort_if_wrong_item(item, items):
+    if item not in items:
+        abort(400, message='Type {} is not {}'.format(
+            item, ' or '.join([str(i) for i in items])))
+
+
 def abort_if_no_publ(publ_id):
     sess = d_s.create_session()
     if not sess.query(Publication).get(publ_id):

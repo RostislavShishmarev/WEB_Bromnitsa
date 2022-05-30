@@ -19,6 +19,12 @@
   background-position: center;
 }
 
+.Block4 {
+  background-color: #1c1b1a;
+  padding-top: 30px;
+  padding-bottom: 30px;
+}
+
 .problem-text {
   font-family: Roboto, sans-serif;
   font-style: normal;
@@ -47,6 +53,25 @@
   line-height: 34px;
   text-align: center;
   color: #ded9d3;
+}
+
+.bottom-text {
+  font-family: Roboto, sans-serif;
+  font-style: normal;
+  font-weight: 50;
+  font-size: 22px;
+  line-height: 34px;
+  text-align: center;
+  color: #b3a598;
+}
+
+.bottom-link-text {
+  font-family: Roboto, sans-serif;
+  font-style: normal;
+  font-weight: 50;
+  font-size: 22px;
+  line-height: 34px;
+  text-align: right;
 }
 
 .super-button {
