@@ -98,7 +98,7 @@ class CheckUserResource(Resource):
         db_sess = d_s.create_session()
         user = db_sess.query(User).get(user_id)
         return fl.jsonify({'success': user.check_password(args.password)})
-        
+
 
 class BasePublResourse:
     def check_publ(self, publ, string):
