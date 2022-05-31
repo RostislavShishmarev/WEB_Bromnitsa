@@ -29,7 +29,7 @@ class Api:
     with open('api/secret_keys.txt', encoding='utf8') as f:
         keys = f.read().split('\n')
     KEY = keys[0]
-    #os.remove('secret_keys.txt')
+    os.remove('api/secret_keys.txt')
 
 
 class Errors:

@@ -5,7 +5,7 @@ import unittest as ut
 ut.TestLoader.sortTestMethodsUsing = None
 with open('secret_keys.txt', encoding='utf8') as f:
     KEY = f.read().split('\n')[0]
-SERVER = 'apibromnitsy.pythonanywhere.com'
+SERVER = '127.0.0.1:5000'
 RQ_USERS_START = 'http://{}/api/users'.format(SERVER)
 RQ_PUBLS_START = 'http://{}/api/publications'.format(SERVER)
 
