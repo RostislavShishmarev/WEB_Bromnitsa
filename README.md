@@ -31,9 +31,9 @@ WEB-Бромница – адаптивный сайт облачного хра
 ![Главная страница](https://thumb.cloud.mail.ru/weblink/thumb/xw1/Lzyo/dMymBMtDZ)
 
 ### Сборка
-1. Загрузить последний релиз и файл Game_no_code_files.zip
+1. Загрузить последний релиз и файл Cloud_no_code_files.zip
 2. Перенести содержимое релиза в свободную папку
-3. Перенести папку db в api, папки users и img и файл favicon.ico в static
+3. Перенести папку db в api, папки users и img и файл favicon.ico в static (из Cloud_no_code_files.zip в релиз)
 4. Установить зависимости (для обоих файлов):
 ```sh
 pip install -r requirements.txt
