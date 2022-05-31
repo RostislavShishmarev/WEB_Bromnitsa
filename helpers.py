@@ -18,6 +18,7 @@ DEFAULT_CLOUD_SET = {'current_dir': '', 'cur_dir_from_user': '',
                      'menu_mode': 'small', 'out_of_root': False, 'string': '',
                      'func_type': 'alpha', 'reverse_files': False,
                      'current_index': 0, 'files_num': 10}
+PUBL_NUMBER = 6
 
 lg.basicConfig(level='DEBUG', format=LOG_FORMAT)
 
@@ -133,6 +134,14 @@ class TempUser(UserMixin):
         return self.exist
 
 
+class TempPubl:
+    def __init__(self, filename, description, author, show_email=False):
+        self.author = author
+        self.filename = author.path + '/cloud/' + filename
+        self.description = description
+        self.show_email = show_email
+
+
 # Функции сортировки
 def get_func(key):
     dict_ = {'alpha': alpha_sorter,
@@ -216,6 +225,12 @@ def make_publ_file(filename):
         ind += 1
     shutil.copy(filename, user_dir + '/public/' + new_name)
     return user_dir + '/public/' + new_name
+
+
+def abort_if_no_file(args):
+    if not os.path.exists(args.filename):
+        fl.abort(404, 'File with path {} isn`t found.'.format(
+            args.filename))
 
 
 # Генерация ключа для формы

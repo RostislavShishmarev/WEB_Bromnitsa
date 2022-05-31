@@ -5,8 +5,8 @@ from data.users import User
 from data.publication import Publication
 
 DEFAULT_PHOTO = 'static/img/No_user.jpg'
-SYMBOLS = list('1234567890!@#$%^&*()~`-=_+ qwertyuiop[]asdfghjkl;zxcvbnm,./\
-QWERTYUIOP{}ASDFGHJKL:"ZXCVBNM<>?')
+SYMBOLS = list('1234567890qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJK\
+LZXCVBNM')
 USER_FIELDS = ['id', 'username', 'email', 'photo', 'path', 'password']
 PUBL_FIELDS = ['id', 'description', 'filename', 'show_email', 'user_id',
                'modified_date']
