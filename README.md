@@ -41,11 +41,13 @@ pip install -r requirements.txt
 5. Запустить файл api/main_api.py
 6. Запустить файл main.py
 
-Примечание: директория api — полностью самостоятельный модуль. main.py из неё нужен только файл api/secret_keys.txt, который api/main_api.py создаёт при каждом запуске, а main.py — удаляет.
+Примечание: директория api — полностью самостоятельный модуль. main.py из неё нужен только файл api/secret_keys.txt, который создаёт api/main_api.py (при необходимости).
 
 ### Код
 
-Сайт создан при помощи библиотеки Flask. Также были использованы его расширения: Flask-WTF для форм, Flask-login для авторизации. В модуле api — Flask-RESTful.
+Сайт создан при помощи библиотеки [Flask](https://pypi.org/project/Flask/). Также были использованы его расширения: [Flask-WTF](https://pypi.org/project/Flask-WTF/) для форм, [Flask-login](https://pypi.org/project/Flask-Login/) для авторизации. В модуле api — [Flask-RESTful](https://pypi.org/project/Flask-RESTful/).
+Связь с базой данных осуществляется библиотекой [SQLAlchemy](https://pypi.org/project/SQLAlchemy/).
+
 Во фронтенде почти не использовался JavaScript: большинство кнопок — это ссылки и скрытые формы. Код принимает POST-запрос и по названию скрытой части формы определяет, какая именно его отправила.
 Пример скрытой формы:
 

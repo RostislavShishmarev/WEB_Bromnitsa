@@ -62,6 +62,10 @@ body::-webkit-scrollbar-thumb,
   color: #f1bc10;
 }
 
+.href-alone {
+  margin: 10px;
+}
+
 .nav-placeholder {
   display: flex;
   justify-content: space-between;

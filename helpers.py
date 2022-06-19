@@ -30,7 +30,6 @@ class Api:
     with open('api/secret_keys.txt', encoding='utf8') as f:
         keys = f.read().split('\n')
     KEY = keys[0]
-    os.remove('api/secret_keys.txt')
 
 
 class Errors:
@@ -97,7 +96,7 @@ class CloudSettings(BaseSettings):
         dir_ = format_name(dir_)
         cur_dir = format_name(path + '/cloud/' + dir_)
         if not os.path.exists(cur_dir):
-            abort(404, message='Директория не найдена')
+            fl.abort(404, 'Директория не найдена')
         if dir_ != self.cur_dir_from_user:
             self.current_index = 0
         self.cur_dir_from_user = dir_
@@ -115,6 +114,8 @@ class TempUser(UserMixin):
         if dict_ is None:
             self.exist = False
             return
+        elif 'message' in dict_.keys():
+            fl.abort(403, dict_['message'])
         self.id = dict_['id']
         self.email = dict_['email']
         self.username = dict_['username']

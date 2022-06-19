@@ -1,3 +1,4 @@
+import os
 from random import choices
 from flask_restful import abort
 from data import db_session as d_s
@@ -10,9 +11,13 @@ LZXCVBNM')
 USER_FIELDS = ['id', 'username', 'email', 'photo', 'path', 'password']
 PUBL_FIELDS = ['id', 'description', 'filename', 'show_email', 'user_id',
                'modified_date']
-SECRET_KEYS = [''.join(choices(SYMBOLS, k=50)) for _ in range(1)]
-with open('secret_keys.txt', mode='w', encoding='utf8') as f:
-    f.write('\n'.join(SECRET_KEYS))
+if not os.path.exists('secret_keys.txt'):
+    SECRET_KEYS = [''.join(choices(SYMBOLS, k=50)) for _ in range(1)]
+    with open('secret_keys.txt', mode='w', encoding='utf8') as f:
+        f.write('\n'.join(SECRET_KEYS))
+else:
+    with open('secret_keys.txt', encoding='utf8') as f:
+        SECRET_KEYS = f.read().split('\n')
 
 
 def abort_if_no_user(user_id):
