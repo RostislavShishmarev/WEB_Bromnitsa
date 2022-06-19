@@ -28,7 +28,7 @@ WEB-Бромница – адаптивный сайт облачного хра
 
 Для доступа к большинству функций нужна авторизация, но публикации доступны всем.
 
-![Главная страница](https://thumb.cloud.mail.ru/weblink/thumb/xw1/Lzyo/dMymBMtDZ)
+![Главная страница](https://thumb.cloud.mail.ru/weblink/thumb/xw1/Rmsj/efap7djPo)
 
 ### Сборка
 1. Загрузить последний релиз и файл Cloud_no_code_files.zip
