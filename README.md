@@ -48,35 +48,10 @@ pip install -r requirements.txt
 Сайт создан при помощи библиотеки [Flask](https://pypi.org/project/Flask/). Также были использованы его расширения: [Flask-WTF](https://pypi.org/project/Flask-WTF/) для форм, [Flask-login](https://pypi.org/project/Flask-Login/) для авторизации. В модуле api — [Flask-RESTful](https://pypi.org/project/Flask-RESTful/).
 Связь с базой данных осуществляется библиотекой [SQLAlchemy](https://pypi.org/project/SQLAlchemy/).
 
-Во фронтенде почти не использовался JavaScript: большинство кнопок — это ссылки и скрытые формы. Код принимает POST-запрос и по названию скрытой части формы определяет, какая именно его отправила.
-Пример скрытой формы:
-
-HTML
-```html
-<div class="nav-block">
-    <form method="POST">
-        <!-- next — название скрытой части формы -->
-        <input
-            name="next" 
-            class="none"/>
-        <input
-            type="submit"
-            value=">"
-            class="nav-button"/>
-    </form>
-</div>
-```
-CSS
-```css
-.none {
-  display: none;
-}
-```
-
 ### Хостинг
 Оба сервера WEB-Бромницы расположены на хостинге [pythonanywhere.com](https://pythonanywhere.com).
 
 Адрес сайта: [bromnitsa.pythonanywhere.com](https://bromnitsa.pythonanywhere.com).
 
 ### Дополнительно
-Все изображения созданы авторами проекта или взяты из свободных интернет-ресурсов.
+Все изображения созданы автором проекта или взяты из свободных интернет-ресурсов.
